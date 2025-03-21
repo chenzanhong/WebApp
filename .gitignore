@@ -47,3 +47,6 @@ coverage/
 .local
 /temp
 /ssr
+
+#package-lock.json配置文件
+vue-project/package-lock.json
