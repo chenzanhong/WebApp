@@ -54,6 +54,11 @@ const routes = [
       },
     ]
   },
+  {
+    path: "/display/TeamBusiness",
+    name: "TeamBusiness",
+    component: () => import('@/views/TeamBusiness.vue'),
+  },
 
   // // 个人信息页
   // {
