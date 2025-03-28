@@ -35,10 +35,10 @@ const routes = [
     component: Home,
   },
 
-   // 服务器详情页（动态路由）
-   {
-    path: "/monitor/:host_name", 
-    name: "MonitorDetail",     
+  // 服务器详情页（动态路由）
+  {
+    path: "/monitor/:host_name",
+    name: "MonitorDetail",
     component: ServerDetail,
     props: true,
     children: [
@@ -46,12 +46,6 @@ const routes = [
         path: 'pageone', // 相对路径，无需重复父级路径
         name: 'pageone',
         component: () => import('@/views/PageOne.vue'),
-        props: true
-      },
-      {
-        path: 'pagetwo',
-        name: 'pagetwo',
-        component: () => import('@/views/PageTwo.vue'),
         props: true
       },
     ]
