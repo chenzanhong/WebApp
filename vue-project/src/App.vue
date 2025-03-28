@@ -19,11 +19,19 @@ export default {
 </script>
 
 <style>
-/* #app {
+ #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #000000;
-} */
+  width: 100%;
+  height: 100%;
+}
+.el-dialog{
+  background-color: #2c3e50 !important;
+  width: 45rem !important;
+  height: 42rem !important;
+}
+
 </style>
