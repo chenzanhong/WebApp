@@ -11,7 +11,7 @@
         @open="handleOpen"
         @close="handleClose"
       >      
-        <el-menu-item v-for="(server,index) in serverList" :key=server.id index="server.id">
+        <el-menu-item v-for="(server,index) in serverList" :key=server.id >
           <el-icon><setting /></el-icon>
           <span>服务器{{ server.id }}</span>
         </el-menu-item>
@@ -26,6 +26,7 @@ export default {
         return {
             serverList: [],
             token: localStorage.getItem('token') || '',  // 从 localStorage 获取 token
+            selectedServer: null,//当前选中的服务器
         }
     },
     mounted() {
