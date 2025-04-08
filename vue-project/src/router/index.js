@@ -47,9 +47,9 @@ const routes = [
     props: true,
     children: [
       {
-        path: 'pageone', // 相对路径，无需重复父级路径
-        name: 'pageone',
-        component: () => import('@/views/PageOne.vue'),
+        path: '', // 默认子路由，直接显示 DetailPage
+        name: 'DetailPage',
+        component: () => import('@/views/DetailPage.vue'),
         props: true
       },
     ]
