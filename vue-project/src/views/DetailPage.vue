@@ -116,68 +116,59 @@ export default {
             error: null    // 新增错误状态
         };
     },
-
-    async mounted() { 
-        try {
-            const host_name = this.$route.params.host_name
-
-            const token = localStorage.getItem('token');
-
-            const response = await axios.get(`http://localhost:8080/monitor/${host_name}`, {
-                
-                headers: {  //添加 Authorization 头
-                    Authorization: `Bearer ${token}`
+    props: {
+        serverList: {
+            type: Array,
+            default: () => []
+        }
+    },
+    mounted() {
+       
+    },
+    watch: {
+        serverList: {
+            handler(newList) {
+                if (newList.length > 0) {
+                    const server = newList[0];
+                    this.hostInfo = {
+                        hostname: server.host_name,
+                        os: server.os,
+                        platform: server.platform,
+                        kernel_arch: server.kernel_arch
+                    };
+                    const cpu = server.cpu || {};
+                    this.cpuData = {
+                        model_name: cpu.model_name || '',
+                        percent: cpu.percent || 0,
+                        cores_num: cpu.cores_num || 0
+                    };
+                    const memory = server.memory || {};
+                    this.memoryData = {
+                        total: memory.total || '',
+                        used: memory.used || '',
+                        user_percent: memory.user_percent || 0
+                    };
+                    this.netData = server.net?.map(item => ({
+                        data: {
+                            name: item?.data?.name || '',
+                            bytes_sent: formatTraffic(item?.data?.bytes_sent || 0),
+                            bytes_recv: formatTraffic(item?.data?.bytes_recv || 0)
+                        },
+                        time: formatTime(item?.time || '')
+                    })) || [];
+                    this.processData = server.process?.map(p => ({
+                        data: {
+                            pid: p?.data?.pid || 0,
+                            cmdline: p?.data?.cmdline || '',
+                            cpu_percent: p?.data?.cpu_percent || 0,
+                            mem_percent: p?.data?.mem_percent || 0
+                        }
+                    })) || [];
+                    this.loading = false;
                 }
-            })
-            const apiData = response.data
-               // 映射主机信息，使用可选链操作符进行安全访问
-            this.hostInfo = {
-                hostname: apiData?.host?.host_name || '',
-                os: apiData?.host?.os || '',
-                platform: apiData?.host?.platform || '',
-                kernel_arch: apiData?.host?.kernel_arch || ''
-            }
-
-            // 映射 CPU 数据（取最新一条）
-            const latestCpu = apiData?.cpu?.[apiData.cpu.length - 1]?.data || {}
-            this.cpuData = {
-                model_name: latestCpu.model_name,
-                percent: latestCpu.percent,
-                cores_num: latestCpu.cores_num
-            }
-
-            // 映射内存数据（取最新一条）
-            const latestMem = apiData?.memory?.[apiData.memory.length - 1]?.data || {}
-            this.memoryData = {
-                total: latestMem.total,      
-                used: latestMem.used,        
-                user_percent: latestMem.user_percent
-            }
-            // 映射网络数据
-            this.netData = apiData?.net?.map(item => ({
-                data: {
-                    name: item?.data?.name || '',
-                    bytes_sent: formatTraffic(item?.data?.bytes_sent || 0), 
-                    bytes_recv: formatTraffic(item?.data?.bytes_recv || 0)
-                },
-                time: formatTime(item?.time || '')
-            })) || []
-
-            // 映射进程数据
-            this.processData = apiData?.process?.map(p => ({
-                data: {
-                    pid: p?.data?.pid || 0,
-                    cmdline: p?.data?.cmdline || '',
-                    cpu_percent: p?.data?.cpu_percent || 0,
-                    mem_percent: p?.data?.mem_percent || 0
-                }
-            })) || []
-
-        } catch (error) {
-            console.error('接口请求失败:', error)
-            this.error = '数据加载失败，请检查网络连接'
-        } finally {
-            this.loading = false
+            },
+            immediate: false, // 不立即执行，只在数据变化时执行
+            deep: true // 深度监听，确保对象内部属性变化也能监听到
         }
     }
 };

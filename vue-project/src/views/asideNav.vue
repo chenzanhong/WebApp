@@ -1,7 +1,8 @@
 <template>
+   <div class="server-list-container"> <!-- 添加外层容器 -->
 <el-row class="tac">
   <el-col :span="12">
-      <h3 class="mb-2" style="color: white">服务器列表</h3>
+    <h3 class="mb-2" style="color: white; font-size: 18px; font-weight: bold;">服务器列表</h3>
       <el-menu
         active-text-color="#ffd04b"
         background-color="#545c64"
@@ -18,6 +19,7 @@
       </el-menu>
     </el-col>
 </el-row>
+   </div>
 </template>
 
 <script>
@@ -60,6 +62,7 @@ export default {
                 }))
                 console.log(data);
                 console.log(this.serverList);
+                this.$emit('serverListUpdated', this.serverList);
             } catch (error) {
                 console.error('获取服务器数据失败:', error.response?.data || error.message);
             }
@@ -76,3 +79,16 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.server-list-container {
+  background-color: #444; /* 设置灰色背景色，可根据需求调整颜色值 */
+  border: 1px solid #666; /* 添加边框，可调整边框样式、宽度和颜色 */
+  border-radius: 5px; /* 添加圆角，使矩形框边缘更圆润 */
+  padding: 10px; /* 添加内边距，让内容和边框有一定间距 */
+  height: 100%; /* 新增，使容器占满侧边栏高度 */
+  display: flex; /* 新增，用于辅助布局 */
+  flex-direction: column; /* 新增，使内容垂直排列 */
+  justify-content: flex-start; /* 新增，内容靠顶部排列 */
+}
+</style>
