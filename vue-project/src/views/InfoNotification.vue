@@ -73,29 +73,7 @@
           { type: 'unprocessedApply', label: '未处理申请' },
           { type: 'processedReview', label: '已处理审核'},
           { type: 'unprocessedReview', label: '未处理审核'}
-        ],
-        allInfo: [
-                { id: 1, content: '"小明"申请加入你创建的"深圳大学"', type: 'unprocessedApply' },
-                { id: 2, content: '"小丽"申请加入你创建的"深圳大学"', type: 'processedApply', status: '已同意' },
-                { id: 3, content: '"小刘"申请加入你创建的"深圳大学"', type: 'processedApply', status: '已拒绝' },
-                { id: 4, content: '你申请加入"杜老师"创建的"软件工程"', type: 'unprocessedReview' },
-                { id: 5, content: '你申请加入"杜老师"创建的"软件工程"', type: 'processedReview', status: '已被同意' },
-                { id: 6, content: '你申请加入"杜老师"创建的"软件工程"', type: 'processedReview', status: '已被拒绝' }
-            ],
-            processedApplyInfo: [
-                { id: 1, content: '"小丽"申请加入你创建的"深圳大学"', status: '已同意' },
-                { id: 2, content: '"小刘"申请加入你创建的"深圳大学"', status: '已拒绝' }
-            ],
-            unprocessedApplyInfo: [
-                { id: 1, content: '"小明"申请加入你创建的"深圳大学"', type: 'unprocessedApply' }
-            ],
-            processedReviewInfo: [
-                { id: 1, content: '你申请加入"杜老师"创建的"软件工程"', status: '已被同意' },
-                { id: 2, content: '你申请加入"杜老师"创建的"软件工程"', status: '已被拒绝' }
-            ],
-            unprocessedReviewInfo: [
-                { id: 1, content: '你申请加入"杜老师"创建的"软件工程"', type: 'unprocessedReview' }
-            ]
+        ]
       }
     },
     methods: {

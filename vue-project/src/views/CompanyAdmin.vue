@@ -708,7 +708,7 @@ const handleToolClick = (tool) => {
       router.push('/home');
       break;
     case 'notice':
-      router.push('/notice');
+      router.push('/info');
       break;
     case'setting':
       router.push('/setting');
