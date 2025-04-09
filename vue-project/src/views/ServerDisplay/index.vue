@@ -76,10 +76,11 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router'; // 引入 useRouter 函数
 import {
   ElInput,
-  ElMessageBox,
+  ElMessageBox
 } from 'element-plus';
 import {
   Search,
@@ -87,7 +88,7 @@ import {
   HomeFilled,
   Setting,
   ChatDotRound,
-  QuestionFilled,
+  QuestionFilled
 } from '@element-plus/icons-vue';
 import ServerCard from "@/components/ServerCard.vue";
 import ServerAddCard from "@/components/ServerAddCard.vue";
@@ -96,21 +97,20 @@ import IconCommunity from "@/components/icons/IconCommunity.vue";
 import IconEcosystem from "@/components/icons/IconEcosystem.vue";
 
 const servers = ref([
-  {id: 1, name: '服务器1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online'},
-  {id: 2, name: '服务器2', os: 'Linux', ip: '134.36.3.7', runtime: '34:36:03', status: 'offline'},
-  {id: 3, name: '服务器3', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online'},
+  { id: 1, name: '服务器1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online' },
+  { id: 2, name: '服务器2', os: 'Linux', ip: '134.36.3.7', runtime: '34:36:03', status: 'offline' },
+  { id: 3, name: '服务器3', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' }
 ]);
 
 // 搜索功能
 const searchQuery = ref('');
 const filteredServers = computed(() => {
   return servers.value.filter(server =>
-      server.name.includes(searchQuery.value)
+    server.name.includes(searchQuery.value)
   );
 });
 
 const show = ref(false);
-
 const deleteDialogVisible = ref(false);
 const serverToDelete = ref("");
 
@@ -145,11 +145,12 @@ const handleDisable = (server) => {
 
 const showDialog = () => {
   show.value = true;
-}
-
+};
 
 const selectedTool = ref('home'); // 记录当前选中的工具
 const currentView = ref('home'); // 当前显示的视图
+
+const router = useRouter(); // 获取路由实例
 
 // 处理工具栏点击
 const handleToolClick = (tool) => {
@@ -161,7 +162,7 @@ const handleToolClick = (tool) => {
     case 'settings':
       openSettings();
       break;
-    case 'messages':
+    case'messages':
       showMessages();
       break;
     case 'help':
@@ -182,7 +183,7 @@ const openSettings = () => {
 
 // 显示消息
 const showMessages = () => {
-  // ElMessageBox.alert('消息中心暂未实现', '提示');
+  router.push({ name: 'InfoNotification' }); // 跳转到信息通知界面
 };
 
 // 显示帮助

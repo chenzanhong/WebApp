@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import Welcome from "@/views/Welcome.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
-import Home from "@/views/Home.vue";
+import Home from "@/views/ServerDisplay/index.vue";
 import ServerDetail from "@/views/ServerDetail.vue";
+import InfoNotification from "@/views/InfoNotification.vue";
 //import Profile from "@/views/Profile.vue";
 
 
@@ -66,6 +67,13 @@ const routes = [
   //   name: "Profile",
   //   component: Profile,
   // },
+// 信息通知页
+  {
+    path: "/info",
+    name: "InfoNotification",
+    component: InfoNotification
+  }
+  
 ];
 
 const router = createRouter({
