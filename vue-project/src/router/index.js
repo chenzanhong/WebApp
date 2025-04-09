@@ -4,8 +4,14 @@ import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
 import Home from "@/views/Home.vue";
 import ServerDetail from "@/views/ServerDetail.vue";
-//import Profile from "@/views/Profile.vue";
+import SystemAdmin from "@/views/SystemAdmin.vue";
+import CompanyAdmin from "@/views/CompanyAdmin.vue";
+import Setting from "@/views/Setting.vue";
+import Notice from "@/views/Notice.vue";
+import Help from "@/views/Help.vue";
+import TeamBusiness from "@/views/TeamBusiness.vue";
 
+//import Profile from "@/views/Profile.vue";
 
 const routes = [
   // 欢迎页（设为默认路由）
@@ -14,6 +20,7 @@ const routes = [
     name: "Welcome",
     component: Welcome,
   },
+
   // 登录页
   {
     path: "/login",
@@ -28,6 +35,20 @@ const routes = [
     component: Register,
   },
 
+  // 系统管理员界面
+  {
+    path: "/systemadmin",
+    name: "SystemAdmin",
+    component: SystemAdmin,
+  },
+
+    // 公司管理员界面
+    {
+      path: "/companyadmin",
+      name: "CompanyAdmin",
+      component: CompanyAdmin,
+    },
+
   // 主界面
   {
     path: "/home",
@@ -39,6 +60,7 @@ const routes = [
     name: "Server",
     component: () => import('@/views/ServerDisplay/index.vue'),
   },
+
   // 服务器详情页（动态路由）
   {
     path: "/monitor/:host_name",
@@ -55,17 +77,31 @@ const routes = [
     ]
   },
   {
-    path: "/display/TeamBusiness",
+    path: "/display/teambusiness",
     name: "TeamBusiness",
-    component: () => import('@/views/TeamBusiness.vue'),
+    component: TeamBusiness,
   },
 
-  // // 个人信息页
-  // {
-  //   path: "/profile",
-  //   name: "Profile",
-  //   component: Profile,
-  // },
+  // 设置界面
+  {
+    path: "/setting",
+    name: "Setting",
+    component: Setting,
+  },
+
+  // 通知界面
+  {
+    path: "/notice",
+    name: "Notice",
+    component: Notice,
+  },
+
+  // 帮助界面
+  {
+    path: "/help",
+    name: "Help",
+    component: Help,
+  },
 ];
 
 const router = createRouter({
@@ -74,3 +110,4 @@ const router = createRouter({
 });
 
 export default router;
+    
