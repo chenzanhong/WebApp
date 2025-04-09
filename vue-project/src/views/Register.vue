@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <img src="" class="logo">
+    <img src="@/assets/display/icons/stLine-server-l.png" class="logo">
     <h3 class="teamname">SeverM</h3>
   </div>
   <div class="welcome-container">
@@ -72,9 +72,7 @@
   font-weight: normal;
   font-style: normal;
 }
-</style>
 
-<style>
 body {
   background-color: #000000;
   height: 100vh;
@@ -83,13 +81,23 @@ body {
   flex-direction: column;
 }
 
+.header {
+  position: absolute; 
+  right: 2vw;
+  top: 2vh; 
+  display: flex; 
+  align-items: center; 
+}
+
+.logo {
+  font-size: 35px;
+}
+
 .teamname {
-  position: fixed;
-  right: 5px;
-  top: 5px;
   color: white;
   font-size: 35px;
   font-family: 'PangMenZhengDao', sans-serif;
+  margin-left: 10px;
 }
 
 .welcome-container {
@@ -123,6 +131,7 @@ h2 {
 
 .buttons {
   position: fixed;
+  font-size: 13px;
   top: 80vh;
   left: 0;
   right: 0;
@@ -175,7 +184,7 @@ a span {
 
 .box-title {
   margin-top: 0.5vh;
-  font-size: 40px;
+  font-size: 33px;
   font-weight: bold;
 }
 
@@ -219,11 +228,11 @@ a span {
 .input-icon1,
 .input-icon2 {
   position: absolute;
-  left: 13%; 
+  left: 15%; 
   transform: translateY(-50%);
   color: white;
   font-weight: bold;
-  font-size: 50px; 
+  font-size: 40px; 
   z-index: 4; 
 }
 
@@ -302,7 +311,7 @@ export default {
                 ElMessage.error('两次输入的密码不一致');
                 return;
             }
-            const apiUrl = 'http://localhost:8080/agent/register';
+            const apiUrl = 'http://120.79.200.209:8080/agent/register';
             const requestData = {
                 email: this.email,
                 name: this.username,
