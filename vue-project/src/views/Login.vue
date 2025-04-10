@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <img src="" class="logo">
+    <img src="@/assets/display/icons/stLine-server-l.png" class="logo">
     <h3 class="teamname">SeverM</h3>
   </div>
   <div class="welcome-container">
@@ -14,7 +14,7 @@
     <a><span>有账号，现在开始→</span></a>
   </div>
   <div class="box">
-    <span class="close-icon1" @click1="closeRegisterBox">
+    <span class="close-icon1" @click="closeLoginBox">
         <el-icon><CircleCloseFilled /></el-icon>
       </span>
     <div class="box-title">登录</div>
@@ -52,9 +52,7 @@
   font-weight: normal;
   font-style: normal;
 }
-</style>
 
-<style scoped>
 body {
   background-color: #000000;
   height: 100vh;
@@ -63,13 +61,23 @@ body {
   flex-direction: column;
 }
 
+.header {
+  position: absolute; 
+  right: 2vw;
+  top: 2vh; 
+  display: flex; 
+  align-items: center; 
+}
+
+.logo {
+  font-size: 35px;
+}
+
 .teamname {
-  position: fixed;
-  right: 5px;
-  top: 5px;
   color: white;
   font-size: 35px;
   font-family: 'PangMenZhengDao', sans-serif;
+  margin-left: 10px;
 }
 
 .welcome-container {
@@ -103,6 +111,7 @@ h2 {
 
 .buttons {
   position: fixed;
+  font-size: 13px;
   top: 80vh;
   left: 0;
   right: 0;
@@ -137,7 +146,7 @@ a span {
   text-align: center;
   width: 60vw;
   max-width: 660px;
-  height: 65vh;
+  height: 60vh;
   background-color: #333333;
   color: white;
   padding: 20px;
@@ -146,8 +155,17 @@ a span {
 
 .box-title {
   margin-top: 1vh;
-  font-size: 40px;
+  font-size: 33px;
   font-weight: bold;
+}
+
+.close-icon1{
+  position: fixed;
+  right: 5%; 
+  color: white;
+  font-weight: bold;
+  font-size: 20px; 
+  z-index: 4; 
 }
 
 .divider {
@@ -190,11 +208,11 @@ a span {
 .input-icon1,
 .input-icon2 {
   position: absolute;
-  left: 13%; 
+  left: 15%; 
   transform: translateY(-50%);
   color: white;
   font-weight: bold;
-  font-size: 50px; 
+  font-size: 40px; 
   z-index: 4; 
 }
 
@@ -264,7 +282,7 @@ export default {
   methods: {
     async loginClick() {
       try {
-        const response = await fetch('http://localhost:8080/agent/login', {
+        const response = await fetch('http://120.79.200.209:8080/agent/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -296,7 +314,7 @@ export default {
     togglePasswordVisibility() {
       this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
     },
-    closeRegisterBox() {
+    closeLoginBox() {
             const router = useRouter();
             this.$router.push('/');
         }
