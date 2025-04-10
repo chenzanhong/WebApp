@@ -221,7 +221,7 @@
 import { ref, reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-
+const token = localStorage.getItem('token') || ''
 const form = reactive({
   companyName: '',
   creditCode: '',
@@ -289,8 +289,13 @@ const submitForm = async () => {
 
     // 发送请求到后端
     const response = await fetch('http://localhost:8080/agent/registercompany', {
+      
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': token
+      }
     })
 
     if (response.ok) {
@@ -359,7 +364,11 @@ const submitJoin = async () => {
     // 发送请求到后端
     const response = await fetch('http://localhost:8080/agent/joincompany', {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': token
+      }
     })
 
     if (response.ok) {
