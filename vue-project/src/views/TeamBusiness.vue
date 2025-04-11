@@ -48,14 +48,14 @@
           </el-form-item>
 
           <!-- 上传区域 -->
-          <el-form-item label="上传公司营业执照" prop="businessLicense">
+          <el-form-item  label="上传公司营业执照" prop="businessLicense">
             <br />
             <el-upload
               action="#"
               list-type="picture-card"
               :auto-upload="false"
               :on-change="handleBusinessLicenseChange">
-              <el-icon><Plus /></el-icon>              
+              <el-icon ><Plus /></el-icon>              
             </el-upload>
           </el-form-item>
 
@@ -121,6 +121,7 @@
             </div>
         </div>
       </div>
+      
 
      <div class="form-section" v-if="currentNav === 'join'">
         <div class="form-section">
@@ -216,13 +217,30 @@
         </div>
       </div>
     </div>
+    <!-- 右侧工具栏 -->
+      <div class="toolbar">
+        <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
+          <el-icon size="32"><HomeFilled/></el-icon>
+        </div>
+        <div class="tool-item" :class="{ active: selectedTool === 'settings' }" @click="handleToolClick('settings')">
+          <el-icon size="32"><Setting/></el-icon>
+        </div>
+        <div class="tool-item" :class="{ active: selectedTool === 'messages' }" @click="handleToolClick('messages')">
+          <el-icon size="32"><ChatDotRound/></el-icon>
+        </div>
+        <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
+          <el-icon size="32"><QuestionFilled/></el-icon>
+        </div>
+      </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
+//import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { HomeFilled, Setting, ChatDotRound, QuestionFilled,Plus } from '@element-plus/icons-vue';
+import src from '@/assets/image.png'; // 使用 import 引入
 //const token = localStorage.getItem('token') || ''
 const form = reactive({
   companyName: '',
@@ -233,6 +251,49 @@ const form = reactive({
   idCardFront: null,
   idCardBack: null
 })
+//const src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
+
+
+const selectedTool = ref('home'); // 记录当前选中的工具
+
+// 处理工具栏点击
+const handleToolClick = (tool) => {
+  selectedTool.value = tool;
+  switch (tool) {
+    case 'home':
+      navigateToHome();
+      break;
+    case 'settings':
+      openSettings();
+      break;
+    case 'messages':
+      showMessages();
+      break;
+    case 'help':
+      showHelp();
+      break;
+  }
+};
+
+// 导航到首页（示例：重置视图）
+const navigateToHome = () => {
+  // 处理导航逻辑
+};
+
+// 打开设置弹窗
+const openSettings = () => {
+  // 处理设置逻辑
+};
+
+// 显示消息
+const showMessages = () => {
+  // 处理消息逻辑
+};
+
+// 显示帮助
+const showHelp = () => {
+  // 处理帮助逻辑
+};
 
 const rules = {
   companyName: [
@@ -263,7 +324,7 @@ const rules = {
 const registerForm = ref(null)
 
 const handleBusinessLicenseChange = (file) => {
-  form.businessLicense = file.raw
+    form.businessLicense = file.raw; // 处理文件
 }
 
 const handleIdCardFrontChange = (file) => {
@@ -358,7 +419,7 @@ const submitForm = async () => {
 //   }
 // }
 
-const src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
+
 // 新增响应式数据
 const currentNav = ref('register') // 默认显示注册团队
 const joinForm = reactive({
@@ -498,7 +559,30 @@ h2{
   
 }
     
+.toolbar {
+  width: 5rem;
+  padding: 1rem 0;
+  background-color: #1f2931;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-left: 1px solid #374151;
+}
 
+.tool-item {
+  text-align: center;
+  cursor: pointer;
+  color: #bbbbbb;
+  transition: color 0.2s ease;
+}
+
+.tool-item:hover {
+  color: #636161;
+}
+
+.active {
+  color: #636161 !important;
+}
 
 .left-nav,
 .notice-box  {
