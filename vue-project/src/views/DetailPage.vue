@@ -220,7 +220,7 @@ const netDataArray = serverData.net || [];
                         name: net.name || 'Unknown',
                         bytes_sent: net.bytes_sent || 0,
                         bytes_recv: net.bytes_recv || 0,
-                        net_info_created_at: net.net_info_created_at || '
+                        net_info_created_at: net.net_info_created_at || ''
                     }));
                 } else {
                     this.netData = [
