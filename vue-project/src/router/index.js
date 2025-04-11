@@ -46,9 +46,9 @@ const routes = [
 
     // 公司管理员界面
     {
-      path: "/companyadmin",
-      name: "CompanyAdmin",
-      component: CompanyAdmin,
+      name: 'companyadmin',
+       path: '/companyadmin/:companyName?',
+      component: CompanyAdmin
     },
 
   // 主界面

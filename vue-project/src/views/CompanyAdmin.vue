@@ -8,17 +8,18 @@
           <p>SeverM</p>
         </div>
       </div>
-      <div class="company-info">
+      <div class="company-info" v-if="companyData">
         <div class="company-info-content">
-          <el-button type="text" class="back-button">< 返回管理页面</el-button>
+          <el-button type="text" class="back-button" @click="handleToolClick('systemadmin')">< 返回管理页面</el-button>
           <div class="company-middle-info">
-            <div class="company-name">深圳大学计算机与软件学院</div>
-            <div class="count-info">
-              <span>成员总数 {{ members.length }}</span>
-              <span>服务器总数 15</span>
-            </div>
-          </div>
-          <el-button type="text" class="forward-button"> 进入主页面 ></el-button>
+        <!-- 更改为动态绑定公司信息 -->
+        <div class="company-name">{{ companyData.name  || ''}}</div>
+        <div class="count-info">
+          <span>成员总数 {{ companyData.member_num || ''}}</span>
+          <span>服务器总数 {{ companyData.system_num || '' }}</span>
+        </div>
+      </div>
+          <el-button type="text" class="forward-button" @click="handleToolClick('home')"> 进入主页面 ></el-button>
         </div>
       </div>
       <div class="main-content">
@@ -50,7 +51,7 @@
             <div class="member-item select-item">
               <el-checkbox v-model="member.isSelected" @change="checkAllSelected"></el-checkbox>
             </div>
-            <div class="member-item name-item">{{ member.name }}</div>
+            <div class="member-item name-item">{{ member.username }}</div>
             <div class="member-item email-item">{{ member.email }}</div>
             <button class="deletebutton" @click="openDeleteMemberDialog(member)">删除</button>
           </div>
@@ -443,7 +444,11 @@
   width: 150px;
   display: flex;
   justify-content: center;
+  border-radius: 7px;
   background-color: rgb(123, 136, 150, 0.38);
+  color: white; 
+  align-items: center; /* 添加这一行，使文字在垂直方向居中 */
+  height: 45px; /* 添加合适的高度，让布局更稳定 */
 }
 
 .deletebutton:hover {
@@ -661,28 +666,71 @@
 
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElInput, ElCheckbox, ElIcon } from 'element-plus';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router'; // 新增useRoute
+import { ElInput, ElCheckbox, ElIcon, ElMessage } from 'element-plus';
 import { Search, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase, UserFilled, Comment } from '@element-plus/icons-vue';
 
-const members = ref([
-  {
-    name: '成员1',
-    email: '123452345@szu.email.cn',
-    isSelected: false
-  },
-  {
-    name: '成员2',
-    email: '123642365@szu.email.cn',
-    isSelected: false
-  },
-  {
-    name: '成员3',
-    email: '13522345@szu.email.cn',
-    isSelected: false
+// 获取路由实例和路由参数
+const route = useRoute(); // 新增路由参数获取
+
+const companyData = ref(null); // 初始化为null
+
+// 模拟数据移除，改为空数组
+const members = ref([]);
+
+
+// 新增获取公司信息方法
+const fetchCompanyInfo = async () => {
+  try {
+    const token = localStorage.getItem('token'); 
+    console.log('token:', token);
+    let apiUrl = 'http://120.79.200.209:8080/agent/get-company-info';
+    
+    // 根据路由参数动态构造请求URL
+    const companyName = route.params.companyName;
+    if (companyName) {
+      apiUrl += `?company-name=${encodeURIComponent(companyName)}`;
+    }
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      }
+    });
+
+    if (!response.ok) throw new Error('获取数据失败');
+    
+    const data = await response.json();
+    console.log('从后端获取的原始数据:', data);
+    // 添加数据有效性验证
+    if (!data?.data?.Company || !Array.isArray(data.data.Members)) {
+      throw new Error('返回数据格式错误');
+    }
+   // 处理返回数据
+   companyData.value = {
+      name: data.data.Company.name || '',
+      member_num: data.data.Members.length,
+      system_num: data.data.Company.system_num || 0
+    };
+
+    members.value = data.data.Members.map(member => ({
+      ...member,
+      isSelected: false // 保持原有的选择状态字段
+    }));
+    
+  } catch (error) {
+    ElMessage.error(error.message || '获取公司信息失败');
+    console.error('API Error:', error);
   }
-]);
+};
+// 在组件挂载时自动获取数据
+onMounted(() => {
+  fetchCompanyInfo();
+});
+
 
 const isAllSelected = ref(false);
 const searchQuery = ref('');
@@ -719,6 +767,9 @@ const handleToolClick = (tool) => {
     case 'help':
       router.push('/help');
       break;
+    case 'systemadmin':
+      router.push('/systemadmin');
+      break;
   }
 };
 // 全选/取消全选逻辑
@@ -735,7 +786,7 @@ const checkAllSelected = () => {
 
 // 打开删除单个成员确认弹窗
 const openDeleteMemberDialog = (member) => {
-  confirmText.value = `确定要删除${member.name}吗？`;
+  confirmText.value = `确定要删除 ${member.username} 吗？`; // 修正为username
   selectedMembersToDelete.value = [member];
   showDeleteMemberDialog.value = true;
 };
@@ -752,34 +803,82 @@ const openDeleteSelectedDialog = () => {
   showDeleteMemberDialog.value = true;
 };
 
-// 确认删除成员
-const confirmDelete = () => {
-  selectedMembersToDelete.value.forEach(member => {
-    const index = members.value.indexOf(member);
-    if (index!== -1) {
-      members.value.splice(index, 1);
+// 确认删除成员（同时处理单个和批量）
+const confirmDelete = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const usernames = selectedMembersToDelete.value.map(m => m.username);
+    
+    const response = await fetch('http://120.79.200.209:8080/agent/deleteMembers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      },
+      body: JSON.stringify({ usernames })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || '删除成员失败');
     }
-  });
-  showDeleteMemberDialog.value = false;
+
+    ElMessage.success(result.message);
+    
+    // 仅保留接口刷新方式（重要修改！）
+    await fetchCompanyInfo();
+
+  } catch (error) {
+    ElMessage.error(error.message);
+    console.error('删除失败:', error);
+  } finally {
+    showDeleteMemberDialog.value = false;
+    selectedMembersToDelete.value = [];
+  }
 };
+
 
 // 打开添加成员弹窗
 const openAddMemberDialog = () => {
   showAddMemberDialog.value = true;
 };
 
-const addMember = () => {
-  if (username.value && email.value) {
-    members.value.push({ 
-      name: username.value, 
-      email: email.value, 
-      isSelected: false 
+const addMember = async () => {
+  try {
+    if (!username.value || !email.value) {
+      ElMessage.warning('请输入成员姓名和邮箱');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+     const response = await fetch('http://120.79.200.209:8080/agent/addMember', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      },
+      body: JSON.stringify({
+        username: username.value,
+        email: email.value
+      })
     });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || '添加成员失败');
+    }
+
+    ElMessage.success(result.message);
+    // 添加成功后刷新成员列表
+    await fetchCompanyInfo();
     showAddMemberDialog.value = false;
     username.value = '';
     email.value = '';
-  } else {
-    alert('请输入成员姓名和成员邮箱');
+  } catch (error) {
+    ElMessage.error(error.message);
+    console.error('添加成员失败:', error);
   }
 };
 
@@ -791,33 +890,3 @@ const handlePasswordInput = () => {
   // 处理密码输入逻辑
 };
 </script>      
-<!-- 接口‘http://120.79.200.209:8080/agent/getCompanyInfo’以获取company-info，以下为接口示例，admin是机构管理员的值、第一个成员的邮箱即是管理员邮箱
-// 示例
-// {
-//     "message": "获取公司信息成功",
-//     "data": {
-//         "Company": {
-//             "id": 1,
-//             "name": "示例公司",
-//             "admin": "adminUser",
-//             "member_num": 10,
-//             "server_num": 5,
-//             "description": "这是一个示例公司"
-//         },
-//         "Members": [
-//             {
-//                 "username": "member1",
-//                 "email": "member1@example.com"
-//             },
-//             {
-//                 "username": "member2",
-//                 "email": "member2@example.com"
-//             },
-//             {
-//                 "username": "member3",
-//                 "email": "member3@example.com"
-//             }
-//             // 更多成员...
-//         ]
-//     }
-// } -->

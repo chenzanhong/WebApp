@@ -279,46 +279,57 @@ export default {
       passwordType: 'password'
     };
   },
-  methods: {
-    async loginClick() {
-      try {
-        const response = await fetch('http://120.79.200.209:8080/agent/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: this.email,
-            password: this.password
-          })
-        });
+   methods: {
+    async loginClick() {
+      try {
+        const response = await fetch('http://120.79.200.209:8080/agent/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: this.email,
+            password: this.password
+          })
+        });
 
-        const data = await response.json();
+        const data = await response.json();
 
-        if (data.message === '登录成功') {
-          const token = data.token;
-          localStorage.setItem('token', token);//token存到本地
-          ElMessage.success(data.message);
-          const router = useRouter();
-          this.$router.push('/home');
-        } else {
-          ElMessage.error(data.message);
-          this.email = '';
-          this.password = '';
-        }
-      } catch (error) {
-        console.error('登录请求出错:', error);
-        ElMessage.error('登录失败，请检查网络或稍后重试');
-      }
-    },
-    togglePasswordVisibility() {
-      this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
-    },
-    closeLoginBox() {
-            const router = useRouter();
-            this.$router.push('/');
-        }
-  },
-  mounted() {}
+        if (data.message === '登录成功') {
+          console.log('[登录成功] 完整响应数据:', data); 
+          const token = data.token;
+          localStorage.setItem('token', token);//token存到本地
+          ElMessage.success(data.message);
+           if(data.role === 'USER')
+         {
+           this.$router.push('/home');
+         }
+         else if(data.role === 'ADMIN')
+         {
+           this.$router.push('/companyadmin');
+         }
+         else if(data.role === 'ROOT')
+        {
+          this.$router.push('/systemadmin');
+        }
+        } else {
+          ElMessage.error(data.message);
+          this.email = '';
+          this.password = '';
+        }
+      } catch (error) {
+        console.error('登录请求出错:', error);
+        ElMessage.error('登录失败，请检查网络或稍后重试');
+      }
+    },
+    togglePasswordVisibility() {
+      this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
+    },
+    closeLoginBox() {
+            const router = useRouter();
+            this.$router.push('/');
+        }
+  },
+  mounted() {}
 };
 </script>
