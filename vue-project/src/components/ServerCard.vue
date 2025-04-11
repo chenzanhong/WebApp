@@ -4,18 +4,18 @@
     <div class="server-card">
       <div class="">
         <div class="status-dot" :class="statusClass"></div>
-        <div class="server-name">{{ server.name }}</div>
+        <div class="server-name">{{ server.host_name }}</div>
       </div>
       <div class="server-details">
         <div class="details">
           <div>操作系统</div>
-          <div>IP</div>
-          <div>运行时长</div>
+          <div>架构</div>
+          <div>平台</div>
         </div>
         <div class="details">
           <div class="details-a">{{ server.os }}</div>
-          <div class="details-a">{{ server.ip }}</div>
-          <div class="details-a">{{ server.runtime }}</div>
+          <div class="details-a">{{ server.kernel_arch }}</div>
+          <div class="details-a">{{ server.platform }}</div>
         </div>
       </div>
       <div class="actions">
@@ -62,6 +62,7 @@ const statusClass = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   transition: transform 0.3s ease;
 }
 

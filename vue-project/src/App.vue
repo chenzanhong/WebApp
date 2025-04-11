@@ -19,7 +19,15 @@ export default {
 </script>
 
 <style>
- #app {
+
+@font-face {
+  font-family: 'PangMenZhengDao';
+  src: url('@/assets/PangMenZhengDaoBiaoTiTiMianFeiBan-2.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+#app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -28,7 +36,8 @@ export default {
   width: 100%;
   height: 100%;
 }
-.el-dialog{
+
+.el-dialog {
   background-color: #2c3e50 !important;
   width: 45rem !important;
   height: 42rem !important;

@@ -4,13 +4,14 @@
       <!-- 顶部导航栏 -->
       <div class="header">
         <div class="logo">
-          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt="" srcset="">
-          <p>SeverM</p>
+          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt=""
+               srcset="">
+          <p class="logo-name">SeverM</p>
         </div>
         <div class="search-bar">
           <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
           <el-icon
-                   style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
+              style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
             <Search style="font-size: 1.2rem; color: #000000;"/>
           </el-icon>
         </div>
@@ -53,8 +54,8 @@
       </div>
       <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
            @click="handleToolClick('messages')">
-<!--        <img src="@/assets/display/icons/store.png" alt="" srcset="">-->
-        <IconEcosystem />
+        <!--        <img src="@/assets/display/icons/store.png" alt="" srcset="">-->
+        <IconEcosystem/>
       </div>
       <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
         <el-icon size="32">
@@ -76,7 +77,7 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import {
   ElInput,
   ElMessageBox,
@@ -94,11 +95,12 @@ import ServerAddCard from "@/components/ServerAddCard.vue";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
 import IconCommunity from "@/components/icons/IconCommunity.vue";
 import IconEcosystem from "@/components/icons/IconEcosystem.vue";
+import {getServerInfo} from "@/api/server.js";
 
 const servers = ref([
-  {id: 1, name: '服务器1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online'},
-  {id: 2, name: '服务器2', os: 'Linux', ip: '134.36.3.7', runtime: '34:36:03', status: 'offline'},
-  {id: 3, name: '服务器3', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online'},
+  // {id: 1, host_name: '服务器1', os: 'Linux', kernel_arch: "", platform: '134.36.3.6', runtime: '34:36:03', status: 'online'},
+  // {id: 2, host_name: '服务器2', os: 'Linux', kernel_arch: "", platform: '134.36.3.7', runtime: '34:36:03', status: 'offline'},
+  // {id: 3, host_name: '服务器3', os: 'Windows', kernel_arch: "", platform: '134.36.3.8', runtime: '12:45:12', status: 'online'},
 ]);
 
 // 搜索功能
@@ -189,6 +191,13 @@ const showMessages = () => {
 const showHelp = () => {
   // ElMessageBox.alert('帮助文档暂未实现', '帮助');
 };
+
+onMounted(() => {
+  getServerInfo().then(r => {
+    console.log(r)
+    servers.value = r;
+  })
+})
 </script>
 
 <style scoped>
@@ -213,7 +222,9 @@ const showHelp = () => {
 .server-list-container {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  flex-wrap: wrap;
+  justify-content: start;
+  margin: 0 auto;
 }
 
 .server-add {
@@ -233,14 +244,14 @@ const showHelp = () => {
   font-size: 1.2rem;
   color: white;
   text-align: start;
-  font-family: "Poppins",serif;
+  font-family: "Poppins", serif;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: start;
 }
 
-.logo p{
+.logo p {
   margin-left: 10px;
   margin-top: 0.2rem;
   font-weight: bold;
@@ -258,7 +269,8 @@ const showHelp = () => {
 }
 
 .main-content {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   padding: 20px;
   background-color: #000000;
 }
@@ -277,6 +289,7 @@ const showHelp = () => {
   margin: 0 auto;
   border-radius: 1rem;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
   justify-content: start;
   align-items: start;
@@ -307,5 +320,9 @@ const showHelp = () => {
 .active {
   color: #636161 !important;
   /* Element Plus 主色 */
+}
+
+.logo-name{
+  font-family: 'PangMenZhengDao', sans-serif;
 }
 </style>
