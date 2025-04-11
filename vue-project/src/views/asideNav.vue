@@ -12,7 +12,11 @@
         @open="handleOpen"
         @close="handleClose"
       >      
-        <el-menu-item v-for="(server,index) in serverList" :key=server.id >
+        <el-menu-item 
+        v-for="(server,index) in serverList" 
+        :key=server.id
+        @click="selectServer(server)"
+        >
           <el-icon><setting /></el-icon>
           <span>服务器{{ server.id }}</span>
         </el-menu-item>
@@ -37,7 +41,7 @@ export default {
     methods:{
         async getserverList() {
            try {
-                const response = await fetch("http://localhost:8080/agent/list", {
+                const response = await fetch("http://120.79.200.209:8080/agent/list", {
                     method: 'GET',  
                     
                     headers: {
@@ -67,9 +71,13 @@ export default {
                 console.error('获取服务器数据失败:', error.response?.data || error.message);
             }
         },
-        // selectServer(server) {
-        //     this.selectedServer = server;
-        // }
+        selectServer(server) {
+    this.$router.push({
+      name: 'MonitorDetail',
+      params: { host_name: server.host_name }
+    });
+  },
+
       handleOpen(key, keyPath) {
         console.log(key, keyPath);
       },

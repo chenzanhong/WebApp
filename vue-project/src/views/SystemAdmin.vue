@@ -67,6 +67,7 @@
                 type="info" 
                 class="custom-button2"
                 :disabled="company.isDisabled"
+                @click="handleToolClick('companyadmin', company.name)"
               >
                 管理
               </el-button>
@@ -364,93 +365,79 @@
 </style>
 
 <script setup>
-import { ref } from 'vue';
-import { ElInput, ElMessageBox, ElButton } from 'element-plus';
+import { ref, onMounted } from 'vue';
+import { ElInput, ElMessageBox, ElButton, ElMessage } from 'element-plus';
 import { Search, Plus, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase } from '@element-plus/icons-vue';
-import ServerCard from "@/components/ServerCard.vue";
 import ServerAddCard from "@/components/ServerAddCard.vue";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
-import IconCommunity from "@/components/icons/IconCommunity.vue";
-import IconEcosystem from "@/components/icons/IconEcosystem.vue";
 import { useRouter } from 'vue-router';
 
-// 获取路由实例
 const router = useRouter();
 
-// 模拟公司数据（添加isDisabled状态字段）
-const companies = ref([
-  {
-    name: '公司A',
-    manager: '小A',
-    email: '123456789@qq.com',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false // 初始状态为启用
-  },
-  {
-    name: '公司B',
-    manager: '小B',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  },
-  {
-    name: '公司C',
-    manager: '小C',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  },
-  {
-    name: '公司D',
-    manager: '小D',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  },
-  {
-    name: '公司E',
-    manager: '小E',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  },
-  {
-    name: '公司F',
-    manager: '小F',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  },
-  {
-    name: '公司G',
-    manager: '小G',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  },
-  {
-    name: '公司H',
-    manager: '小H',
-    email: '152344453@szu.email.cn',
-    staffCount: 15,
-    serverCount: 15,
-    isDisabled: false
-  }
-]);
-
-// 新增全选状态控制
+// 初始化公司列表
+const companies = ref([]);
 const isAllDisabled = ref(false);
+const searchQuery = ref('');
+const show = ref(false);
+const deleteDialogVisible = ref(false);
+const serverToDelete = ref("");
+const selectedTool = ref('home');
+
+// 获取公司列表的API调用
+const fetchCompanyList = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      ElMessage.error('请先登录');
+      router.push('/login');
+      return;
+    }
+
+    const response = await fetch('http://120.79.200.209:8080/agent/get-company-list', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}` // JWT令牌格式
+      }
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      ElMessage.error(data.message || '获取公司列表失败');
+      return;
+    }
+
+    const data = await response.json();
+    if (data.message === '查询成功') {
+      // 数据映射处理：将API数据转换为组件需要的格式
+      const mappedCompanies = data.data.map(company => ({
+        id: company.id,
+        name: company.name,
+        manager: company.admin_id, // 假设admin_id为管理员标识（需根据实际接口调整）
+        email: '暂无邮箱信息', // 示例API中没有邮箱字段，可根据实际接口补充
+        staffCount: company.membernum,
+        serverCount: company.systemnum,
+        isDisabled: false // 假设初始状态为启用，如需同步状态需从API获取
+      }));
+      
+      companies.value = mappedCompanies;
+      // 更新全选状态
+      isAllDisabled.value = companies.value.every(c => c.isDisabled);
+    }
+  } catch (error) {
+    console.error('获取公司列表出错:', error);
+    ElMessage.error('网络请求失败，请检查网络或稍后重试');
+  }
+};
+
+// 组件挂载后获取数据
+onMounted(() => {
+  fetchCompanyList();
+});
 
 // 切换全部状态
 const toggleAllDisable = () => {
-  const newState =!isAllDisabled.value;
+  const newState = !isAllDisabled.value;
   companies.value.forEach(company => {
     company.isDisabled = newState;
   });
@@ -459,47 +446,32 @@ const toggleAllDisable = () => {
 
 // 切换单个公司状态
 const toggleDisable = (company) => {
-  company.isDisabled =!company.isDisabled;
-  // 同步全选状态
+  company.isDisabled = !company.isDisabled;
   isAllDisabled.value = companies.value.every(c => c.isDisabled);
-  console.log(`切换公司状态：${company.name} 现在为 ${company.isDisabled? '停用' : '启用'}`);
+  console.log(`切换公司状态：${company.name} 现在为 ${company.isDisabled ? '停用' : '启用'}`);
 };
 
-// 其他原有逻辑...
-const searchQuery = ref('');
-const show = ref(false);
-const deleteDialogVisible = ref(false);
-const serverToDelete = ref("");
-
-// 打开删除对话框
+// 其他功能函数（删除、添加、工具栏处理等）保持不变
 const openDeleteDialog = (server) => {
   serverToDelete.value = server.name;
   deleteDialogVisible.value = true;
 };
 
-// 处理删除操作
 const handleDelete = () => {
   console.log("删除服务器:", serverToDelete.value);
   alert(`已删除服务器: ${serverToDelete.value}`);
 };
 
-// 打开添加对话框
 const openDialog = () => {
   show.value = true;
 };
 
-// 处理表单提交
 const handleSubmit = (serverData) => {
   console.log("收到表单数据:", serverData);
   alert("服务器信息提交成功！");
 };
 
-// 工具栏状态管理
-const selectedTool = ref('home'); 
-const currentView = ref('home'); 
-
-// 处理工具栏点击事件
-const handleToolClick = (tool) => {
+const handleToolClick = (tool, companyName) => {
   selectedTool.value = tool;
   switch (tool) {
     case 'home':
@@ -517,15 +489,16 @@ const handleToolClick = (tool) => {
     case 'help':
       router.push('/help');
       break;
+    case 'companyadmin':
+      router.push({ name: 'companyadmin', params: { companyName: companyName } });// 将公司名传到companyadmin页面
+      break;
   }
 };
 
-// 导航到主页
 const navigateToHome = () => {
   currentView.value = 'home';
 };
 
-// 其他空方法保留原有结构
 const openSettings = () => {};
 const showMessages = () => {};
 const showBriefcase = () => {};
