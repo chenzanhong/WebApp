@@ -102,7 +102,7 @@ const routes = [
       {
         path: "notice",
         name: "Notice",
-        component: Notice,
+        component: InfoNotification,
       },
       // 帮助界面
       {
