@@ -2,11 +2,6 @@
   <div class="container">
     <!-- 左侧侧边栏 -->
     <div class="left-sidebar">
-      <!-- 添加 logo -->
-      <div class="logo">
-        <img src="@/assets/display/icons/stLine-server-l.png" width="30" height="30"  style="vertical-align: middle;" alt="" srcset="">
-        <p>SeverM</p>
-      </div>
       <h2 class="sidebar-title">信息通知</h2>
       <ul class="sidebar-menu">
         <li 
@@ -26,34 +21,7 @@
       <InfoList :selectedInfo="selectedInfo" />
     </div>
 
-     <!-- 右侧工具栏 -->
-<div class="toolbar">
-  <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-    <el-icon size="32">
-      <HomeFilled />
-    </el-icon>
-  </div>
-  <div class="tool-item" :class="{ active: selectedTool === 'notice' }" @click="handleToolClick('notice')">
-    <el-icon size="32">
-      <ChatDotRound />
-    </el-icon>
-  </div>
-  <div class="tool-item" :class="{ active: selectedTool ==='setting' }" @click="handleToolClick('setting')">
-    <el-icon size="32">
-      <Setting />
-    </el-icon>
-  </div>
-  <div class="tool-item" :class="{ active: selectedTool === 'teambusiness' }" @click="handleToolClick('teambusiness')">
-    <el-icon size="32">
-      <Briefcase />
-    </el-icon>
-  </div>
-  <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-    <el-icon size="32">
-      <QuestionFilled />
-    </el-icon>
-  </div>
-</div>
+    
   </div>
 </template>
 
@@ -89,29 +57,7 @@ export default {
     navigateTo(path) {
       this.$router.push(path);
     },
-    handleToolClick(tool, companyName) {
-        this.selectedTool = tool;
-        switch (tool) {
-            case 'home':
-                this.$router.push('/home'); // 使用 this.$router 访问路由实例
-                break;
-            case 'notice':
-                this.$router.push('/info');
-                break;
-            case 'setting':
-                this.$router.push('/setting');
-                break;
-            case 'teambusiness':
-                this.$router.push('/display/teambusiness');
-                break;
-            case 'help':
-                this.$router.push('/help');
-                break;
-            case 'companyadmin':
-                this.$router.push({ name: 'companyadmin', params: { companyName: companyName } });// 将公司名传到companyadmin页面
-                break;
-        }
-    }
+   
   }
 }
 </script>

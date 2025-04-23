@@ -3,10 +3,7 @@
     <div class="server-left">
       <!-- 顶部导航栏 -->
       <div class="header">
-        <div class="logo">
-          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt="" srcset="">
-          <p>SeverM</p>
-        </div>
+        <
         <div class="search-bar">
           <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
           <el-icon
@@ -34,34 +31,7 @@
     </div>
 
    
-    <!-- 右侧工具栏 -->
-    <div class="toolbar">
-      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-        <el-icon size="32">
-          <HomeFilled />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'notice' }" @click="handleToolClick('notice')">
-        <el-icon size="32">
-          <ChatDotRound />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool ==='setting' }" @click="handleToolClick('setting')">
-        <el-icon size="32">
-          <Setting />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'teambusiness' }" @click="handleToolClick('teambusiness')">
-        <el-icon size="32">
-          <Briefcase />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-        <el-icon size="32">
-          <QuestionFilled />
-        </el-icon>
-      </div>
-    </div>
+    
 
 
     <ServerAddCard v-model:visible="show"
@@ -161,30 +131,7 @@ const currentView = ref('home'); // 当前显示的视图
 
 const router = useRouter(); // 获取路由实例
 
-// 处理工具栏点击
-const handleToolClick = (tool, companyName) => {
-  selectedTool.value = tool;
-  switch (tool) {
-    case 'home':
-      router.push('/home');
-      break;
-    case 'notice':
-      router.push('/info');
-      break;
-    case 'setting':
-      router.push('/setting');
-      break;
-    case 'teambusiness':
-      router.push('/display/teambusiness');
-      break;
-    case 'help':
-      router.push('/help');
-      break;
-    case 'companyadmin':
-      router.push({ name: 'companyadmin', params: { companyName: companyName } });// 将公司名传到companyadmin页面
-      break;
-  }
-};
+
 
 // 导航到首页（示例：重置视图）
 const navigateToHome = () => {

@@ -50,6 +50,57 @@ const routes = [
     component: CompanyAdmin,
   },
 
+  // 主界面
+  {
+    path: "/home",
+    name: "Home",
+    component: Home,
+  },
+  {
+    path: "/display/server",
+    name: "Server",
+    component: () => import('@/views/ServerDisplay/index.vue'),
+  },
+  // 服务器详情页（动态路由）
+  {
+    path: "/monitor/:host_name",
+    name: "MonitorDetail",
+    component: ServerDetail,
+    props: true,
+    children: [
+      {
+        path: '', // 默认子路由，直接显示 DetailPage
+        name: 'DetailPage',
+        component: () => import('@/views/DetailPage.vue'),
+        props: true
+      },
+    ]
+  },
+  {
+    path: "/display/teambusiness",
+    name: "TeamBusiness1",
+    component: TeamBusiness,
+  },
+  // 设置界面
+  {
+    path: "/setting",
+    name: "Set",
+    component: Setting,
+  },
+  // 通知界面
+  {
+    path: "/info",
+    name: "Info",
+    component: InfoNotification,
+  },
+  // 帮助界面
+  {
+    path: "/help",
+    name: "Help",
+    component: Help,
+  },
+
+
   // layout
   {
     path: "/headbar",

@@ -217,21 +217,7 @@
         </div>
       </div>
     </div>
-    <!-- 右侧工具栏 -->
-      <div class="toolbar">
-        <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-          <el-icon size="32"><HomeFilled/></el-icon>
-        </div>
-        <div class="tool-item" :class="{ active: selectedTool === 'settings' }" @click="handleToolClick('settings')">
-          <el-icon size="32"><Setting/></el-icon>
-        </div>
-        <div class="tool-item" :class="{ active: selectedTool === 'messages' }" @click="handleToolClick('messages')">
-          <el-icon size="32"><ChatDotRound/></el-icon>
-        </div>
-        <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-          <el-icon size="32"><QuestionFilled/></el-icon>
-        </div>
-      </div>
+    
   </div>
 </template>
 
