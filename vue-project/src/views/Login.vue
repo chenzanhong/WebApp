@@ -300,7 +300,7 @@ export default {
           localStorage.setItem('token', token);//token存到本地
           ElMessage.success(data.message);
           const router = useRouter();
-          this.$router.push('/home');
+          this.$router.push('/headbar');//暂时改为直接到headbar
         } else {
           ElMessage.error(data.message);
           this.email = '';
