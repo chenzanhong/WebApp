@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="setting-page">
     <h1 style="color: white;">设置页</h1>
   </div>
 </template>

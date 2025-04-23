@@ -12,8 +12,7 @@ import Setting from "@/views/Setting.vue";
 import Notice from "@/views/Notice.vue";
 import Help from "@/views/Help.vue";
 import TeamBusiness from "@/views/TeamBusiness.vue";
-
-//import Profile from "@/views/Profile.vue";
+import Headbar from "@/views/headbar.vue";
 
 const routes = [
   // 欢迎页（设为默认路由）
@@ -44,39 +43,75 @@ const routes = [
     component: SystemAdmin,
   },
 
-    // 公司管理员界面
-    {
-      name: 'companyadmin',
-       path: '/companyadmin/:companyName?',
-      component: CompanyAdmin
-    },
-
-  // 主界面
+  // 公司管理员界面
   {
-    path: "/home",
-    name: "Home",
-    component: Home,
-  },
-  {
-    path: "/display/server",
-    name: "Server",
-    component: () => import('@/views/ServerDisplay/index.vue'),
+    path: "/companyadmin",
+    name: "CompanyAdmin",
+    component: CompanyAdmin,
   },
 
-  // 服务器详情页（动态路由）
+  // layout
   {
-    path: "/monitor/:host_name",
-    name: "MonitorDetail",
-    component: ServerDetail,
-    props: true,
+    path: "/headbar",
+    component: Headbar,
+    redirect: { path: "/headbar/home" },
     children: [
+      // 默认路由
       {
-        path: '', // 默认子路由，直接显示 DetailPage
-        name: 'DetailPage',
-        component: () => import('@/views/DetailPage.vue'),
-        props: true
+      path: "", 
+      component: Home // 直接渲染Home组件
+      },
+      // 主界面
+      {
+        path: "home",
+        name: "Home",
+        component: Home,
+      },
+      {
+        path: "display/server",
+        name: "Server",
+        component: () => import('@/views/ServerDisplay/index.vue'),
+      },
+      // 服务器详情页（动态路由）
+      {
+        path: "monitor/:host_name",
+        name: "MonitorDetail",
+        component: ServerDetail,
+        props: true,
+        children: [
+          {
+            path: '', // 默认子路由，直接显示 DetailPage
+            name: 'DetailPage',
+            component: () => import('@/views/DetailPage.vue'),
+            props: true
+          },
+        ]
+      },
+      {
+        path: "display/teambusiness",
+        name: "TeamBusiness",
+        component: TeamBusiness,
+      },
+      // 设置界面
+      {
+        path: "setting",
+        name: "Setting",
+        component: Setting,
+      },
+      // 通知界面
+      {
+        path: "notice",
+        name: "Notice",
+        component: Notice,
+      },
+      // 帮助界面
+      {
+        path: "help",
+        name: "Help",
+        component: Help,
       },
     ]
+<<<<<<< HEAD
   },
   {
     path: "/display/teambusiness",
@@ -120,6 +155,9 @@ const routes = [
     component: Help,
   },
 
+=======
+  }
+>>>>>>> main
 ];
 
 const router = createRouter({
@@ -128,4 +166,3 @@ const router = createRouter({
 });
 
 export default router;
-    

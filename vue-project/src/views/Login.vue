@@ -300,18 +300,19 @@ export default {
           const token = data.token;
           localStorage.setItem('token', token);//token存到本地
           ElMessage.success(data.message);
-           if(data.role === 'USER')
-         {
-           this.$router.push('/home');
-         }
-         else if(data.role === 'ADMIN')
-         {
-           this.$router.push('/companyadmin');
-         }
-         else if(data.role === 'ROOT')
-        {
-          this.$router.push('/systemadmin');
-        }
+//            if(data.role === 'USER')
+//          {
+//            this.$router.push('/home');
+//          }
+//          else if(data.role === 'ADMIN')
+//          {
+//            this.$router.push('/companyadmin');
+//          }
+//          else if(data.role === 'ROOT')
+//         {
+//           this.$router.push('/systemadmin');
+//         }
+          this.$router.push('/headbar');//暂时改为直接到headbar
         } else {
           ElMessage.error(data.message);
           this.email = '';
