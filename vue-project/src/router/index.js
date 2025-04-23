@@ -111,53 +111,7 @@ const routes = [
         component: Help,
       },
     ]
-<<<<<<< HEAD
-  },
-  {
-    path: "/display/teambusiness",
-    name: "TeamBusiness",
-    component: TeamBusiness,
-  },
-
-
-  // // 个人信息页
-  // {
-  //   path: "/profile",
-  //   name: "Profile",
-  //   component: Profile,
-  // },
-// 信息通知页
-  {
-    path: "/info",
-    name: "InfoNotification",
-    component: InfoNotification
-  },
-  
-
-  // 设置界面
-  {
-    path: "/setting",
-    name: "Setting",
-    component: Setting,
-  },
-
-  // 通知界面
-  {
-    path: "/notice",
-    name: "Notice",
-    component: Notice,
-  },
-
-  // 帮助界面
-  {
-    path: "/help",
-    name: "Help",
-    component: Help,
-  },
-
-=======
   }
->>>>>>> main
 ];
 
 const router = createRouter({
