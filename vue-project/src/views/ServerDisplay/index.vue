@@ -22,43 +22,43 @@
           <div class="server-count">服务器总数 {{ servers.length }}</div>
           <div class="server-list-container">
             <div class="server-add" style="margin-left: 1rem; margin-right: 1rem; margin-top: 1rem;"
-                 @click="showDialog">
+                 @click="showDialog" >
               <img src="@/assets/display/add_icon.png" alt="" srcset="">
             </div>
             <ServerCard v-for="server in servers" :key="server.id" :server="server"
-                        @delete="openDeleteDialog(server)" @disable="handleDisable(server)"/>
+                        @delete="openDeleteDialog(server)" @disable="handleDisable(server)"
+                        @click="handleServerClick(server)"/>
           </div>
         </div>
       </div>
     </div>
 
+   
     <!-- 右侧工具栏 -->
     <div class="toolbar">
       <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
         <el-icon size="32">
-          <HomeFilled/>
+          <HomeFilled />
         </el-icon>
       </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'settings' }"
-           @click="handleToolClick('settings')">
+      <div class="tool-item" :class="{ active: selectedTool === 'notice' }" @click="handleToolClick('notice')">
         <el-icon size="32">
-          <Setting/>
+          <ChatDotRound />
         </el-icon>
       </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
-           @click="handleToolClick('messages')">
+      <div class="tool-item" :class="{ active: selectedTool ==='setting' }" @click="handleToolClick('setting')">
         <el-icon size="32">
-          <ChatDotRound/>
+          <Setting />
         </el-icon>
       </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
-           @click="handleToolClick('messages')">
-<!--        <img src="@/assets/display/icons/store.png" alt="" srcset="">-->
-        <IconEcosystem />
+      <div class="tool-item" :class="{ active: selectedTool === 'teambusiness' }" @click="handleToolClick('teambusiness')">
+        <el-icon size="32">
+          <Briefcase />
+        </el-icon>
       </div>
       <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
         <el-icon size="32">
-          <QuestionFilled/>
+          <QuestionFilled />
         </el-icon>
       </div>
     </div>
@@ -78,6 +78,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router'; // 引入 useRouter 函数
+
 import {
   ElInput,
   ElMessageBox
@@ -88,13 +89,16 @@ import {
   HomeFilled,
   Setting,
   ChatDotRound,
-  QuestionFilled
+  QuestionFilled,
+  Briefcase
 } from '@element-plus/icons-vue';
 import ServerCard from "@/components/ServerCard.vue";
 import ServerAddCard from "@/components/ServerAddCard.vue";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
 import IconCommunity from "@/components/icons/IconCommunity.vue";
 import IconEcosystem from "@/components/icons/IconEcosystem.vue";
+
+
 
 const servers = ref([
   { id: 1, name: '服务器1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online' },
@@ -113,6 +117,11 @@ const filteredServers = computed(() => {
 const show = ref(false);
 const deleteDialogVisible = ref(false);
 const serverToDelete = ref("");
+
+const handleServerClick = (server) => {
+      // 这里使用 router.push 方法进行路由跳转
+      router.push('/monitor/machine');
+    };
 
 const openDeleteDialog = (server) => {
   serverToDelete.value = server.name;
@@ -153,20 +162,26 @@ const currentView = ref('home'); // 当前显示的视图
 const router = useRouter(); // 获取路由实例
 
 // 处理工具栏点击
-const handleToolClick = (tool) => {
+const handleToolClick = (tool, companyName) => {
   selectedTool.value = tool;
   switch (tool) {
     case 'home':
-      navigateToHome();
+      router.push('/home');
       break;
-    case 'settings':
-      openSettings();
+    case 'notice':
+      router.push('/info');
       break;
-    case'messages':
-      showMessages();
+    case 'setting':
+      router.push('/setting');
+      break;
+    case 'teambusiness':
+      router.push('/display/teambusiness');
       break;
     case 'help':
-      showHelp();
+      router.push('/help');
+      break;
+    case 'companyadmin':
+      router.push({ name: 'companyadmin', params: { companyName: companyName } });// 将公司名传到companyadmin页面
       break;
   }
 };

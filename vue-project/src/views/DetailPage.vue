@@ -293,6 +293,7 @@ const netDataArray = serverData.net || [];
     padding: 8px;
     background: #2a2a2a;
     border-radius: 4px;
+    font-size: 15px;
 }
 
 .process-item {
@@ -331,5 +332,6 @@ h2 {
     margin: 0 0 15px 0;
     padding-bottom: 10px;
     border-bottom: 1px solid #333;
+    font-size: 20px;
 }
 </style>    
