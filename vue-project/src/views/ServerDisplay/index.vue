@@ -3,7 +3,6 @@
     <div class="server-left">
       <!-- 顶部导航栏 -->
       <div class="header">
-        <
         <div class="search-bar">
           <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
           <el-icon
