@@ -66,13 +66,13 @@ const routes = [
   },
   // 服务器详情页（动态路由）
   {
-    path: "/monitor/:host_name",
+    path: "/monitor/:hostname",
     name: "MonitorDetail",
     component: ServerDetail,
     props: true,
     children: [
       {
-        path: '', // 默认子路由，直接显示 DetailPage
+        path: '', 
         name: 'DetailPage',
         component: () => import('@/views/DetailPage.vue'),
         props: true
@@ -128,7 +128,7 @@ const routes = [
       },
       // 服务器详情页（动态路由）
       {
-        path: "monitor/:host_name",
+        path: "monitor/:hostname",
         name: "MonitorDetail",
         component: ServerDetail,
         props: true,

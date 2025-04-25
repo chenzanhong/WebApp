@@ -1,27 +1,42 @@
 <template>
     <div class="info-container">
         <div class="info-item">
-            <div class="info-header" >{{ getHeaderText }}</div>
+            <!-- 状态筛选栏 -->
+            <div class="status-filter">
+                <button
+                    v-for="status in statusFilters"
+                    :key="status.type"
+                    :class="{ active: selectedStatus === status.type }"
+                    @click="updateStatus(status.type)"
+                >
+                    {{ status.label }}
+                </button>
+            </div>
 
             <!-- 信息列表 -->
-            <div class="message-list">
-                <div 
-                    v-for="item in filteredItems" 
-                    :key="item.id" 
-                    class="message-card"
-                    :class="[item.type, item.status]"
-                >
-                    <div class="message-content">
-                        {{ item.content }}
-                        <span v-if="item.status" class="status-tag" :class="item.status">
-                            {{ getStatusText(item) }}
-                        </span>
-                    </div>
+            <div class="info-item">
+                <div class="info-header">
+                    {{ 
+                        selectedCategory === 'all' ? '全部通知' : (selectedCategory === 'received' ? '接收的信息' : '发送的信息') 
+                    }} - {{ statusMap[selectedStatus] }}
+                </div>
+                <div class="message-list">
+                    <div 
+                        v-for="(item, index) in filteredItems" 
+                        class="message-card"
+                        :class="item.status"
+                    >
+                        <div class="message-content">
+                            {{ item.content }}
+                            <span class="status-tag" :class="item.status">
+                                {{ getStatusText(item) }}
+                            </span>
+                        </div>
 
-                    <!-- 操作按钮，仅当类型为 unprocessedApply 时显示 -->
-                    <div v-if="item.type === 'unprocessedApply'" class="action-buttons">
-                        <button class="agree" @click="handleAgree(item)">同意</button>
-                        <button class="reject" @click="handleReject(item)">拒绝</button>
+                        <!-- 操作按钮，当状态为未确认时显示 -->
+                        <div v-if="item.status === 'unconfirmed' && item.category === 'received'" class="action-buttons">
+                            <button class="confirm" @click="handleConfirm(item, index)">确认</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -30,74 +45,208 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     props: {
-        selectedInfo: {
+        selectedCategory: {
+            type: String,
+            required: true
+        },
+        selectedStatus: {
             type: String,
             required: true
         }
     },
     data() {
         return {
-            allInfo: [
-                { id: 1, content: '"小明"申请加入你创建的"深圳大学"', type: 'unprocessedApply' },
-                { id: 2, content: '"小丽"申请加入你创建的"深圳大学"', type: 'processedApply', status: '已同意' },
-                { id: 3, content: '"小刘"申请加入你创建的"深圳大学"', type: 'processedApply', status: '已拒绝' },
-                { id: 4, content: '你申请加入"杜老师"创建的"软件工程"', type: 'unprocessedReview', status: '待处理' },
-                { id: 5, content: '你申请加入"杜老师"创建的"软件工程"', type: 'processedReview', status: '已被同意' },
-                { id: 6, content: '你申请加入"杜老师"创建的"软件工程"', type: 'processedReview', status: '已被拒绝' }
-            ],
-            typeMapping: {
-                all: { label: '全部信息' },
-                processedApply: { label: '已处理申请' },
-                unprocessedApply: { label: '未处理申请' },
-                processedReview: { label: '已处理审核' },
-                unprocessedReview: { label: '未处理审核' }
-            }
+            allInfo: [], // 存储从后端获取的数据
+            statusFilters: [
+                { type: 'all', label: '全部状态' },
+                { type: 'confirmed', label: '已确认' },
+                { type: 'unconfirmed', label: '未确认' },
+                { type: 'expired', label: '已过期' }
+            ]
         }
     },
     computed: {
-        // 过滤显示的条目
         filteredItems() {
-            if (this.selectedInfo === 'all') return this.allInfo;
-            return this.allInfo.filter(item => item.type === this.selectedInfo);
+            return this.allInfo.filter(item => {
+                const categoryMatch = this.selectedCategory === 'all' || 
+                    item.category === this.selectedCategory;
+                const statusMatch = this.selectedStatus === 'all' || 
+                    item.status === this.selectedStatus;
+                return categoryMatch && statusMatch;
+            });
         },
-        // 获取标题文字
-        getHeaderText() {
-            return this.selectedInfo === 'all' 
-                ? `${this.typeMapping.all.icon || ''} ${this.typeMapping.all.label}` 
-                : `${this.typeMapping[this.selectedInfo].icon || ''} ${this.typeMapping[this.selectedInfo].label}`;
+        statusMap() {
+            return {
+                all: '全部状态',
+                confirmed: '已确认',
+                unconfirmed: '未确认',
+                expired: '已过期'
+            };
         }
     },
     methods: {
-        // 获取状态显示文字
+        // 映射状态显示文本
         getStatusText(item) {
             const statusMap = {
-                '已同意': '✅ 已同意',
-                '已拒绝': '❌ 已拒绝',
-                '已被同意': '✅ 已通过',
-                '已被拒绝': '❌ 未通过',
-                '待处理': '⏳ 待处理'
+                confirmed: '✅ 已确认',
+                unconfirmed: '⌛ 未确认',
+                expired: '❌ 已过期'
             };
             return statusMap[item.status] || '';
         },
-        // 是否需要显示操作按钮，修改为仅对 unprocessedApply 显示
-        needsAction(item) {
-            return item.type === 'unprocessedApply';
+
+        // 修改后的确认处理方法
+        async handleConfirm(item, index) {
+            try {
+                // 先更新本地状态
+                this.updateItemStatus(item.id, 'confirmed');
+                console.log(`开始发送确认请求，消息 ID: ${item.id}`);
+                // 发送确认请求
+                await this.processConfirm(item.id);
+                console.log(`确认请求发送成功，消息 ID: ${item.id}`);
+            } catch (error) {
+                console.error(`确认操作失败，消息 ID: ${item.id}:`, error);
+                // 失败时回滚状态
+                this.updateItemStatus(item.id, 'unconfirmed');
+            }
         },
-        handleAgree(item) {
-            console.log('同意处理:', item.id);
-            // 这里可以添加实际处理逻辑
+
+        // 更新状态筛选
+        updateStatus(status) {
+            this.$emit('update-status', status);
         },
-        handleReject(item) {
-            console.log('拒绝处理:', item.id);
-            // 这里可以添加实际处理逻辑
+
+        // 修改后的数据获取方法
+        async fetchNotifications() {
+            try {
+                const token = localStorage.getItem('token');
+                console.log('当前Token:', token);
+
+                // 并行获取收发通知
+                const [receiveRes, sendRes] = await Promise.all([
+                    fetch(`http://120.79.200.209:8080/agent/info/recivelist`, {
+                        headers: { 'Authorization': ` ${token}` }
+                    }),
+                    fetch(`http://120.79.200.209:8080/agent/info/sendlist`, {
+                        headers: { 'Authorization': ` ${token}` }
+                    })
+                ]);
+                // 处理接收通知
+                const receiveData = await receiveRes.json();
+                console.log('后端传来接收信息:', receiveData);
+                const receiveNotices = Array.isArray(receiveData.receiveNotices) ? receiveData.receiveNotices.map(notice => ({
+                    id: notice.id || Math.random().toString(36).substr(2, 9),
+                    content: notice.content,
+                    category: 'received',
+                    status: this.mapProcessedStatus(notice.state),
+                    rawData: notice
+                })) : [];
+
+                // 处理发送通知
+                const sendData = await sendRes.json();
+                console.log('后端传来发送信息:', sendData);
+                const sendNotices = Array.isArray(sendData.sendNotices) ? sendData.sendNotices.map(notice => ({
+                    id: notice.id || Math.random().toString(36).substr(2, 9),
+                    content: notice.content,
+                    category: 'sent',
+                    status: this.mapProcessedStatus(notice.state),
+                    rawData: notice
+                })) : [];
+
+                this.allInfo = [...receiveNotices, ...sendNotices];
+                console.log('合并后的通知列表:', this.allInfo);
+
+            } catch (error) {
+                console.error('获取通知失败:', error);
+            }
+        },
+
+        // 完善后的状态映射
+        mapProcessedStatus(processed) {
+            if (typeof processed === 'boolean') {
+                return processed ? 'confirmed' : 'unconfirmed';
+            }
+            const statusMap = {
+                unprocessed: 'unconfirmed',
+                processed: 'confirmed',
+                expired: 'expired'
+            };
+            return statusMap[processed?.toLowerCase()] || 'expired';
+        },
+
+        // 更新本地数据状态
+        updateItemStatus(id, newStatus) {
+            const index = this.allInfo.findIndex(item => item.id === id);
+            if (index !== -1) {
+                this.allInfo[index].status = newStatus;
+            }
+        },
+
+        // 实际处理请求的方法
+        async processConfirm(id) {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await axios.post(`http://120.79.200.209:8080/agent/info/manage`, { id }, {
+                    headers: { Authorization: ` ${token}` }
+                });
+                console.log('后端响应:', response.data);
+                return response.data;
+            } catch (error) {
+                console.error('请求后端接口失败:', error);
+                throw error;
+            }
         }
+    },
+    mounted() {
+        this.fetchNotifications();
     }
 };
 </script>
 
 <style scoped>
+
+/* 新增状态筛选样式 */
+.status-filter {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 2px solid #4a5568;
+}
+
+.status-filter button {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid #4a5568;
+    background: transparent;
+    color: #a0aec0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.status-filter button.active {
+    background: #4299e1;
+    border-color: #4299e1;
+    color: white;
+}
+
+/* 调整信息卡片状态标识 */
+.message-card.confirmed {
+    border-left: 4px solid #48bb78;
+}
+
+.message-card.unconfirmed {
+    border-left: 4px solid #f6e05e;
+}
+
+.message-card.expired {
+    border-left: 4px solid #f56565;
+}
+
 .info-header {
     color: white;
     font-size: 1.5rem;
@@ -211,4 +360,4 @@ export default {
     background-color: #f56565;
     color: white;
 }
-</style>
+</style>    

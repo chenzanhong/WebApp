@@ -5,23 +5,24 @@
       <h2 class="sidebar-title">信息通知</h2>
       <ul class="sidebar-menu">
         <li 
-          v-for="item in menuItems" 
+          v-for="item in filterCategories" 
           :key="item.type"
-          :class="{ active: selectedInfo === item.type }"
-          @click="selectedInfo = item.type"
+          :class="{ active: selectedCategory === item.type }"
+          @click="selectedCategory = item.type"
         >
-          <span class="icon">{{ item.icon }}</span>
           {{ item.label }}
         </li>
       </ul>
     </div>
 
-    <!-- 主要内容 -->
-    <div class="main-content">
-      <InfoList :selectedInfo="selectedInfo" />
+   <!-- 主要内容 -->
+   <div class="main-content">
+      <InfoList 
+        :selectedCategory="selectedCategory"
+        :selectedStatus="selectedStatus"
+        @update-status="selectedStatus = $event"
+      />
     </div>
-
-    
   </div>
 </template>
 
@@ -42,15 +43,13 @@ export default {
   },
   data() {
     return {
-      selectedInfo: 'all',
-      menuItems: [
-        { type: 'all', label: '全部信息' },
-        { type: 'processedApply', label: '已处理申请' },
-        { type: 'unprocessedApply', label: '未处理申请' },
-        { type: 'processedReview', label: '已处理审核'},
-        { type: 'unprocessedReview', label: '未处理审核'}
-      ],
-      selectedTool: null
+      selectedCategory: 'all',
+      selectedStatus: 'all',
+      filterCategories: [
+        { type: 'all', label: '全部通知' },
+        { type: 'sent', label: '发送信息通知' },
+        { type: 'received', label: '接收信息通知' }
+      ]
     }
   },
   methods: {
@@ -65,11 +64,24 @@ export default {
 <style scoped>
 /* 保持与主界面一致的布局 */
 .container {
+  font-size: 17px; /* 全局基础字号 */
   display: flex;
   height: 100vh;
   background-color: #000000;
 }
+/* 调整侧边栏样式 */
+.sidebar-menu li {
+  font-size: 16px;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
 
+.sidebar-menu li.active {
+  border-left-color: #4299e1;
+  background-color: rgba(66, 153, 225, 0.1);
+}
 /* 左侧侧边栏样式 */
 .left-sidebar {
   width: 240px;
