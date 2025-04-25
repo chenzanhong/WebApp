@@ -240,46 +240,6 @@ const form = reactive({
 //const src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
 
 
-const selectedTool = ref('home'); // 记录当前选中的工具
-
-// 处理工具栏点击
-const handleToolClick = (tool) => {
-  selectedTool.value = tool;
-  switch (tool) {
-    case 'home':
-      navigateToHome();
-      break;
-    case 'settings':
-      openSettings();
-      break;
-    case 'messages':
-      showMessages();
-      break;
-    case 'help':
-      showHelp();
-      break;
-  }
-};
-
-// 导航到首页（示例：重置视图）
-const navigateToHome = () => {
-  // 处理导航逻辑
-};
-
-// 打开设置弹窗
-const openSettings = () => {
-  // 处理设置逻辑
-};
-
-// 显示消息
-const showMessages = () => {
-  // 处理消息逻辑
-};
-
-// 显示帮助
-const showHelp = () => {
-  // 处理帮助逻辑
-};
 
 const rules = {
   companyName: [

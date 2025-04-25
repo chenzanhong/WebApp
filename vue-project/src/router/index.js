@@ -11,7 +11,10 @@ import CompanyAdmin from "@/views/CompanyAdmin.vue";
 import Setting from "@/views/Setting.vue";
 import Notice from "@/views/Notice.vue";
 import Help from "@/views/Help.vue";
-import TeamBusiness from "@/views/TeamBusiness.vue";
+import TeamBusiness from "@/views/TeamBusiness/TeamBusiness.vue";
+import ApplyToTeam from "@/views/TeamBusiness/ApplyToTeam.vue";
+import InviteMember from "@/views/TeamBusiness/InviteMember.vue";
+import ChangeMonitor from "@/views/TeamBusiness/ChangeMonitor.vue";
 import Headbar from "@/views/headbar.vue";
 
 const routes = [
@@ -109,8 +112,8 @@ const routes = [
     children: [
       // 默认路由
       {
-      path: "", 
-      component: Home // 直接渲染Home组件
+        path: "",
+        component: Home // 直接渲染Home组件
       },
       // 主界面
       {
@@ -141,7 +144,24 @@ const routes = [
       {
         path: "display/teambusiness",
         name: "TeamBusiness",
-        component: TeamBusiness,
+        component: () => import('@/views/TeamBusiness/TeamBusiness.vue'),
+        children: [
+          {
+            path: 'applytoteam', // 默认子路由，直接显示 
+            name: 'ApplyToTeam',//申请公司组件
+            component: () => import('@/views/TeamBusiness/ApplyToTeam.vue'),
+          },
+          {
+            path: 'invitemember',
+            name: 'InviteMember',//邀请成员组件
+            component: () => import('@/views/TeamBusiness/InviteMember.vue'),
+          },
+          {
+            path: 'changemonitor',
+            name: 'ChangeMonitor',//更换管理员组件
+            component: () => import('@/views/TeamBusiness/ChangeMonitor.vue'),
+          },
+        ]
       },
       // 设置界面
       {
