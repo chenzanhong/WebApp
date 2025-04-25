@@ -72,7 +72,7 @@ const routes = [
     props: true,
     children: [
       {
-        path: '', 
+        path: '',
         name: 'DetailPage',
         component: () => import('@/views/DetailPage.vue'),
         props: true
@@ -145,9 +145,10 @@ const routes = [
         path: "display/teambusiness",
         name: "TeamBusiness",
         component: () => import('@/views/TeamBusiness/TeamBusiness.vue'),
+        redirect: '/headbar/display/teambusiness/applytoteam', // 设置默认重定向到 applytoteam
         children: [
           {
-            path: 'applytoteam', // 默认子路由，直接显示 
+            path: 'applytoteam', // 
             name: 'ApplyToTeam',//申请公司组件
             component: () => import('@/views/TeamBusiness/ApplyToTeam.vue'),
           },
