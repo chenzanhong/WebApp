@@ -89,7 +89,7 @@ const serverToDelete = ref("");
 
 const handleServerClick = (server) => {
       // 这里使用 router.push 方法进行路由跳转
-      router.push('/monitor/machine');
+      router.push('/headbar/monitor/wjh1');
     };
 
 const openDeleteDialog = (server) => {

@@ -8,41 +8,14 @@
     border: 0;
     padding: 0;"> <!-- style： 隐藏滚动条  去掉白边-->
           <!-- 侧边栏 -->
-          <el-aside style="position: fixed; left: 0; top: 0; height: 100vh; z-index: 2000; width: 250px;">
+          <el-aside style="position: fixed; left:0; top: 80px; height: 100vh; z-index: 2000; width: 300px;">
               <asideNav  @serverListUpdated="updateServerList"></asideNav>
           </el-aside>
           <!-- 主页面 -->
           <el-main style="flex: 1; margin-left: 350px;">
               <DetailPage :serverList="serverList"></DetailPage>
           </el-main>
-           <!-- 右侧工具栏 -->
-  <div class="toolbar">
-    <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-      <el-icon size="32">
-        <HomeFilled />
-      </el-icon>
-    </div>
-    <div class="tool-item" :class="{ active: selectedTool === 'notice' }" @click="handleToolClick('notice')">
-      <el-icon size="32">
-        <ChatDotRound />
-      </el-icon>
-    </div>
-    <div class="tool-item" :class="{ active: selectedTool ==='setting' }" @click="handleToolClick('setting')">
-      <el-icon size="32">
-        <Setting />
-      </el-icon>
-    </div>
-    <div class="tool-item" :class="{ active: selectedTool === 'teambusiness' }" @click="handleToolClick('teambusiness')">
-      <el-icon size="32">
-        <Briefcase />
-      </el-icon>
-    </div>
-    <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-      <el-icon size="32">
-        <QuestionFilled />
-      </el-icon>
-    </div>
-  </div>
+          
       </el-container>
 
   </div>
