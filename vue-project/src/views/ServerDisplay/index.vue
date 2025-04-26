@@ -20,13 +20,13 @@
       <!-- 主内容区域 -->
       <div class="main-content">
         <div class="server-list">
-          <div class="server-count">服务器总数 {{ servers.length }}</div>
+          <div class="server-count">服务器总数 {{ filteredServers.length }}</div>
           <div class="server-list-container">
-            <div class="server-add" style="margin-left: 1rem; margin-right: 1rem; margin-top: 1rem;"
+            <div v-if="!searchQuery" class="server-add" style="margin-left: 1rem; margin-right: 1rem; margin-top: 1rem;"
                  @click="showDialog">
               <img src="@/assets/display/add_icon.png" alt="" srcset="">
             </div>
-            <ServerCard v-for="server in servers" :key="server.id" :server="server"
+            <ServerCard v-for="server in filteredServers" :key="server.id" :server="server"
                         @delete="openDeleteDialog(server)" @disable="handleDisable(server)"/>
           </div>
         </div>
@@ -95,19 +95,18 @@ import ServerAddCard from "@/components/ServerAddCard.vue";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
 import IconCommunity from "@/components/icons/IconCommunity.vue";
 import IconEcosystem from "@/components/icons/IconEcosystem.vue";
-import {getServerInfo} from "@/api/server.js";
+import {addServer, getServerInfo} from "@/api/server.js";
 
-const servers = ref([
-  // {id: 1, host_name: '服务器1', os: 'Linux', kernel_arch: "", platform: '134.36.3.6', runtime: '34:36:03', status: 'online'},
-  // {id: 2, host_name: '服务器2', os: 'Linux', kernel_arch: "", platform: '134.36.3.7', runtime: '34:36:03', status: 'offline'},
-  // {id: 3, host_name: '服务器3', os: 'Windows', kernel_arch: "", platform: '134.36.3.8', runtime: '12:45:12', status: 'online'},
-]);
+const servers = ref([]);
 
 // 搜索功能
 const searchQuery = ref('');
 const filteredServers = computed(() => {
+  if (!searchQuery.value) {
+    return servers.value;
+  }
   return servers.value.filter(server =>
-      server.name.includes(searchQuery.value)
+      server.host_name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -132,7 +131,7 @@ const openDialog = () => {
 
 const handleSubmit = (serverData) => {
   console.log("收到表单数据:", serverData);
-  alert("服务器信息提交成功！");
+  addServer(serverData)
 };
 
 // 添加服务器

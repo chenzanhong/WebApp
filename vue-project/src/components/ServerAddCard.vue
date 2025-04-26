@@ -61,6 +61,7 @@ const server = ref({
 
 // 提交表单
 const submitForm = () => {
+  server.value.port = Number(server.value.port);
   emit("submit", server.value);
   closeDialog();
 };
