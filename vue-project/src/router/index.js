@@ -61,6 +61,12 @@ const routes = [
     component: () => import('@/views/ServerDisplay/index.vue'),
   },
 
+  {
+    path: "/personal",
+    name: "Personal",
+    component: () => import('@/views/Personal/index.vue'),
+  },
+
   // 服务器详情页（动态路由）
   {
     path: "/monitor/:host_name",
