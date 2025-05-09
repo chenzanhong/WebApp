@@ -41,3 +41,12 @@ export async function searchServer(hostname) {
         data
     })
 }
+
+export async function getUserInfo(){
+    return api('/agent/userInfo', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+}
