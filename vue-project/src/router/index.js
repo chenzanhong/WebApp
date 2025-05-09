@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Welcome from "@/views/Welcome.vue";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
+import ResetPassword from "@/views/ResetPassword.vue";
 import Home from "@/views/ServerDisplay/index.vue";
 import ServerDetail from "@/views/ServerDetail.vue";
 import InfoNotification from "@/views/InfoNotification.vue";
@@ -39,6 +40,13 @@ const routes = [
     component: Register,
   },
 
+  //重置密码页
+  {
+    path:"/resetpassword",
+    name:"ResetPassword",
+    component:ResetPassword,
+
+  },
   // 系统管理员界面
   {
     path: "/systemadmin",

@@ -70,9 +70,11 @@ import IconEcosystem from "@/components/icons/IconEcosystem.vue";
 
 
 const servers = ref([
-  { id: 1, name: '服务器1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online' },
-  { id: 2, name: '服务器2', os: 'Linux', ip: '134.36.3.7', runtime: '34:36:03', status: 'offline' },
-  { id: 3, name: '服务器3', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' }
+  { id: 1, name: 'root1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online' },
+  { id: 2, name: 'root2', os: 'Linux', ip: '134.36.3.7', runtime: '34:36:03', status: 'offline' },
+  { id: 3, name: 'root3', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' },
+  { id: 4, name: 'wjh1', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' },
+  { id: 5, name: 'wjh2', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' }
 ]);
 
 // 搜索功能

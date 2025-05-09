@@ -1,10 +1,10 @@
 <template>
   <div class="dashboard-container">
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-overlay">
+      <!-- <div v-if="loading" class="loading-overlay">
           <el-icon class="is-loading" :size="35" style="color: #ffffff"><Loading /></el-icon>
           <span class="loading-text":size="35" style="color: #ffffff">数据加载中...</span>
-      </div>
+      </div> -->
 
       <!-- 错误提示 -->
       <div v-if="error" class="error-message">
