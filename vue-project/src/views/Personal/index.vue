@@ -34,8 +34,9 @@
       <!-- 左侧导航 -->
       <el-aside width="240px" class="dark-sidebar">
         <p style="font-size: 20px; text-align: start; margin-left: 1rem; margin-top: 1rem; color: white">设置</p>
-        <div style="display: flex; flex-direction: row; justify-content: start; margin-left: 1rem">
+        <div style="display: flex; flex-direction: row; justify-content: start; margin-left: 1rem; margin-top: 0.5rem;">
           <input style="width: 60%; height: 2rem; margin-left: 0;"/>
+          <img :src="search" alt="" srcset="" style="width: 2rem; height: 2rem; margin-left: 1rem;">
         </div>
         <el-menu
             class="nav-menu"
@@ -86,7 +87,10 @@
               </div>
               <div class="info-item">
                 <label>密码</label>
-                <p class="info-value">{{ !user.password ? '******' : '未设置' }} <img :src="password_eye" alt="" srcset="" style="width: 12px; margin-left: 10px; margin-top: -20px;"></p>
+                <p class="info-value">{{ !user.password ? '******' : '未设置' }} <img :src="password_eye" alt=""
+                                                                                      srcset=""
+                                                                                      style="width: 12px; margin-left: 10px; margin-top: -20px;">
+                </p>
               </div>
               <div class="info-item">
                 <label>所属公司</label>
@@ -102,6 +106,10 @@
               <button style="width: 60vw; margin-top: 20px; background-color: transparent">退出登录</button>
             </el-col>
           </el-row>
+          <div>
+            <img v-if="isHandelEdit" style="position: absolute; right: 1rem; top: 1rem; z-index: 100; width: 2rem;" :src="edit" alt="" srcset="" @click="handleEdit">
+            <el-button v-else  style="position: absolute; right: 1rem; top: 1rem;">确认修改</el-button>
+          </div>
         </div>
       </el-main>
     </el-container>
@@ -117,8 +125,11 @@ import {
   QuestionFilled
 } from '@element-plus/icons-vue'
 import {getUserInfo} from "@/api/server.js";
+
 const avatarImg = new URL('@/assets/display/avatar.png', import.meta.url).href
 const password_eye = new URL('@/assets/display/password_eye.png', import.meta.url).href
+const edit = new URL('@/assets/display/edit.png', import.meta.url).href
+const search = new URL('@/assets/display/search.png', import.meta.url).href
 
 const activeMenu = ref('1')
 
@@ -127,6 +138,11 @@ const handleLogout = () => {
 }
 
 const user = ref({})
+const isHandelEdit = ref(true)
+
+const handleEdit = () => {
+  isHandelEdit.value = !isHandelEdit.value
+}
 
 onMounted(() => {
   getUserInfo().then(r => {
@@ -221,11 +237,13 @@ onMounted(() => {
   .content-main {
     background: #0f1a2d;
     padding: 24px;
+    position: relative;
 
     .content-card {
       background: #1f2931;
       border-radius: 8px;
       padding: 32px;
+      position: relative;
     }
 
     .page-title {
