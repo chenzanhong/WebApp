@@ -9,7 +9,7 @@ import CompanyAdmin from "@/views/CompanyAdmin.vue";
 import Setting from "@/views/Setting.vue";
 import Notice from "@/views/Notice.vue";
 import Help from "@/views/Help.vue";
-import TeamBusiness from "@/views/TeamBusiness.vue";
+import TeamBusiness from "@/views/TeamBusiness/TeamBusiness.vue";
 
 //import Profile from "@/views/Profile.vue";
 
@@ -60,7 +60,6 @@ const routes = [
     name: "Server",
     component: () => import('@/views/ServerDisplay/index.vue'),
   },
-
   {
     path: "/personal",
     name: "Personal",

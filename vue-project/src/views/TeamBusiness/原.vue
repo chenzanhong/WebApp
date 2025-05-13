@@ -48,38 +48,39 @@
           </el-form-item>
 
           <!-- 上传区域 -->
-          <el-form-item label="上传公司营业执照" prop="businessLicense">
+          <el-form-item  label="上传公司营业执照" prop="businessLicense">
             <br />
             <el-upload
               action="#"
               list-type="picture-card"
               :auto-upload="false"
               :on-change="handleBusinessLicenseChange">
-              <el-icon><Plus /></el-icon>              
+              <el-icon ><Plus /></el-icon>              
             </el-upload>
           </el-form-item>
 
-          <el-form-item label="上传公司法人身份证（正反面）" prop="idCardFront">
-            <div class="id-upload">
-              <el-upload
-                class="id-card-upload"
-                action="#"
-                list-type="picture-card"
-                :auto-upload="false"
-                :on-change="handleIdCardFrontChange">
-                <el-icon><Plus /></el-icon>
-                <div>正面</div>
-              </el-upload>
-              <el-upload
-                class="id-card-upload"
-                action="#"
-                list-type="picture-card"
-                :auto-upload="false"
-                :on-change="handleIdCardBackChange">
-                <el-icon><Plus /></el-icon>
-                <div>反面</div>
-              </el-upload>
-            </div>
+          <el-form-item label="上传公司法人身份证（正面）" prop="idCardFront">
+            <el-upload
+              class="id-card-upload"
+              action="#"
+              list-type="picture-card"
+              :auto-upload="false"
+              :on-change="handleIdCardFrontChange">
+              <el-icon><Plus /></el-icon>
+              <div>正面</div>
+            </el-upload>
+          </el-form-item>
+
+          <el-form-item label="上传公司法人身份证（反面）" prop="idCardBack">
+            <el-upload
+              class="id-card-upload"
+              action="#"
+              list-type="picture-card"
+              :auto-upload="false"
+              :on-change="handleIdCardBackChange">
+              <el-icon><Plus /></el-icon>
+              <div>反面</div>
+            </el-upload>
           </el-form-item>
 
           <el-button type="primary" class="submit-btn" @click="submitForm">提交注册申请</el-button>
@@ -120,6 +121,7 @@
             </div>
         </div>
       </div>
+      
 
      <div class="form-section" v-if="currentNav === 'join'">
         <div class="form-section">
@@ -157,27 +159,28 @@
           </el-form-item>
 
           <!-- 身份证上传 -->
-          <el-form-item label="上传身份证（正反面）" prop="idCardFront">
-            <div class="id-upload">             
-              <el-upload
-                class="id-card-upload"
-                action="#"
-                list-type="picture-card"
-                :auto-upload="false"
-                :on-change="handleJoinIdCardFrontChange">
-                <el-icon><Plus /></el-icon>
-                <div>正面</div>
-              </el-upload>
-              <el-upload
-                class="id-card-upload"
-                action="#"
-                list-type="picture-card"
-                :auto-upload="false"
-                :on-change="handleJoinIdCardBackChange">
-                <el-icon><Plus /></el-icon>
-                <div>反面</div>
-              </el-upload>
-            </div>
+          <el-form-item label="上传身份证（正面）" prop="idCardFront">
+            <el-upload
+              class="id-card-upload"
+              action="#"
+              list-type="picture-card"
+              :auto-upload="false"
+              :on-change="handleJoinIdCardFrontChange">
+              <el-icon><Plus /></el-icon>
+              <div>正面</div>
+            </el-upload>
+          </el-form-item>
+
+          <el-form-item label="上传身份证（反面）" prop="idCardBack">
+            <el-upload
+              class="id-card-upload"
+              action="#"
+              list-type="picture-card"
+              :auto-upload="false"
+              :on-change="handleJoinIdCardBackChange">
+              <el-icon><Plus /></el-icon>
+              <div>反面</div>
+            </el-upload>
           </el-form-item>
 
           <el-button 
@@ -214,14 +217,17 @@
         </div>
       </div>
     </div>
+    
   </div>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
+//import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-
+import { HomeFilled, Setting, ChatDotRound, QuestionFilled,Plus } from '@element-plus/icons-vue';
+import src from '@/assets/image.png'; // 使用 import 引入
+//const token = localStorage.getItem('token') || ''
 const form = reactive({
   companyName: '',
   creditCode: '',
@@ -231,6 +237,9 @@ const form = reactive({
   idCardFront: null,
   idCardBack: null
 })
+//const src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
+
+
 
 const rules = {
   companyName: [
@@ -261,7 +270,7 @@ const rules = {
 const registerForm = ref(null)
 
 const handleBusinessLicenseChange = (file) => {
-  form.businessLicense = file.raw
+    form.businessLicense = file.raw; // 处理文件
 }
 
 const handleIdCardFrontChange = (file) => {
@@ -272,38 +281,91 @@ const handleIdCardBackChange = (file) => {
   form.idCardBack = file.raw
 }
 
+
 const submitForm = async () => {
   if (!registerForm.value) return
   
   try {
     await registerForm.value.validate()
-    // 创建 FormData 对象
-    const formData = new FormData()
-    formData.append('companyName', form.companyName)
-    formData.append('creditCode', form.creditCode)
-    formData.append('legalPerson', form.legalPerson)
-    formData.append('idNumber', form.idNumber)
-    formData.append('businessLicense', form.businessLicense)
-    formData.append('idCardFront', form.idCardFront)
-    formData.append('idCardBack', form.idCardBack)
+
+    // 创建请求体对象
+    const requestBody = {
+      username: "root", // 测试用户为root
+      company: form.companyName,   // 公司名称
+      realname: form.legalPerson,   // 法人姓名
+      identity: form.idNumber       // 身份证号码
+    };
+
+    console.log('Submitting form:', requestBody); // 打印表单数据
 
     // 发送请求到后端
-    const response = await fetch('http://localhost:8080/agent/registercompany', {
+    const response = await fetch('http://120.79.200.209:8080/agent/registercompany', {
       method: 'POST',
-      body: formData
-    })
+      body: JSON.stringify(requestBody), // 将请求体转换为 JSON 字符串
+      headers: {
+        'Content-Type': 'application/json', // 设置内容类型为 JSON
+        'Authorization': localStorage.getItem('token'), // 添加授权头
+      }
+    });
 
     if (response.ok) {
-      ElMessage.success('表单提交成功')
+      ElMessage.success('表单提交成功');
     } else {
-      ElMessage.error('提交失败，请重试')
+      const errorData = await response.json(); // 获取错误信息
+      console.error('Error response:', errorData);
+      ElMessage.error('提交失败，请重试');
     }
   } catch (error) {
-    ElMessage.error('请填写完整的表单信息')
+    console.error('Validation failed:', error); // 添加调试信息
+    ElMessage.error('请填写完整的表单信息');
   }
 }
 
-const src="https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
+
+// const submitForm = async () => {
+//   if (!registerForm.value) return
+  
+//   try {
+//     await registerForm.value.validate()
+
+//     console.log('Submitting form:', form);// 打印表单数据
+
+//     // 创建 FormData 对象
+//     const formData = new FormData()
+//     formData.append('companyName', form.companyName)
+//     formData.append('creditCode', form.creditCode)
+//     formData.append('legalPerson', form.legalPerson)
+//     formData.append('idNumber', form.idNumber)
+//     formData.append('businessLicense', form.businessLicense)
+//     formData.append('idCardFront', form.idCardFront)
+//     formData.append('idCardBack', form.idCardBack)
+//     console.log(formData)
+//     // 转换为 JSON 对象
+//     const jsonData = formDataToJson(formData);
+//     console.log('JSON Data:', jsonData);
+//     // 发送请求到后端
+//     const response = await fetch('http://120.79.200.209:8080/agent/registercompany', {
+      
+//       method: 'POST',
+//       body: JSON.stringify(jsonData), //formData
+//       headers: {
+//         'Content-Type':'application/json',
+//         'Authorization': localStorage.getItem('token'),
+//       }
+//     })
+
+//     if (response.ok) {
+//       ElMessage.success('表单提交成功')
+//     } else {
+//       ElMessage.error('提交失败，请重试')
+//     }
+//   } catch (error) {
+//     console.log('Validation failed:', error); // 添加调试信息
+//     ElMessage.error('请填写完整的表单信息')
+//   }
+// }
+
+
 // 新增响应式数据
 const currentNav = ref('register') // 默认显示注册团队
 const joinForm = reactive({
@@ -323,7 +385,7 @@ const joinRules = {
   ],
   idNumber: [
     { required: true, message: '请输入身份证号码', trigger: 'blur' },
-    { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确', trigger: 'blur' }
+    //{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确', trigger: 'blur' }
   ],
   idCardFront: [
     { required: true, message: '请上传身份证正面', trigger: 'change' }
@@ -343,23 +405,27 @@ const handleJoinIdCardBackChange = (file) => {
   joinForm.idCardBack = file.raw
 }
 
+
 const submitJoin = async () => {
   if (!joinFormRef.value) return
-  
+  console.log('Submitting join form:', joinForm); // 打印表单数据
   try {
     await joinFormRef.value.validate()
-    // 创建 FormData 对象
     const formData = new FormData()
-    formData.append('companyName', joinForm.companyName)
-    formData.append('realName', joinForm.realName)
-    formData.append('idNumber', joinForm.idNumber)
-    formData.append('idCardFront', joinForm.idCardFront)
-    formData.append('idCardBack', joinForm.idCardBack)
+    //formData.append('username', "joinForm.realName") // 假设 realName 是用户名
+    formData.append('username', "root") // 假设 realName 是用户名
+    formData.append('company', joinForm.companyName) // 假设 companyName 是公司名
+    // 转换为 JSON 对象
+    const jsonData = formDataToJson(formData);
+    console.log('JSON Data:', jsonData);
 
-    // 发送请求到后端
-    const response = await fetch('http://localhost:8080/agent/joincompany', {
+    const response = await fetch('http://120.79.200.209:8080/agent/joincompany', {
       method: 'POST',
-      body: formData
+      body: JSON.stringify(jsonData),//formData
+      headers: {
+        'Content-Type': 'application/json', // 设置内容类型为 JSON
+        'Authorization': localStorage.getItem('token'),// 不需要设置 'Content-Type'
+      }
     })
 
     if (response.ok) {
@@ -368,9 +434,57 @@ const submitJoin = async () => {
       ElMessage.error('提交失败，请重试')
     }
   } catch (error) {
-    ElMessage.error('请填写完整的表单信息')
+    console.error('Fetch error:', error);
+    ElMessage.error('请填写完整的表单信息');
   }
 }
+
+const formDataToJson = (formData) => {
+  const jsonObject = {};
+  for (const [key, value] of formData.entries()) {
+    // 如果值是文件对象，处理为字符串或其他格式
+    if (value instanceof File) {
+      jsonObject[key] = value; // 或者你可以选择将文件名或其他信息存储在 JSON 中
+    } else {
+      jsonObject[key] = value;
+    }
+  }
+  return jsonObject;
+}
+
+// const submitJoin = async () => {
+//   if (!joinFormRef.value) return
+  
+//   try {
+//     await joinFormRef.value.validate()
+//     // 创建 FormData 对象
+//     const formData = new FormData()
+//     formData.append('companyName', joinForm.companyName)
+//     formData.append('realName', joinForm.realName)
+//     formData.append('idNumber', joinForm.idNumber)
+//     formData.append('idCardFront', joinForm.idCardFront)
+//     formData.append('idCardBack', joinForm.idCardBack)
+//     console.log(formData);
+//     // 发送请求到后端
+//     const response = await fetch('http://120.79.200.209:8080/agent/joincompany', {
+//       method: 'POST',
+//       body: formData,
+//       headers: {
+//         'Content-Type':'application/json',
+//         'Authorization': localStorage.getItem('token'), 
+//       }
+//     })
+
+//     if (response.ok) {
+//       ElMessage.success('加入申请提交成功')
+//     } else {
+//       ElMessage.error('提交失败，请重试')
+//     }
+//   } catch (error) {
+//     console.log('Validation failed:', error); // 添加调试信息
+//     ElMessage.error('请填写完整的表单信息')
+//   }
+// }
 
 // 新增导航切换方法
 const switchNav = (type) => {
@@ -391,7 +505,30 @@ h2{
   
 }
     
+.toolbar {
+  width: 5rem;
+  padding: 1rem 0;
+  background-color: #1f2931;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-left: 1px solid #374151;
+}
 
+.tool-item {
+  text-align: center;
+  cursor: pointer;
+  color: #bbbbbb;
+  transition: color 0.2s ease;
+}
+
+.tool-item:hover {
+  color: #636161;
+}
+
+.active {
+  color: #636161 !important;
+}
 
 .left-nav,
 .notice-box  {

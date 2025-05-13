@@ -33,14 +33,19 @@
     <el-container>
       <!-- 左侧导航 -->
       <el-aside width="240px" class="dark-sidebar">
+        <p style="font-size: 20px; text-align: start; margin-left: 1rem; margin-top: 1rem; color: white">设置</p>
+        <div style="display: flex; flex-direction: row; justify-content: start; margin-left: 1rem">
+          <input style="width: 60%; height: 2rem; margin-left: 0;"/>
+        </div>
         <el-menu
             class="nav-menu"
             :default-active="activeMenu"
-            background-color="#001529"
-            text-color="#a8abb2"
-            active-text-color="#409EFF"
+            background-color="#404148"
+            text-color="#ffffff"
+            active-text-color="#ffffff"
+            router
         >
-          <el-menu-item index="1">
+          <el-menu-item style="" index="1">
             <template #title>
               <el-icon>
                 <User/>
@@ -69,12 +74,11 @@
           <!-- 修改详细信息绑定 -->
           <el-row :gutter="40" class="detail-section">
             <el-col :span="2">
-              <el-avatar :size="80"/>
+              <el-avatar :src="avatarImg" :size="80"/>
             </el-col>
             <el-col :span="22">
               <div class="info-item">
-                <label>用户名</label>
-                <p class="info-value">{{ user.name }}</p>
+                <p class="info-value" style="font-size: 20px;">{{ user.name }}</p>
               </div>
               <div class="info-item">
                 <label>邮箱</label>
@@ -82,8 +86,20 @@
               </div>
               <div class="info-item">
                 <label>密码</label>
-                <p class="info-value">{{ !user.password ? '******' : '未设置' }}</p>
+                <p class="info-value">{{ !user.password ? '******' : '未设置' }} <img :src="password_eye" alt="" srcset="" style="width: 12px; margin-left: 10px; margin-top: -20px;"></p>
               </div>
+              <div class="info-item">
+                <label>所属公司</label>
+                <p class="info-value">{{ user.company_id === 0 ? '深圳大学计算机与软件学院' : '未绑定' }}</p>
+              </div>
+              <div class="info-item">
+                <label>所属公司管理员</label>
+                <p class="info-value">{{ user.name }}</p>
+              </div>
+            </el-col>
+
+            <el-col :span="24" style="border-top: 1px solid #ffffff">
+              <button style="width: 60vw; margin-top: 20px; background-color: transparent">退出登录</button>
             </el-col>
           </el-row>
         </div>
@@ -101,6 +117,8 @@ import {
   QuestionFilled
 } from '@element-plus/icons-vue'
 import {getUserInfo} from "@/api/server.js";
+const avatarImg = new URL('@/assets/display/avatar.png', import.meta.url).href
+const password_eye = new URL('@/assets/display/password_eye.png', import.meta.url).href
 
 const activeMenu = ref('1')
 
@@ -118,7 +136,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .dark-container {
   height: 100vh;
   background: #000000;
@@ -181,6 +199,16 @@ onMounted(() => {
     .nav-menu {
       border-right: none;
       padding-top: 20px;
+      background-color: #1f2931;
+
+      .el-menu-item.is-active {
+        color: #409EFF !important; /* 设置选中颜色 */
+        background-color: #1f2931 !important; /* 设置选中背景颜色 */
+      }
+
+      .el-menu-item:hover {
+        background-color: #404148;
+      }
 
       .el-menu-item {
         height: 50px;
@@ -195,7 +223,7 @@ onMounted(() => {
     padding: 24px;
 
     .content-card {
-      background: #162233;
+      background: #1f2931;
       border-radius: 8px;
       padding: 32px;
     }
@@ -234,7 +262,7 @@ onMounted(() => {
         label {
           display: block;
           color: #5d6678;
-          margin-bottom: 8px;
+          margin-bottom: 0;
           font-size: 14px;
         }
 

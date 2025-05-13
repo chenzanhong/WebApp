@@ -32,9 +32,10 @@
       <input :type="passwordType" v-model="password" placeholder="请输入密码" class="bar2" @input="handlePasswordInput">
       <span class="toggle-password" @click="togglePasswordVisibility()"
             v-show="password.length > 0 && (passwordType === 'password' || passwordType === 'text')">
-        <el-icon :is="passwordType === 'password'? Hide : View" :key="passwordType" />
+        <el-icon :is="passwordType === 'password'? 'ElIconHide' : 'ElIconView'" :key="passwordType" />
       </span>
     </div>
+    <button class="reset-button" @click="resetClick">重置密码</button>
     <button class="login-button" @click="(loginClick)">登录</button>
   </div>
 </template>
@@ -230,7 +231,7 @@ a span {
   right: 15%;
   top: 50%;
   transform: translateY(-50%);
-  color: #9A9A9A;
+  color: #fefefe;
   z-index: 3;
 }
 
@@ -243,7 +244,7 @@ a span {
   color: white;
   margin-bottom: 2vh;
   z-index: 2;
-  margin-top: 5vh;
+  margin-top: 6vh;
   margin-bottom: 3.4vh;
   border-radius: 15px;
   border: none;
@@ -254,13 +255,34 @@ a span {
   color: white;
 }
 
+.reset-button {
+  background-color: transparent; /* 透明背景 */
+  border: none; /* 去除边框 */
+  padding: 0; /* 去除内边距 */
+  margin: 0; /* 去除外边距 */
+  position: absolute;
+  right: 15%;
+  bottom: 200px; /* 调整与输入框的垂直距离 */
+  color: #4095E5;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  font-family: 'Ubuntu';
+}
+
+.reset-button:hover {
+  text-decoration: underline; /* 悬停添加下划线 */
+  opacity: 0.8; /* 保持原有透明度变化 */
+}
+
 </style>
 
 <script>
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { UserFilled, GoodsFilled, View, Hide, InfoFilled,
+import { UserFilled, GoodsFilled,  InfoFilled,
   CircleCloseFilled } from '@element-plus/icons-vue';
+import { View, Hide } from '@element-plus/icons-vue' // 必须添加这行
 
 export default {
   name: 'LoginPage',
@@ -279,46 +301,62 @@ export default {
       passwordType: 'password'
     };
   },
-  methods: {
-    async loginClick() {
-      try {
-        const response = await fetch('http://120.79.200.209:8080/agent/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: this.email,
-            password: this.password
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.message === '登录成功') {
-          const token = data.token;
-          localStorage.setItem('token', token);//token存到本地
-          ElMessage.success(data.message);
-          const router = useRouter();
-          this.$router.push('/home');
-        } else {
-          ElMessage.error(data.message);
-          this.email = '';
-          this.password = '';
-        }
-      } catch (error) {
-        console.error('登录请求出错:', error);
-        ElMessage.error('登录失败，请检查网络或稍后重试');
-      }
+   methods: {
+    resetClick(){
+      const router = useRouter();
+      this.$router.push('/resetpassword');
     },
-    togglePasswordVisibility() {
-      this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
-    },
-    closeLoginBox() {
-            const router = useRouter();
-            this.$router.push('/');
-        }
-  },
-  mounted() {}
+    async loginClick() {
+      try {
+        const response = await fetch('http://120.79.200.209:8080/agent/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: this.email,
+            password: this.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.message === '登录成功') {
+          console.log('[登录成功] 完整响应数据:', data); 
+          const token = data.token;
+          localStorage.setItem('token', token);//token存到本地
+          ElMessage.success(data.message);
+//            if(data.role === 'USER')
+//          {
+//            this.$router.push('/home');
+//          }
+//          else if(data.role === 'ADMIN')
+//          {
+//            this.$router.push('/companyadmin');
+//          }
+//          else if(data.role === 'ROOT')
+//         {
+//           this.$router.push('/systemadmin');
+//         }
+          this.$router.push('/headbar');//暂时改为直接到headbar
+        } else {
+          ElMessage.error(data.message);
+          this.email = '';
+          this.password = '';
+        }
+      } catch (error) {
+        console.error('登录请求出错:', error);
+        ElMessage.error('登录失败，请检查网络或稍后重试');
+      }
+    },
+    togglePasswordVisibility() {
+      this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
+    },
+    closeLoginBox() {
+            const router = useRouter();
+            this.$router.push('/');
+        }
+  },
+  mounted() {}
 };
 </script>
