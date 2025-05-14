@@ -118,11 +118,11 @@ const route = useRoute();
 
 //////////////////////////////////////////////////////////////////
 // 侧边栏状态
-const sidebarOpen = ref(true);
+const sidebarOpen = ref(false);
 
 // 检查当前是否是home路由
 const isHomeRoute = computed(() => {
-    return route.path.includes('/headbar/home');
+    return route.path.includes('/headbar/home') || route.path === '/headbar';
 });
 
 // 切换侧边栏
