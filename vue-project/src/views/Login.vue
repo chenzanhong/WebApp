@@ -280,8 +280,7 @@ a span {
 <script>
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { UserFilled, GoodsFilled,  InfoFilled,
-  CircleCloseFilled } from '@element-plus/icons-vue';
+import { UserFilled, GoodsFilled,  InfoFilled,CircleCloseFilled } from '@element-plus/icons-vue';
 import { View, Hide } from '@element-plus/icons-vue' // 必须添加这行
 
 export default {
