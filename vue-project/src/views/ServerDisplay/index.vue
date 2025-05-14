@@ -3,10 +3,15 @@
     <div class="server-left">
       <!-- 顶部导航栏 -->
       <div class="header">
+        <div class="logo">
+          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt=""
+               srcset="">
+          <p class="logo-name">SeverM</p>
+        </div>
         <div class="search-bar">
           <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
           <el-icon
-                   style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
+              style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
             <Search style="font-size: 1.2rem; color: #000000;"/>
           </el-icon>
         </div>
@@ -15,22 +20,49 @@
       <!-- 主内容区域 -->
       <div class="main-content">
         <div class="server-list">
-          <div class="server-count">服务器总数 {{ servers.length }}</div>
+          <div class="server-count">服务器总数 {{ filteredServers.length }}</div>
           <div class="server-list-container">
-            <div class="server-add" style="margin-left: 1rem; margin-right: 1rem; margin-top: 1rem;"
-                 @click="showDialog" >
+            <div v-if="!searchQuery" class="server-add" style="margin-left: 1rem; margin-right: 1rem; margin-top: 1rem;"
+                 @click="showDialog">
               <img src="@/assets/display/add_icon.png" alt="" srcset="">
             </div>
-            <ServerCard v-for="server in servers" :key="server.id" :server="server"
-                        @delete="openDeleteDialog(server)" @disable="handleDisable(server)"
-                        @click="handleServerClick(server)"/>
+            <ServerCard v-for="server in filteredServers" :key="server.id" :server="server"
+                        @delete="openDeleteDialog(server)" @disable="handleDisable(server)"/>
           </div>
         </div>
       </div>
     </div>
 
-   
-    
+    <!-- 右侧工具栏 -->
+    <div class="toolbar">
+      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
+        <el-icon size="32">
+          <HomeFilled/>
+        </el-icon>
+      </div>
+      <div class="tool-item" :class="{ active: selectedTool === 'settings' }"
+           @click="handleToolClick('settings')">
+        <el-icon size="32">
+          <Setting/>
+        </el-icon>
+      </div>
+      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
+           @click="handleToolClick('messages')">
+        <el-icon size="32">
+          <ChatDotRound/>
+        </el-icon>
+      </div>
+      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
+           @click="handleToolClick('messages')">
+        <!--        <img src="@/assets/display/icons/store.png" alt="" srcset="">-->
+        <IconEcosystem/>
+      </div>
+      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
+        <el-icon size="32">
+          <QuestionFilled/>
+        </el-icon>
+      </div>
+    </div>
 
 
     <ServerAddCard v-model:visible="show"
@@ -45,12 +77,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router'; // 引入 useRouter 函数
-
+import {ref, computed, onMounted} from 'vue';
 import {
   ElInput,
-  ElMessageBox
+  ElMessageBox,
 } from 'element-plus';
 import {
   Search,
@@ -59,40 +89,31 @@ import {
   Setting,
   ChatDotRound,
   QuestionFilled,
-  Briefcase
 } from '@element-plus/icons-vue';
 import ServerCard from "@/components/ServerCard.vue";
 import ServerAddCard from "@/components/ServerAddCard.vue";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
 import IconCommunity from "@/components/icons/IconCommunity.vue";
 import IconEcosystem from "@/components/icons/IconEcosystem.vue";
+import {addServer, getServerInfo} from "@/api/server.js";
 
-
-
-const servers = ref([
-  { id: 1, name: 'root1', os: 'Linux', ip: '134.36.3.6', runtime: '34:36:03', status: 'online' },
-  { id: 2, name: 'root2', os: 'Linux', ip: '134.36.3.7', runtime: '34:36:03', status: 'offline' },
-  { id: 3, name: 'root3', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' },
-  { id: 4, name: 'wjh1', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' },
-  { id: 5, name: 'wjh2', os: 'Windows', ip: '134.36.3.8', runtime: '12:45:12', status: 'online' }
-]);
+const servers = ref([]);
 
 // 搜索功能
 const searchQuery = ref('');
 const filteredServers = computed(() => {
+  if (!searchQuery.value) {
+    return servers.value;
+  }
   return servers.value.filter(server =>
-    server.name.includes(searchQuery.value)
+      server.host_name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
 const show = ref(false);
+
 const deleteDialogVisible = ref(false);
 const serverToDelete = ref("");
-
-const handleServerClick = (server) => {
-      // 这里使用 router.push 方法进行路由跳转
-      router.push('/headbar/monitor/wjh1');
-    };
 
 const openDeleteDialog = (server) => {
   serverToDelete.value = server.name;
@@ -110,7 +131,7 @@ const openDialog = () => {
 
 const handleSubmit = (serverData) => {
   console.log("收到表单数据:", serverData);
-  alert("服务器信息提交成功！");
+  addServer(serverData)
 };
 
 // 添加服务器
@@ -125,14 +146,30 @@ const handleDisable = (server) => {
 
 const showDialog = () => {
   show.value = true;
-};
+}
+
 
 const selectedTool = ref('home'); // 记录当前选中的工具
 const currentView = ref('home'); // 当前显示的视图
 
-const router = useRouter(); // 获取路由实例
-
-
+// 处理工具栏点击
+const handleToolClick = (tool) => {
+  selectedTool.value = tool;
+  switch (tool) {
+    case 'home':
+      navigateToHome();
+      break;
+    case 'settings':
+      openSettings();
+      break;
+    case 'messages':
+      showMessages();
+      break;
+    case 'help':
+      showHelp();
+      break;
+  }
+};
 
 // 导航到首页（示例：重置视图）
 const navigateToHome = () => {
@@ -146,13 +183,20 @@ const openSettings = () => {
 
 // 显示消息
 const showMessages = () => {
-  router.push({ name: 'InfoNotification' }); // 跳转到信息通知界面
+  // ElMessageBox.alert('消息中心暂未实现', '提示');
 };
 
 // 显示帮助
 const showHelp = () => {
   // ElMessageBox.alert('帮助文档暂未实现', '帮助');
 };
+
+onMounted(() => {
+  getServerInfo().then(r => {
+    console.log(r)
+    servers.value = r;
+  })
+})
 </script>
 
 <style scoped>
@@ -177,7 +221,9 @@ const showHelp = () => {
 .server-list-container {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  flex-wrap: wrap;
+  justify-content: start;
+  margin: 0 auto;
 }
 
 .server-add {
@@ -197,14 +243,14 @@ const showHelp = () => {
   font-size: 1.2rem;
   color: white;
   text-align: start;
-  font-family: "Poppins",serif;
+  font-family: "Poppins", serif;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: start;
 }
 
-.logo p{
+.logo p {
   margin-left: 10px;
   margin-top: 0.2rem;
   font-weight: bold;
@@ -222,7 +268,8 @@ const showHelp = () => {
 }
 
 .main-content {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   padding: 20px;
   background-color: #000000;
 }
@@ -241,6 +288,7 @@ const showHelp = () => {
   margin: 0 auto;
   border-radius: 1rem;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
   justify-content: start;
   align-items: start;
@@ -271,5 +319,9 @@ const showHelp = () => {
 .active {
   color: #636161 !important;
   /* Element Plus 主色 */
+}
+
+.logo-name{
+  font-family: 'PangMenZhengDao', sans-serif;
 }
 </style>
