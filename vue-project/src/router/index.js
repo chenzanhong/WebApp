@@ -64,7 +64,7 @@ const routes = [
   {
     path: "/home",
     name: "Home",
-    component: Home,
+    component: () => import('@/views/ServerDisplay/index.vue'),
   },
   {
     path: "/display/server",
