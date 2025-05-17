@@ -129,7 +129,7 @@
 </template>
 
 <script>
-import { Loading } from '@element-plus/icons-vue'
+import { Loading } from '@element-plus/icons-vue';
 import * as echarts from 'echarts/core';
 import { PieChart } from 'echarts/charts';
 import { LineChart } from 'echarts/charts';

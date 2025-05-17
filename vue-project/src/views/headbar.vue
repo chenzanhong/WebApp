@@ -37,13 +37,13 @@
         <div class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen }">
           <div class="sidebar-header">功能</div>
           <div class="sidebar-menu">
-            <button class="sidebar-button" @click="navigateTo('file-transfer')">
+            <button class="sidebar-button" @click="showServerFileTransferDialog">
               <el-icon>
                 <ArrowRight />
               </el-icon>
               <span>服务器文件互传</span>
             </button>
-            <button class="sidebar-button" @click="navigateTo('local-transfer')">
+            <button class="sidebar-button" @click="showLocalFileTransferDialog">
               <el-icon>
                 <ArrowRight />
               </el-icon>
@@ -104,6 +104,18 @@
         </div>
       </div>
     </div>
+
+    <!-- 服务器文件互传弹窗 -->
+    <ServerFileTransferDialog
+      v-model:visible="showServerFileDialog"
+      @transfer="handleServerFileTransfer"
+    />
+
+    <!-- 本机文件传输弹窗 -->
+    <LocalFileTransferDialog
+      v-model:visible="showLocalFileDialog"
+      @transfer="handleLocalFileTransfer"
+    />
   </div>
 </template>
 
@@ -112,6 +124,8 @@ import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { UserFilled, Setting, QuestionFilled, View, Hide, ArrowLeft, ArrowRight, Operation } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
+import ServerFileTransferDialog from '@/components/dialogs/ServerFileTransferDialog.vue';
+import LocalFileTransferDialog from '@/components/dialogs/LocalFileTransferDialog.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -309,6 +323,34 @@ const togglePasswordVisibility = () => {
 const logout = () => {
     localStorage.removeItem('token');
     router.push('/login');
+};
+
+// 文件传输弹窗状态
+const showServerFileDialog = ref(false);
+const showLocalFileDialog = ref(false);
+
+// 显示服务器文件互传弹窗
+const showServerFileTransferDialog = () => {
+    showServerFileDialog.value = true;
+};
+
+// 显示本机文件传输弹窗
+const showLocalFileTransferDialog = () => {
+    showLocalFileDialog.value = true;
+};
+
+// 处理服务器文件传输
+const handleServerFileTransfer = (formData) => {
+    console.log('服务器文件传输数据:', formData);
+    // 这里可以添加实际的文件传输逻辑
+    ElMessage.success('服务器文件传输请求已提交');
+};
+
+// 处理本机文件传输
+const handleLocalFileTransfer = (formData) => {
+    console.log('本机文件传输数据:', formData);
+    // 这里可以添加实际的文件传输逻辑
+    ElMessage.success('本机文件传输请求已提交');
 };
 
 // 点击外部关闭下拉栏
