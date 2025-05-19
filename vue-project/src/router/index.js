@@ -66,11 +66,11 @@ const routes = [
     name: "Home",
     component: () => import('@/views/ServerDisplay/index.vue'),
   },
-  {
-    path: "/display/server",
-    name: "Server",
-    component: () => import('@/views/ServerDisplay/index.vue'),
-  },
+  // {
+  //   path: "/display/server",
+  //   name: "Server",
+  //   component: () => import('@/views/ServerDisplay/index.vue'),
+  // },
   // 服务器详情页（动态路由）
   {
     path: "/monitor/:hostname",

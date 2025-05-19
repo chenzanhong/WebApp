@@ -3,11 +3,11 @@
     <div class="server-left">
       <!-- 顶部导航栏 -->
       <div class="header">
-        <div class="logo">
-          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt=""
-               srcset="">
-          <p class="logo-name">SeverM</p>
-        </div>
+<!--        <div class="logo">-->
+<!--          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt=""-->
+<!--               srcset="">-->
+<!--          <p class="logo-name">SeverM</p>-->
+<!--        </div>-->
         <div class="search-bar">
           <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
           <el-icon
@@ -22,7 +22,7 @@
         <div class="server-list">
           <div class="server-count">服务器总数 {{ filteredServers.length }}</div>
           <div class="server-list-container">
-            <div v-if="!searchQuery" class="server-add" style="margin-left: 1rem; margin-right: 1rem; margin-top: 1rem;"
+            <div v-if="!searchQuery" class="server-add" style="margin-left: 1rem; margin-right: 0.1rem; margin-top: 1rem;"
                  @click="showDialog">
               <img src="@/assets/display/add_icon.png" alt="" srcset="">
             </div>
@@ -34,35 +34,35 @@
     </div>
 
     <!-- 右侧工具栏 -->
-    <div class="toolbar">
-      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-        <el-icon size="32">
-          <HomeFilled/>
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'settings' }"
-           @click="handleToolClick('settings')">
-        <el-icon size="32">
-          <Setting/>
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
-           @click="handleToolClick('messages')">
-        <el-icon size="32">
-          <ChatDotRound/>
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"
-           @click="handleToolClick('messages')">
-        <!--        <img src="@/assets/display/icons/store.png" alt="" srcset="">-->
-        <IconEcosystem/>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-        <el-icon size="32">
-          <QuestionFilled/>
-        </el-icon>
-      </div>
-    </div>
+<!--    <div class="toolbar">-->
+<!--      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">-->
+<!--        <el-icon size="32">-->
+<!--          <HomeFilled/>-->
+<!--        </el-icon>-->
+<!--      </div>-->
+<!--      <div class="tool-item" :class="{ active: selectedTool === 'settings' }"-->
+<!--           @click="handleToolClick('settings')">-->
+<!--        <el-icon size="32">-->
+<!--          <Setting/>-->
+<!--        </el-icon>-->
+<!--      </div>-->
+<!--      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"-->
+<!--           @click="handleToolClick('messages')">-->
+<!--        <el-icon size="32">-->
+<!--          <ChatDotRound/>-->
+<!--        </el-icon>-->
+<!--      </div>-->
+<!--      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"-->
+<!--           @click="handleToolClick('messages')">-->
+<!--        &lt;!&ndash;        <img src="@/assets/display/icons/store.png" alt="" srcset="">&ndash;&gt;-->
+<!--        <IconEcosystem/>-->
+<!--      </div>-->
+<!--      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">-->
+<!--        <el-icon size="32">-->
+<!--          <QuestionFilled/>-->
+<!--        </el-icon>-->
+<!--      </div>-->
+<!--    </div>-->
 
 
     <ServerAddCard v-model:visible="show"
@@ -211,7 +211,7 @@ onMounted(() => {
 }
 
 .server-left {
-  width: calc(100% - 6rem);
+  width: calc(100%);
   display: flex;
   flex-direction: column;
   padding: 0;
