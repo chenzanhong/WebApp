@@ -166,7 +166,7 @@ const startTransfer = async () => {
   // 设置进度条动画
   transferTimer.value = setInterval(() => {
     if (percentage.value < 90) {
-      percentage.value += 20;
+      percentage.value += 11;
     }
   }, 100);
   
@@ -217,7 +217,6 @@ const startTransfer = async () => {
     } catch (error) {
       isLoading.value = false;
       console.error('传输请求异常:', error);
-      ElMessage.error('传输请求发生错误，请检查网络连接');
       
       // 停止进度条动画
       if (transferTimer.value) {
