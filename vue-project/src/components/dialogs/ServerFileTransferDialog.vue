@@ -168,7 +168,7 @@ const startTransfer = async () => {
     if (percentage.value < 90) {
       percentage.value += 20;
     }
-  }, 200);
+  }, 100);
   
   // 设置2秒后发送请求
   transferTimeout.value = setTimeout(async () => {
@@ -176,7 +176,8 @@ const startTransfer = async () => {
       console.log('发送文件传输请求:', requestData);
       
       // 发送网络请求
-      const response = await fetch('http://120.79.200.209:8080/agent/transfer', {
+      //const response = await fetch('http://120.79.200.209:8080/agent/transfer', {
+      const response = await fetch('https://5063-58-251-166-12.ngrok-free.app/agent/transfer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -206,7 +207,7 @@ const startTransfer = async () => {
         setTimeout(() => {
           isLoading.value = false;
           closeDialog();
-        }, 500);
+        }, 100);
       } else {
         isLoading.value = false;
         const errorData = await response.text();

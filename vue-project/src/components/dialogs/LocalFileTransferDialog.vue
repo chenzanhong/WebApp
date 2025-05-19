@@ -140,7 +140,7 @@ const startTransfer = async () => {
     if (transferPercentage.value < 90) {
       transferPercentage.value += 20;
     }
-  }, 200);
+  }, 100);
   
   // 设置2秒后发送请求
   transferTimeout.value = setTimeout(async () => {
@@ -152,7 +152,7 @@ const startTransfer = async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('token') || ''
+          'Authorization': Bearer (localStorage.getItem('token') || '')
         },
         body: JSON.stringify(requestData)
       });
@@ -178,7 +178,7 @@ const startTransfer = async () => {
         setTimeout(() => {
           isTransferring.value = false;
           closeDialog();
-        }, 500);
+        }, 100);
       } else {
         isTransferring.value = false;
         const errorData = await response.text();
