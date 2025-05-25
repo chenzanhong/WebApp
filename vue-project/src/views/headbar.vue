@@ -49,6 +49,12 @@
               </el-icon>
               <span>本机文件传输</span>
             </button>
+            <button class="sidebar-button" @click="openServerFileDownloadDialog">
+              <el-icon>
+                <ArrowRight />
+              </el-icon>
+              <span>服务器文件下载</span>
+            </button>
           </div>
         </div>
         <div class="sidebar-toggle" @click="toggleSidebar">
@@ -116,6 +122,12 @@
       v-model:visible="showLocalFileDialog"
       @transfer="handleLocalFileTransfer"
     />
+
+    <!-- 服务器文件下载弹窗 -->
+    <ServerFileDownloadDialog
+      v-model:visible="showServerFileDownloadDialog"
+      @transfer="handleServerFileDownload"
+    />
   </div>
 </template>
 
@@ -126,6 +138,7 @@ import { UserFilled, Setting, QuestionFilled, View, Hide, ArrowLeft, ArrowRight,
 import { ElMessage } from 'element-plus';
 import ServerFileTransferDialog from '@/components/dialogs/ServerFileTransferDialog.vue';
 import LocalFileTransferDialog from '@/components/dialogs/LocalFileTransferDialog.vue';
+import ServerFileDownloadDialog from '@/components/dialogs/ServerFileDownloadDialog.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -328,6 +341,7 @@ const logout = () => {
 // 文件传输弹窗状态
 const showServerFileDialog = ref(false);
 const showLocalFileDialog = ref(false);
+const showServerFileDownloadDialog = ref(false);
 
 // 显示服务器文件互传弹窗
 const showServerFileTransferDialog = () => {
@@ -351,6 +365,19 @@ const handleLocalFileTransfer = (formData) => {
     console.log('本机文件传输数据:', formData);
     // 这里可以添加实际的文件传输逻辑
     ElMessage.success('本机文件传输请求已提交');
+};
+
+// 显示服务器文件下载弹窗
+const openServerFileDownloadDialog = () => {
+    showServerFileDownloadDialog.value = true;
+    isDropdownVisible.value = false;
+};
+
+// 处理服务器文件下载
+const handleServerFileDownload = (formData) => {
+    console.log('处理服务器文件下载:', formData);
+    // 这里可以添加其他处理逻辑
+    ElMessage.success('服务器文件下载请求已提交');
 };
 
 // 点击外部关闭下拉栏

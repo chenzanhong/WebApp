@@ -6,12 +6,29 @@
       <div class="dialog-content">
         <div class="form-group">
           <label class="input-title">本地文件路径：</label>
-          <input v-model="formData.filePath" class="info-input" placeholder="请输入本地文件的完整路径">
+          <el-upload
+            class="upload-demo custom-upload"
+            drag
+            action=""
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :limit="1"
+          >
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">
+              拖拽文件到此处或 <em>点击上传</em>
+            </div>
+            <!-- <template #tip>
+              <div class="el-upload__tip">
+                选择要传输到服务器的文件
+              </div>
+            </template> -->
+          </el-upload>
         </div>
         
         <div class="form-group">
           <label class="input-title">目标服务器IP：</label>
-          <input v-model="formData.targetIp" class="info-input" placeholder="请输入目标服务器IP地址">
+          <IpSearchInput v-model="formData.targetIp" placeholder="请输入目标服务器IP地址" />
         </div>
         
         <div class="form-group">
@@ -52,8 +69,9 @@
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
-import { View, Hide } from '@element-plus/icons-vue';
+import { View, Hide, UploadFilled } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
+import IpSearchInput from '@/components/common/IpSearchInput.vue';
 
 const props = defineProps({
   visible: {
@@ -86,8 +104,20 @@ const formData = ref({
   transferPath: ''
 });
 
+// 存储选择的文件对象
+const selectedFile = ref(null);
+
 const togglePasswordVisibility = () => {
   passwordType.value = passwordType.value === 'password' ? 'text' : 'password';
+};
+
+const handleFileChange = (file) => {
+  // 获取文件对象并更新表单数据
+  if (file && file.raw) {
+    selectedFile.value = file.raw;
+    formData.value.filePath = file.raw.name;
+    console.log('选择的文件:', formData.value.filePath);
+  }
 };
 
 const closeDialog = () => {
@@ -115,21 +145,12 @@ const cancelTransfer = () => {
 
 const startTransfer = async () => {
   // 验证表单
-  if (!formData.value.filePath || !formData.value.targetUsername || 
+  if (!selectedFile.value || !formData.value.targetUsername || 
       !formData.value.targetIp || !formData.value.targetPassword || 
       !formData.value.transferPath) {
-    ElMessage.error('请填写所有必填字段');
+    ElMessage.error('请填写所有必填字段并选择文件');
     return;
   }
-  
-  // 准备请求数据 - 使用上传接口的格式
-  const requestData = {
-    server: formData.value.targetIp,
-    user: formData.value.targetUsername,
-    auth: formData.value.targetPassword,
-    path: formData.value.transferPath,
-    local_path: formData.value.filePath
-  };
   
   // 显示进度条
   isTransferring.value = true;
@@ -145,16 +166,24 @@ const startTransfer = async () => {
   // 设置2秒后发送请求
   transferTimeout.value = setTimeout(async () => {
     try {
-      console.log('发送本地文件传输请求:', requestData);
+      // 创建FormData对象来发送文件
+      const formDataToSend = new FormData();
+      formDataToSend.append('file', selectedFile.value);
+      formDataToSend.append('server', formData.value.targetIp);
+      formDataToSend.append('user', formData.value.targetUsername);
+      formDataToSend.append('auth', formData.value.targetPassword);
+      formDataToSend.append('path', formData.value.transferPath);
+      
+      console.log('发送本地文件传输请求，文件名:', selectedFile.value.name);
       
       // 发送网络请求
-      const response = await fetch('http://120.79.200.209:8080/agent/download', {
+      const response = await fetch('https://4c85-120-229-205-173.ngrok-free.app/agent/upload', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': Bearer (localStorage.getItem('token') || '')
+          'Authorization': localStorage.getItem('token') || ''
+          //移除了手动设置的Content-Type头，让浏览器自动设置正确的multipart/form-data边界
         },
-        body: JSON.stringify(requestData)
+        body: formDataToSend
       });
       
       // 停止进度条动画
@@ -315,8 +344,8 @@ const startTransfer = async () => {
 
 .form-group {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  align-items: flex-start;
+  margin-bottom: 15px;
 }
 
 .input-title {
@@ -391,5 +420,30 @@ const startTransfer = async () => {
 
 .cancel-button:hover {
   background-color: #504f4f;
+}
+
+/* 自定义上传框样式 */
+.custom-upload {
+  width: 100%;
+}
+
+.custom-upload :deep(.el-upload) {
+  width: 100%;
+}
+
+.custom-upload :deep(.el-upload-dragger) {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4F4F4F;
+  border: 1px solid #636161;
+  border-radius: 4px;
+}
+
+.custom-upload :deep(.el-upload__text) {
+  color: #fff;
+  font-size: 14px;
 }
 </style>

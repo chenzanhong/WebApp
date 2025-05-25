@@ -14,6 +14,11 @@ api.interceptors.request.use(
         const token = localStorage.getItem('token');
         console.log(token)
         if (token) config.headers.Authorization = `${token}`;
+        
+        // 添加ngrok绕过头部
+        config.headers['ngrok-skip-browser-warning'] = 'true';
+        config.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        
         return config;
     },
     (error) => Promise.reject(error)

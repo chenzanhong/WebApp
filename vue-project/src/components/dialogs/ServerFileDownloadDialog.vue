@@ -1,23 +1,23 @@
 <template>
   <div v-if="visible" class="dialog-overlay" @click.self="closeDialog">
     <div class="dialog-box">
-      <div class="box-title">服务器文件互传</div>
+      <div class="box-title">服务器文件下载</div>
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
-          <label class="input-title">传输服务器用户名：</label>
+          <label class="input-title">服务器IP</label>
+          <IpSearchInput v-model="formData.serverIp" placeholder="请输入目标服务器IP" />
+        </div>
+        
+        <div class="form-group">
+          <label class="input-title">服务器用户名</label>
           <input v-model="formData.serverUsername" class="info-input" placeholder="请输入用户名">
         </div>
         
         <div class="form-group">
-          <label class="input-title">传输服务器IP：</label>
-          <IpSearchInput v-model="formData.serverIp" placeholder="请输入传输服务器IP" />
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">传输服务器密钥：</label>
+          <label class="input-title">服务器密钥</label>
           <div class="password-input-wrapper">
-            <input v-model="formData.serverPassword" :type="passwordType" class="info-input" placeholder="请输入传输服务器密码">
+            <input v-model="formData.serverPassword" :type="passwordType" class="info-input" placeholder="请输入目标服务器密钥">
             <span class="toggle-password" @click="togglePasswordVisibility">
               <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
             </span>
@@ -25,45 +25,20 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">文件地址：</label>
-          <input v-model="formData.filePath" class="info-input" placeholder="请输入待传输文件的文件地址">
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">目标服务器用户名：</label>
-          <input v-model="formData.targetUsername" class="info-input" placeholder="请输入用户名">
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">目标服务器IP：</label>
-          <IpSearchInput v-model="formData.targetIp" placeholder="请输入目标服务器IP" />
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">目标服务器密钥：</label>
-          <div class="password-input-wrapper">
-            <input v-model="formData.targetPassword" :type="passwordType" class="info-input" placeholder="请输入目标服务器密码">
-            <span class="toggle-password" @click="togglePasswordVisibility">
-              <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
-            </span>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">传输路径：</label>
-          <input v-model="formData.transferPath" class="info-input" placeholder="请输入要传输的文件路径">
+          <label class="input-title">文件路径</label>
+          <input v-model="formData.filePath" class="info-input" placeholder="请输入要下载文件的路径">
         </div>
       </div>
       
       <div class="dialog-buttons">
-        <div v-if="!isLoading" class="button-container">
-          <button class="confirm-button" @click="startTransfer">开始传送</button>
+        <div v-if="!isTransferring" class="button-container">
+          <button class="confirm-button" @click="startTransfer">开始下载</button>
           <button class="cancel-button" @click="closeDialog">取消</button>
         </div>
         <div v-else class="progress-container">
-          <el-progress type="dashboard" :percentage="percentage" :color="progressColors" />
-          <div class="progress-text">正在准备传输...</div>
-          <button class="cancel-button cancel-transfer" @click="cancelTransfer">取消传输</button>
+          <el-progress type="dashboard" :percentage="transferPercentage" :color="progressColors" />
+          <div class="progress-text">正在准备下载...</div>
+          <button class="cancel-button cancel-transfer" @click="cancelTransfer">取消下载</button>
         </div>
       </div>
     </div>
@@ -86,24 +61,11 @@ const props = defineProps({
 const emit = defineEmits(['update:visible', 'transfer']);
 
 const passwordType = ref('password');
-const formData = ref({
-  serverUsername: '',
-  serverIp: '',
-  serverPassword: '',
-  filePath: '',
-  targetUsername: '',
-  targetIp: '',
-  targetPassword: '',
-  transferPath: ''
-});
-
-// 进度条相关变量
-const isLoading = ref(false);
-const percentage = ref(0);
+const isTransferring = ref(false);
+const transferPercentage = ref(0);
 const transferTimer = ref(null);
 const transferTimeout = ref(null);
 
-// 进度条颜色
 const progressColors = [
   { color: '#f56c6c', percentage: 20 },
   { color: '#e6a23c', percentage: 40 },
@@ -112,12 +74,19 @@ const progressColors = [
   { color: '#6f7ad3', percentage: 100 },
 ];
 
+const formData = ref({
+  serverUsername: '',
+  serverIp: '',
+  serverPassword: '',
+  filePath: ''
+});
+
 const togglePasswordVisibility = () => {
   passwordType.value = passwordType.value === 'password' ? 'text' : 'password';
 };
 
 const closeDialog = () => {
-  if (isLoading.value) {
+  if (isTransferring.value) {
     cancelTransfer();
   }
   emit('update:visible', false);
@@ -134,51 +103,47 @@ const cancelTransfer = () => {
     transferTimeout.value = null;
   }
   
-  isLoading.value = false;
-  percentage.value = 0;
-  ElMessage.info('传输已取消');
+  isTransferring.value = false;
+  transferPercentage.value = 0;
+  ElMessage.info('下载已取消');
 };
 
 const startTransfer = async () => {
   // 验证表单
-  if (!formData.value.serverUsername || !formData.value.serverIp || !formData.value.serverPassword ||
-      !formData.value.filePath || !formData.value.targetUsername || !formData.value.targetIp ||
-      !formData.value.targetPassword || !formData.value.transferPath) {
+  if (!formData.value.serverUsername || 
+      !formData.value.serverIp || 
+      !formData.value.serverPassword || 
+      !formData.value.filePath) {
     ElMessage.error('请填写所有必填字段');
     return;
   }
   
   // 准备请求数据
   const requestData = {
-    source_server: formData.value.serverIp,
-    source_user: formData.value.serverUsername,
-    source_auth: formData.value.serverPassword,
-    source_path: formData.value.filePath,
-    target_server: formData.value.targetIp,
-    target_user: formData.value.targetUsername,
-    target_auth: formData.value.targetPassword,
-    target_path: formData.value.transferPath
+    server: formData.value.serverIp,
+    user: formData.value.serverUsername,
+    auth: formData.value.serverPassword,
+    path: formData.value.filePath
   };
   
   // 显示进度条
-  isLoading.value = true;
-  percentage.value = 0;
+  isTransferring.value = true;
+  transferPercentage.value = 0;
   
   // 设置进度条动画
   transferTimer.value = setInterval(() => {
-    if (percentage.value < 90) {
-      percentage.value += 20;
+    if (transferPercentage.value < 90) {
+      transferPercentage.value += 20;
     }
   }, 100);
   
   // 设置2秒后发送请求
   transferTimeout.value = setTimeout(async () => {
     try {
-      console.log('发送文件传输请求:', requestData);
+      console.log('发送服务器文件下载请求:', requestData);
       
-      // 发送网络请求
-      //const response = await fetch('http://120.79.200.209:8080/agent/transfer', {
-      const response = await fetch('https://4c85-120-229-205-173.ngrok-free.app/agent/transfer', {
+      // 发送网络请求，使用blob模式获取文件数据
+      const response = await fetch('https://4c85-120-229-205-173.ngrok-free.app/agent/download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,30 +160,52 @@ const startTransfer = async () => {
       
       if (response.ok) {
         // 设置进度为100%
-        percentage.value = 100;
+        transferPercentage.value = 100;
         
-        const result = await response.json();
-        console.log('传输请求响应:', result);
-        ElMessage.success('文件传输请求已提交');
+        // 获取文件名
+        let filename = formData.value.filePath.split('/').pop();
+        if (!filename) {
+          filename = 'downloaded_file';
+        }
+        
+        // 获取文件数据并创建Blob
+        const fileData = await response.blob();
+        
+        // 创建下载链接
+        const downloadUrl = window.URL.createObjectURL(fileData);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename;
+        
+        // 模拟点击下载
+        document.body.appendChild(link);
+        link.click();
+        
+        // 清理
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        
+        console.log('文件下载完成:', filename);
+        ElMessage.success(`文件 ${filename} 下载成功`);
         
         // 发射事件，将数据传递给父组件
         emit('transfer', formData.value);
         
         // 延迟关闭对话框，让用户看到100%进度
         setTimeout(() => {
-          isLoading.value = false;
+          isTransferring.value = false;
           closeDialog();
         }, 100);
       } else {
-        isLoading.value = false;
+        isTransferring.value = false;
         const errorData = await response.text();
-        console.error('传输请求失败:', errorData);
-        ElMessage.error(`传输请求失败: ${response.status}`);
+        console.error('下载请求失败:', errorData);
+        ElMessage.error(`下载请求失败: ${response.status}`);
       }
     } catch (error) {
-      isLoading.value = false;
-      console.error('传输请求异常:', error);
-      ElMessage.error('传输请求发生错误，请检查网络连接');
+      isTransferring.value = false;
+      console.error('下载请求异常:', error);
+      ElMessage.error('下载请求发生错误，请检查网络连接');
       
       // 停止进度条动画
       if (transferTimer.value) {
@@ -254,32 +241,6 @@ const startTransfer = async () => {
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-}
-
-.progress-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  margin: 10px 0;
-}
-
-.progress-text {
-  color: white;
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.cancel-transfer {
-  margin-top: 10px;
-  min-width: 100px;
 }
 
 .box-title {
@@ -350,26 +311,41 @@ const startTransfer = async () => {
 .dialog-buttons {
   display: flex;
   justify-content: center;
-  gap: 20px;
   margin-top: 20px;
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.progress-text {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #ffffff;
+}
+
 .confirm-button {
-  min-width: 120px;
+  width: 35%;
   height: 40px;
   background-color: rgba(39, 67, 124, 0.7);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: white;
   border-radius: 15px;
   border: none;
   cursor: pointer;
   transition: all 0.3s;
-  white-space: nowrap;
-  padding: 0 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .confirm-button:hover {
@@ -377,23 +353,25 @@ const startTransfer = async () => {
 }
 
 .cancel-button {
-  min-width: 80px;
+  width: 35%;
   height: 40px;
   background-color: #636161;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: white;
   border-radius: 15px;
   border: none;
   cursor: pointer;
   transition: all 0.3s;
-  padding: 0 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cancel-button:hover {
   background-color: #504f4f;
+}
+
+.cancel-transfer {
+  width: auto;
+  min-width: 120px;
+  margin-top: 10px;
 }
 </style>
