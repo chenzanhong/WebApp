@@ -16,6 +16,7 @@ import ApplyToTeam from "@/views/TeamBusiness/ApplyToTeam.vue";
 import InviteMember from "@/views/TeamBusiness/InviteMember.vue";
 import ChangeMonitor from "@/views/TeamBusiness/ChangeMonitor.vue";
 import Headbar from "@/views/headbar.vue";
+import Log from "@/views/log.vue";
 
 const routes = [
   // 欢迎页（设为默认路由）
@@ -188,6 +189,12 @@ const routes = [
         path: "help",
         name: "Help",
         component: Help,
+      },
+      // 日志界面
+      {
+        path: "log",
+        name: "Log",
+        component: Log,
       },
     ]
   }

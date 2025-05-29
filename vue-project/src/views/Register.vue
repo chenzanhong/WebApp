@@ -311,7 +311,7 @@ export default {
                 ElMessage.error('两次输入的密码不一致');
                 return;
             }
-            const apiUrl = 'http://120.79.200.209:8080/agent/register';
+            const apiUrl = 'http://47.86.232.20:8080/agent/register';
             const requestData = {
                 email: this.email,
                 name: this.username,

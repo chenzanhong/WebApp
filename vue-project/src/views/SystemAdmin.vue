@@ -393,7 +393,7 @@ const fetchCompanyList = async () => {
       return;
     }
 
-    const response = await fetch('http://120.79.200.209:8080/agent/get-company-list', {
+    const response = await fetch('http://47.86.232.20:8080/agent/get-company-list', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

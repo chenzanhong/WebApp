@@ -9,6 +9,7 @@
         <button :class="{ active: activeButton === 'home' }" @click="navigateTo('home')">主页面</button>
         <button :class="{ active: activeButton === 'notice' }" @click="navigateTo('notice')">通知</button>
         <button :class="{ active: activeButton === 'teambusiness' }" @click="navigateTo('teambusiness')">团队业务</button>
+        <button :class="{ active: activeButton === 'log' }" @click="navigateTo('log')">日志</button>
       </div>
       <div class="right-icons">
         <el-icon :class="{ active: activeButton === 'user', 'user-active': isDropdownVisible  }"
@@ -166,6 +167,7 @@ const updateActiveState = () => {
     if (path.includes('home')) activeButton.value = 'home';
     else if (path.includes('notice')) activeButton.value = 'notice';
     else if (path.includes('teambusiness')) activeButton.value = 'teambusiness';
+    else if (path.includes('log')) activeButton.value = 'log';
     else if (path.includes('setting')) activeButton.value = 'setting';
     else if (path.includes('help')) activeButton.value = 'help';
 };
@@ -183,6 +185,9 @@ const navigateTo = (target) => {
             break;
         case 'teambusiness':
             router.push('/headbar/display/teambusiness');
+            break;
+        case 'log':
+            router.push('/headbar/log');
             break;
         case 'setting':
             router.push('/headbar/setting');
@@ -223,7 +228,7 @@ const fetchUserInfo = async () => {
             throw new Error('未找到登录凭证');
         }
 
-        const response = await fetch('http://120.79.200.209:8080/agent/userInfo', {
+        const response = await fetch('http://47.86.232.20:8080/agent/userInfo', {
             method: 'GET',
             headers: {
                 'Authorization': token
@@ -281,7 +286,7 @@ const confirmEdit = async () => {
             realname: userInfo.value.name
         };
 
-        const response = await fetch('http://120.79.200.209:8080/agent/updateUserInfo', {
+        const response = await fetch('http://47.86.232.20:8080/agent/updateUserInfo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

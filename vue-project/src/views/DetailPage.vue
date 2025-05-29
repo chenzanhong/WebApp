@@ -256,7 +256,7 @@ methods: {
       const token = localStorage.getItem('token')
       
       const response = await fetch(
-        //`http://120.79.200.209:8080/agent/monitor/status/${hostname}`,
+        //`http://47.86.232.20:8080/agent/monitor/status/${hostname}`,
         `http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
         {  headers: { 'Authorization': ` ${token}` } }
       )
