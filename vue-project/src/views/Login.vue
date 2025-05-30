@@ -307,7 +307,7 @@ export default {
     },
     async loginClick() {
       try {
-        const response = await fetch('http://120.79.200.209:8080/agent/login', {
+        const response = await fetch('http://47.86.232.20:8080/agent/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
