@@ -177,7 +177,7 @@ const startTransfer = async () => {
       console.log('发送本地文件传输请求，文件名:', selectedFile.value.name);
       
       // 发送网络请求
-      const response = await fetch('https://4c85-120-229-205-173.ngrok-free.app/agent/upload', {
+      const response = await fetch('https://a4d3-116-7-245-184.ngrok-free.app/agent/upload', {
         method: 'POST',
         headers: {
           'Authorization': localStorage.getItem('token') || ''

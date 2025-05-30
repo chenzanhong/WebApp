@@ -128,10 +128,10 @@ export default {
 
                 // 并行获取收发通知
                 const [receiveRes, sendRes] = await Promise.all([
-                    fetch(`http://120.79.200.209:8080/agent/info/recivelist`, {
+                    fetch(`http://47.86.232.20:8080/agent/info/recivelist`, {
                         headers: { 'Authorization': ` ${token}` }
                     }),
-                    fetch(`http://120.79.200.209:8080/agent/info/sendlist`, {
+                    fetch(`http://47.86.232.20:8080/agent/info/sendlist`, {
                         headers: { 'Authorization': ` ${token}` }
                     })
                 ]);

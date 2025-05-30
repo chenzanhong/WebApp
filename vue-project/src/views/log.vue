@@ -8,7 +8,7 @@
             v-model="dateRangeStart"
             type="datetime"
             placeholder="请选择起始日期"
-            value-format="YYYY-MM-DDTHH:mm:ssZ"
+            value-format="YYYY-MM-DD HH:mm:ss"
             class="date-picker-item"
           />
           <span class="date-separator">-</span>
@@ -16,7 +16,7 @@
             v-model="dateRangeEnd"
             type="datetime"
             placeholder="请选择终止日期"
-            value-format="YYYY-MM-DDTHH:mm:ssZ"
+            value-format="YYYY-MM-DD HH:mm:ss"
             class="date-picker-item"
           />
         </div>
@@ -28,9 +28,9 @@
             <el-option label="添加服务器" value="添加服务器" />
             <el-option label="删除服务器" value="删除服务器" />
             <el-option label="修改服务器" value="修改服务器" />
-             <el-option label="本地文件上传" value="本地文件上传" />
-             <el-option label="服务器文件传输" value="服务器文件传输" />
-             <el-option label="服务器文件下载" value="服务器文件下载" />
+            <el-option label="文件上传" value="文件上传" />
+            <el-option label="文件下载" value="文件下载" />
+            <el-option label="两服务器间单文件传输" value="两服务器间单文件传输" />
           </el-select>
         </div>
 
@@ -49,7 +49,7 @@
         </div>
 
         <el-icon
-              style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%; cursor: pointer;" @click="refreshLogs">
+              style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%; cursor: pointer;" @click="handleSearch">
               <Search style="font-size: 1.2rem; color: #000000;" />
         </el-icon>
       </div>
@@ -57,22 +57,22 @@
 
     <div class="log-content">
       <el-table
-        :data="logs"
+        :data="filteredLogs"
         style="width: 100%"
         :stripe="true"
         :border="false"
         class="log-table"
       >
-        <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="timestamp" label="操作时间" width="180">
+        <el-table-column type="index" label="序号" min-width="80" />
+        <el-table-column prop="timestamp" label="操作时间" min-width="180">
            <template #default="scope">
             {{ formatDate(scope.row.timestamp) }}
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="操作类型" width="120" />
-        <el-table-column prop="server_name" label="相关服务器" width="150" />
-        <el-table-column prop="result" label="操作结果" width="150" />
-        <el-table-column prop="detail" label="操作详情" />
+        <el-table-column prop="type" label="操作类型" min-width="120" />
+        <el-table-column prop="server_name" label="相关服务器" min-width="150" />
+        <el-table-column prop="result" label="操作结果" min-width="150" />
+        <el-table-column prop="detail" label="操作详情" min-width="200" />
       </el-table>
 
       <div class="pagination-container">
@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 
@@ -105,6 +105,26 @@ const currentPage = ref(1);
 const pageSize = ref(20);
 const total = ref(0);
 const logs = ref([]);
+
+// 计算属性：过滤后的日志数据
+const filteredLogs = computed(() => {
+  let currentLogs = logs.value;
+
+  // 根据操作结果进行前端过滤
+  if (resultType.value !== 'all') {
+    currentLogs = currentLogs.filter(log => {
+      const result = log.level === 'error' ? '失败' : '成功';
+      return result === resultType.value;
+    });
+  }
+
+  // 这里可以添加其他前端筛选逻辑（例如 serverName）
+
+  // 更新总数以反映过滤后的日志数量
+  total.value = currentLogs.length;
+
+  return currentLogs;
+});
 
 // 格式化日期
 const formatDate = (dateString) => {
@@ -120,63 +140,125 @@ const formatDate = (dateString) => {
   return `${year}年${month}月${day}日 ${hours}:${minutes}:${seconds}`;
 };
 
+// 将时间转换为ISO8601格式 (带时区偏移)
+const convertToISO8601WithOffset = (date) => {
+  if (!date) return '';
+  let d = date;
+  if (!(d instanceof Date)) {
+    // 尝试将输入解析为 Date 对象，假设输入是本地时间字符串
+    // 注意：直接解析 'YYYY-MM-DD HH:mm:ss' 可能在不同浏览器行为不一致
+    // 一个更健壮的方法是手动解析年、月、日、时、分、秒来构建 Date 对象，或者考虑使用日期处理库
+    // 这里为了简化，先尝试直接创建 Date 对象。如果发现时区问题，需要进一步调整。
+    d = new Date(date.replace(' ', 'T')); // 将空格替换为'T'尝试用ISO 8601解析
+    if (isNaN(d.getTime())) {
+        // 如果标准解析失败，尝试手动解析 YYYY-MM-DD HH:mm:ss 格式
+        const parts = date.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+        if (parts) {
+            // 注意：月份是从 0 开始的
+            d = new Date(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]);
+        } else {
+             console.error('无法解析日期格式:', date);
+             return ''; // 返回空字符串或根据需要处理错误
+        }
+    }
+  }
+
+  const year = d.getFullYear();
+  const month = ('0' + (d.getMonth() + 1)).slice(-2);
+  const day = ('0' + d.getDate()).slice(-2);
+  const hours = ('0' + d.getHours()).slice(-2);
+  const minutes = ('0' + d.getMinutes()).slice(-2);
+  const seconds = ('0' + d.getSeconds()).slice(-2);
+  const milliseconds = ('00' + d.getMilliseconds()).slice(-3);
+
+  const timezoneOffset = d.getTimezoneOffset(); // 分钟为单位
+  const offsetHours = Math.abs(Math.floor(timezoneOffset / 60));
+  const offsetMinutes = Math.abs(timezoneOffset % 60);
+  const offsetSign = timezoneOffset > 0 ? '-' : '+';
+  const formattedOffset = `${offsetSign}${('0' + offsetHours).slice(-2)}${('0' + offsetMinutes).slice(-2)}`;
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${formattedOffset}`;
+};
 
 // 刷新日志数据
-const refreshLogs = async () => {
+const refreshLogs = async (isSearch = false) => {
   try {
     const token = localStorage.getItem('token');
-    const params = new URLSearchParams({
-      page: currentPage.value,
-      size: pageSize.value
-    });
-
-    if (logType.value !== 'all') {
-      params.append('type', logType.value);
+    
+    // 从token中获取用户角色
+    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+    const username = tokenPayload.role === 'admin' || tokenPayload.role === 'root' ? 'root' : '';
+    
+    // 构建请求体
+    const requestBody = {
+      username: username,
+      fromTime: '',
+      toTime: '',
+      operation: '',
+      level: ''
+    };
+    
+    // 只有在点击搜索时才添加搜索参数
+    if (isSearch) {
+      if (dateRangeStart.value) {
+        requestBody.fromTime = convertToISO8601WithOffset(dateRangeStart.value);
+      }
+      if (dateRangeEnd.value) {
+        requestBody.toTime = convertToISO8601WithOffset(dateRangeEnd.value);
+      }
+      if (logType.value !== 'all') {
+        requestBody.operation = logType.value;
+      }
     }
 
-    if (resultType.value !== 'all') {
-      params.append('result', resultType.value);
-    }
+    console.log('完整的请求参数:', requestBody);
 
-    if (serverName.value) {
-      params.append('server_name', serverName.value);
-    }
+    // 打印发送到后端的时间参数
+    console.log('发送到后端的时间参数 fromTime:', requestBody.fromTime);
+    console.log('发送到后端的时间参数 toTime:', requestBody.toTime);
 
-    if (dateRangeStart.value) {
-      params.append('from', dateRangeStart.value);
-    }
-     if (dateRangeEnd.value) {
-      params.append('to', dateRangeEnd.value);
-    }
-
-    const response = await fetch(`http://47.86.232.20:8080/agent/log?${params.toString()}`, {
-      method: 'GET',
+    const response = await fetch('http://47.86.232.20:8080/agent/getuseroperationlogs', {
+      method: 'POST',
       headers: {
         'Authorization': token,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      throw new Error('获取日志失败');
+      const errorText = await response.text();
+      console.error('服务器响应错误:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorText: errorText
+      });
+      throw new Error(`获取日志失败: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('服务器响应数据:', data);
 
-     // 将示例中的 timestamp, type, result, server_name, detail 映射到表格数据
+    // 将接口返回的数据映射到表格数据
+    if (!data.logs) {
+      logs.value = [];
+      total.value = 0;
+      return;
+    }
+
     logs.value = data.logs.map(log => ({
-      timestamp: log.from, // 使用from作为操作时间
-      type: log.type,
-      result: log.result,
-      server_name: log.server_name,
-      detail: log.result // 直接使用result作为操作详情
+      timestamp: log.ts,
+      type: log.msg,
+      result: log.level === 'error' ? '失败' : '成功',
+      server_name: log.username,
+      detail: log.detail
     })) || [];
 
-    total.value = data.total || 0;
+    total.value = logs.value.length;
 
   } catch (error) {
     console.error('获取日志失败:', error);
-    ElMessage.error('获取日志失败，请稍后重试');
+    ElMessage.error(`获取日志失败: ${error.message}`);
   }
 };
 
@@ -192,22 +274,39 @@ const handleCurrentChange = (val) => {
   refreshLogs();
 };
 
-// 组件挂载时获取日志数据
+// 处理搜索按钮点击
+const handleSearch = () => {
+  refreshLogs(true);
+};
+
+// 组件挂载时获取日志数据（不带参数）
 onMounted(() => {
-  refreshLogs();
+  refreshLogs(false);
 });
 </script>
 
 <style scoped>
 .log-container {
   padding: 20px;
-  height: 100%;
+  height: 100vh;
   background-color: #1a1a1a;
   color: white;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.log-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .log-header {
   margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background-color: #1a1a1a;
+  z-index: 1;
+  padding: 10px 0;
 }
 
 .log-header h2 {
@@ -261,14 +360,22 @@ onMounted(() => {
   width: 200px; /* 调整输入框宽度 */
 }
 
-.log-content  {
+.log-content {
   flex: 1;
-  background-color: rgba(62, 79, 96, 0.34);
+  background-color: transparent;
   border-radius: 1rem;
   padding: 25px;
   margin: 13px 15px 28px 30px;
   border: 1px solid #374151;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
+
+.log-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 .log-table {
   margin-bottom: 20px;
 }
@@ -280,43 +387,90 @@ onMounted(() => {
 }
 
 :deep(.el-table) {
-  background-color: transparent; 
+  background-color: transparent !important; 
   color: white;
   border-collapse: collapse; 
   border: none !important;
+  table-layout: auto !important;
+  width: 100% !important;
 }
 
-:deep(.el-table--border) {
-  border: none !important;
+:deep(.el-table__header) {
+  background-color: transparent !important;
+  width: 100% !important;
 }
 
-:deep(.el-table__inner-wrapper) {
-  border: none !important;
+:deep(.el-table__header-wrapper) {
+  background-color: transparent !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
 }
 
-:deep(.el-table__border-left-patch) {
-  display: none !important;
+:deep(.el-table__header-wrapper::-webkit-scrollbar) {
+  display: none !important; /* Chrome, Safari, Opera */
 }
 
-:deep(.el-table__border-top) {
-  display: none !important;
+:deep(.el-table__body) {
+  width: 100% !important;
+  background-color: transparent !important;
 }
 
-:deep(.el-table th) {
-  background-color: transparent !important; 
+:deep(.el-table__body-wrapper) {
+  width: 100% !important;
+  background-color: transparent !important;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 300px) !important;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  display: none !important; /* Chrome, Safari, Opera */
+}
+
+:deep(.el-table__header tr) {
+  background-color: transparent !important;
+}
+
+:deep(.el-table__header th) {
+  background-color: transparent !important;
+  padding: 12px 0 !important;
+  text-align: center !important;
+  border-bottom: 2px solid #ffffff !important;
+  border-right: none !important;
   color: white !important;
-  border-bottom: 2px solid #ffffff !important; 
-  border-right: none !important; /* 去掉表头之间的边框 */
 }
 
-:deep(.el-table tr) {
-    background-color: transparent !important; 
+:deep(.el-table__body td) {
+  padding: 12px 0 !important;
+  text-align: center !important;
+  background-color: transparent !important;
 }
 
-:deep(.el-table td) {
-  background-color: transparent !important; 
-  color: white !important;
-  border: none !important;
+:deep(.el-table__row) {
+  background-color: transparent !important;
+}
+
+:deep(.el-table__row--striped) {
+  background-color: transparent !important;
+}
+
+:deep(.el-table__fixed) {
+  background-color: transparent !important;
+}
+
+:deep(.el-table__fixed-right) {
+  background-color: transparent !important;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  background-color: transparent !important;
+}
+
+:deep(.el-table__fixed-body-wrapper) {
+  background-color: transparent !important;
 }
 
 :deep(.el-pagination) {

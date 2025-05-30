@@ -75,7 +75,7 @@ export default {
      },
        async getserverList() {
           try {
-               const response = await fetch("http://120.79.200.209:8080/agent/list", {
+               const response = await fetch("http://47.86.232.20:8080/agent/list", {
                    method: 'GET',  
                    
                    headers: {
@@ -90,7 +90,8 @@ export default {
                })
                
                const data = await response.json();
-               this.serverList = data.map(item => ({
+               console.log(data);
+               this.serverList = data.hosts.map(item => ({
                id: item.id,
                host_name: item.host_name,
                os: item.os,

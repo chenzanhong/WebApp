@@ -1018,7 +1018,7 @@ mem_percent: processData.mem_percent?.toFixed(1) || 0
   startRefresh() {
     this.refreshInterval = setInterval(() => {
       this.fetchServerDetail();
-    }, 30000) 
+    }, 3000) 
   },
 },
 beforeDestroy() {
