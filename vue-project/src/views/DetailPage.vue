@@ -11,8 +11,10 @@
           <el-alert type="error" :title="error" show-icon />
       </div>
       <template v-if="!loading && !error">
+          <!-- 左侧容器 -->
+        <div class="left-container">
       <!-- 实例信息区域 -->
-      <div class="instance-info metric-box">
+      <div class="metric-box">
           <h2>实例信息</h2>
           <div class="info-item">
               <span>主机名称：</span>
@@ -30,21 +32,42 @@
               <span>上传时间：</span>
               <span>{{ formatTime(hostInfo.last_report) }}</span>
           </div>
-          <!-- 新增进程趋势图 -->
-          <div class="process-charts">
-            <div 
-              id="cpuProcessChart"
-              class="chart-container"
-              style="width: 100%; height: 240px; margin-top: 20px"
-            ></div>
-            <div 
-              id="memoryProcessChart"
-              class="chart-container"
-              style="width: 100%; height: 240px; margin-top: 20px"
-            ></div>
-          </div>
         </div>
-      <!-- 右侧四个框的容器 -->
+         <!-- 网络信息区域 -->
+          <div class="metric-box">
+              <h2>网络流量</h2>
+              <div v-for="(net, index) in netData" :key="index" class="info-item">
+                  <span>发送</span>
+                  <span>{{ net.bytes_sent }} </span>
+              </div>
+              <div v-for="(net, index) in netData" :key="index" class="info-item">
+                  <span>接收</span>
+                  <span>{{ net.bytes_recv }} </span>
+              </div>
+          </div>
+          <!-- 进程信息区域 -->
+          <div class="metric-box">
+              <h2>运行进程</h2>
+              <div  v-for="(process, index) in processData" :key="index" class="info-item">
+                      <span>命令行：</span>
+                      <span>{{ process.cmdline }}</span>
+                  </div>
+              <div  v-for="(process, index) in processData" :key="index" class="info-item">
+                      <span>PID：</span>
+                      <span>{{ process.pid }}</span>
+                  </div>
+                  <div  v-for="(process, index) in processData" :key="index" class="info-item">
+                      <span>CPU占用：</span>
+                      <span>{{ process.cpu_percent }}%</span>
+                  </div>
+                  <div  v-for="(process, index) in processData" :key="index" class="info-item">
+                      <span>内存占用：</span>
+                      <span>{{ process.mem_percent }}%</span>
+                  </div>
+          </div>
+
+          </div>
+      <!-- 右侧容器 -->
       <div class="right-container">
           <!-- CPU利用率区域 -->
           <div class="metric-box">
@@ -67,6 +90,13 @@
               class="chart-container"
               style="width: 100%; height: 220px"
             ></div>
+             <div class="process-charts">
+            <div 
+              id="cpuUsageTrend"
+              class="chart-container"
+              style="width: 100%; height: 340px; margin-top: 20px"
+            ></div>
+             </div>
           </div>
           <!-- 内存使用区域 -->
           <div class="metric-box">
@@ -89,40 +119,13 @@
                 class="chart-container"
                 style="width: 100%; height: 220px"
               ></div>
+               <div 
+              id="memoryProcessChart"
+              class="chart-container"
+              style="width: 100%; height: 340px; margin-top: 20px"
+            ></div>
           </div>
-          <!-- 网络信息区域 -->
-          <div class="metric-box">
-              <h2>网络流量</h2>
-              <div v-for="(net, index) in netData" :key="index" class="info-item">
-                  <span>发送</span>
-                  <span>{{ net.bytes_sent }} </span>
-              </div>
-              <div v-for="(net, index) in netData" :key="index" class="info-item">
-                  <span>接收</span>
-                  <span>{{ net.bytes_recv }} </span>
-              </div>
-             
-          </div>
-          <!-- 进程信息区域 -->
-          <div class="metric-box">
-              <h2>运行进程</h2>
-              <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>命令行：</span>
-                      <span>{{ process.cmdline }}</span>
-                  </div>
-              <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>PID：</span>
-                      <span>{{ process.pid }}</span>
-                  </div>
-                  <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>CPU占用：</span>
-                      <span>{{ process.cpu_percent }}%</span>
-                  </div>
-                  <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>内存占用：</span>
-                      <span>{{ process.mem_percent }}%</span>
-                  </div>
-          </div>
+         
       </div>
   </template>
   </div>
@@ -189,9 +192,11 @@ data() {
     refreshInterval: null,// 用于存储定时器ID
     cpuChart: null,
     memoryChart: null,
-    processHistory:[],
-    cpuProcessChart: null,
-    memoryProcessChart: null,
+    memoryUsageChart: null,
+    cpuUsageChart:null,
+    cpuUsageHistory: [],
+    memoryUsageHistory:[],
+    initialHistoryLoaded: false, // 标记是否已加载初始历史数据
   }
 },
 watch: {
@@ -223,7 +228,7 @@ created() {
 mounted() {
     this.initCpuChart();
     this.initMemoryChart();
-    this.initCpuProcessChart();
+    this.initCpuUsageTrendChart();
     this.initMemoryProcessChart();
     window.addEventListener('resize', this.handleChartResize);
   },
@@ -247,16 +252,81 @@ methods: {
     return '无效时间'
   }
 },
+//获取历史数据
+   async fetchHistoryData() {
+  try {
+    const hostname = encodeURIComponent(this.$route.params.hostname)
+    const token = localStorage.getItem('token')
+    
+    // 请求历史数据接口
+    const response = await fetch(
+      `http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/1`,
+      { headers: { 'Authorization': ` ${token}` } }
+    )
+
+    if (!response.ok) throw new Error(`历史数据请求失败: ${response.status}`)
+    
+    const historyData = await response.json()
+    console.log('获取到的历史监控数据:', historyData)
+    
+    // 检查并处理CPU历史数据
+    if (historyData.cpu_info && Array.isArray(historyData.cpu_info)) {
+      // 将历史数据存入数组
+      const allCpuData = historyData.cpu_info.map(item => ({
+        value: item.percent,
+        time: new Date(item.cpu_info_created_at).getTime(),
+        created_at: item.cpu_info_created_at
+      }))
+      
+      // 按时间戳排序（从新到旧）
+      allCpuData.sort((a, b) => b.time - a.time)
+      
+      // 取最近的30个数据点
+      this.cpuUsageHistory = allCpuData.slice(0, 30)
+      
+      console.log('已加载初始历史数据点:', this.cpuUsageHistory.length)
+    } else {
+      console.warn('返回的历史数据中没有有效的cpu_info数组')
+    }
+    
+     // 处理内存历史数据
+        if (historyData.mem_info && Array.isArray(historyData.mem_info)) {
+          const allMemData = historyData.mem_info.map(item => ({
+            value: item.user_percent,
+            time: new Date(item.mem_info_created_at).getTime(),
+            created_at: item.mem_info_created_at
+          }))
+          
+          // 按时间戳排序（从新到旧）
+          allMemData.sort((a, b) => b.time - a.time)
+          
+          // 取最近的30个数据点
+          this.memoryUsageHistory = allMemData.slice(0, 30)
+          console.log('已加载初始内存历史数据点:', this.memoryUsageHistory.length)
+        } else {
+          console.warn('返回的历史数据中没有有效的mem_info数组')
+        }
+
+    this.initialHistoryLoaded = true
+  } catch (error) {
+    console.error('获取历史数据失败:', error)
+    // 即使失败也标记为已加载，避免阻塞后续流程
+    this.initialHistoryLoaded = true
+  }
+},
   async fetchServerDetail() {
     try {
       this.loading = true
       this.error = null
-      
+      // 如果尚未加载历史数据，先加载历史数据
+        if (!this.initialHistoryLoaded) {
+          await this.fetchHistoryData()
+        }
       const hostname = encodeURIComponent(this.$route.params.hostname)
       const token = localStorage.getItem('token')
       
       const response = await fetch(
-        //`http://120.79.200.209:8080/agent/monitor/status/${hostname}`,
+        //`http://47.86.232.20:8080/agent/monitor/status/${hostname}`,
         `http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
         {  headers: { 'Authorization': ` ${token}` } }
       )
@@ -520,196 +590,267 @@ methods: {
   },
 
 
-  // 新增CPU进程图表初始化
-    async initCpuProcessChart() {
-      let retryCount = 0;
-      const maxRetries = 5;
-      const tryInit = () => {
-        const dom = document.getElementById('cpuProcessChart');
-        if (dom) {
-          if (this.cpuProcessChart) this.cpuProcessChart.dispose();
-          try {
-            this.cpuProcessChart = echarts.init(dom, 'dark');
-            this.updateCpuProcessChart(this.processHistory);
-          } catch (error) {
-            console.error('CPU进程图表初始化失败:', error);
-          }
-        } else if (retryCount < maxRetries) {
-          retryCount++;
-          setTimeout(tryInit, 300);
-        }
-      };
-      this.$nextTick(() => tryInit());
-    },
+   // 初始化CPU使用率趋势图表
+   async initCpuUsageTrendChart() {
+  let retryCount = 0;
+  const maxRetries = 5;
+  
+  const tryInit = () => {
+    const dom = document.getElementById('cpuUsageTrend');
+    
+    if (dom) {
+      if (this.cpuUsageChart) this.cpuUsageChart.dispose();
+      
+      try {
+        this.cpuUsageChart = echarts.init(dom, 'dark');
+        console.log('CPU趋势图初始化成功');
+        this.updateCpuUsageTrendChart();
+      } catch (error) {
+        console.error('CPU趋势图初始化失败:', error);
+      }
+    } else if (retryCount < maxRetries) {
+      retryCount++;
+      console.warn(`第 ${retryCount} 次重试查找CPU趋势图容器...`);
+      setTimeout(tryInit, 300);
+    } else {
+      console.error(`无法找到CPU趋势图容器，已尝试 ${maxRetries} 次`);
+    }
+  };
+
+  // 在nextTick中尝试初始化，确保DOM已更新
+  this.$nextTick(() => tryInit());
+},
 
     // 新增内存进程图表初始化
     async initMemoryProcessChart() {
       let retryCount = 0;
       const maxRetries = 5;
+      
       const tryInit = () => {
-        const dom = document.getElementById('memoryProcessChart');
+        const dom = document.getElementById('memoryProcessChart'); // 使用内存进程图表容器
         if (dom) {
-          if (this.memoryProcessChart) this.memoryProcessChart.dispose();
+          if (this.memoryUsageChart) this.memoryUsageChart.dispose();
+          
           try {
-            this.memoryProcessChart = echarts.init(dom, 'dark');
-            this.updateMemoryProcessChart(this.processHistory);
+            this.memoryUsageChart = echarts.init(dom, 'dark');
+            console.log('内存趋势图初始化成功');
+            this.updateMemoryUsageTrendChart(); // 初始化后立即更新数据
           } catch (error) {
-            console.error('内存进程图表初始化失败:', error);
+            console.error('内存趋势图初始化失败:', error);
           }
         } else if (retryCount < maxRetries) {
           retryCount++;
           setTimeout(tryInit, 300);
         }
       };
+
       this.$nextTick(() => tryInit());
     },
 
-    // 更新CPU进程图表
-    updateCpuProcessChart(processData) {
-      if (!this.cpuProcessChart) return;
-      
-      const safeData = Array.isArray(processData) ? processData : [];
-      const chartData = safeData.slice(-100).map((item, index) => ({
-        index,
-        time: item.time,
-        value: item.cpu_percent
+   // 更新CPU使用率趋势图表
+    updateCpuUsageTrendChart() {
+      if (!this.cpuUsageChart) return;
+
+      // 处理历史数据（最多保留100个点）
+      const cpuhistory = this.cpuUsageHistory.slice(-100);
+      const data = cpuhistory.map((item, index) => ({
+        x: index, // 使用索引作为X轴
+        y: item.value,
+        time: item.time // 保留时间戳用于tooltip
       }));
 
       const option = {
         title: {
-          text: 'CPU使用趋势',
+          text: 'CPU使用率趋势',
           left: 'center',
           textStyle: { color: '#fff', fontSize: 14 }
         },
-        tooltip: {
-          trigger: 'axis',
-          formatter: (params) => {
-            const data = params[0].data;
-            return `时间: ${data.time}<br/>CPU: ${data.value}%`;
-          }
-        },
+         tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(40, 40, 40, 0.9)', // 深色背景
+      borderColor: '#4ECDC4', // 边框颜色匹配折线
+      borderWidth: 1,
+      textStyle: {
+        color: '#fff',
+        fontSize: 12
+      },
+      formatter: (params) => {
+        const point = params[0];
+        const date = new Date(point.data.time);
+        // 格式化日期时间：YYYY-MM-DD HH:mm:ss
+        const formattedDate = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+        
+        // 使用HTML自定义tooltip布局
+        return `
+          <div style="margin: 5px 0;">
+            <div style="font-weight: bold; margin-bottom: 5px;">${formattedDate}</div>
+            <div style="display: flex; align-items: center;">
+              <span style="display: inline-block; width: 10px; height: 10px; background: ${point.color}; border-radius: 50%; margin-right: 5px;"></span>
+              <span>CPU使用率: ${point.data.y.toFixed(1)}%</span>
+            </div>
+          </div>
+        `;
+      }
+    },
         xAxis: {
           type: 'category',
           axisLine: { lineStyle: { color: '#666' } },
-          axisLabel: { show: false },
-          data: chartData.map(d => d.index)
+          axisLabel: { 
+            show: true, 
+            color: '#999',
+            formatter: (index) => {
+              const seconds = Math.round(index * 30); 
+              return `${seconds}s`;
+            }
+          },
+          boundaryGap: false,
+          data: data.map(item => item.x)
         },
         yAxis: {
           type: 'value',
           min: 0,
           max: 100,
           interval: 20,
-          axisLabel: { color: '#999',
-            formatter: (value) => `${value}%`
-           },
+          axisLabel: { 
+            color: '#999', 
+            formatter: (value) => `${value}%` 
+          },
           splitLine: { 
-            show: true,  // 确保显示分割线
-            lineStyle: { 
-              color: '#333',
-              type: 'dashed' 
-            } 
+            show: true, 
+            lineStyle: { color: '#333', type: 'dashed' } 
           }
         },
         series: [{
+          name: 'CPU使用率',
           type: 'line',
-          showSymbol: false,
+          showSymbol: false, // 显示数据点
+          symbol: 'circle', // 设置为圆形
+          symbolSize: 8,    // 调整圆点大小（推荐6-10）
           smooth: true,
-          data: chartData.map(d => ({
-            name: d.time,
-            value: [d.index, d.value],
-            time: d.time
-          })),
-          itemStyle: { color: '#ff9f43' },
-          lineStyle: { width: 2 },
+          data: data.map(item => item.y),
+          itemStyle: {
+            color: '#fff',      // 圆点填充色
+            borderColor: '#4ECDC4', // 圆点边框色
+            borderWidth: 2       // 边框粗细
+          },
+           emphasis: {  // 鼠标悬停时放大效果
+              itemStyle: {
+                borderColor: '#ffeb3b', // 悬停时边框变为黄色
+                borderWidth: 3,
+                symbolSize: 12
+              }
+            },
+          lineStyle: {
+            width: 2,
+            color: '#4ECDC4' 
+           },
           areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(255,159,67,0.4)' },
-              { offset: 1, color: 'rgba(255,159,67,0.05)' }
-            ])
+            color: new echarts.graphic.LinearGradient(
+              0, 0, 0, 1,
+              [{ offset: 0, color: 'rgba(78, 205, 196, 0.4)' }],
+              false
+            )
           }
         }],
         grid: { top: 40, bottom: 5, left: 5, right: 5 }
       };
 
-      this.cpuProcessChart.setOption(option);
+      this.cpuUsageChart.setOption(option, true); // 不清除动画直接更新
     },
 
-    // 更新内存进程图表
-    updateMemoryProcessChart(processData) {
-      if (!this.memoryProcessChart) return;
-      
-        // 添加数据校验和过滤
-      const safeData = (Array.isArray(processData) ? processData : [])
-        .filter(item => !!item && !!item.time && !!item.mem_percent)
-        .map(item => ({
-          time: item.time,
-          mem_percent: Number(item.mem_percent) || 0
-        }));
 
-      // 使用安全数据生成图表数据
-      const chartData = safeData.slice(-100).map((item, index) => ({
-        index,
-        time: item.time,
-        value: item.mem_percent
+    // 更新内存进程图表
+     updateMemoryUsageTrendChart() {
+      if (!this.memoryUsageChart) return;
+
+      // 处理历史数据（最多保留100个点）
+      const memHistory = this.memoryUsageHistory.slice(-100);
+      if (memHistory.length === 0) return;
+
+      const data = memHistory.map((item, index) => ({
+        x: index, // 使用索引作为时间轴（假设30秒间隔）
+        y: item.value,
+        time: item.time // 保存时间戳用于tooltip显示
       }));
+
       const option = {
         title: {
-          text: '内存使用趋势',
+          text: '内存使用率趋势',
           left: 'center',
           textStyle: { color: '#fff', fontSize: 14 }
         },
         tooltip: {
           trigger: 'axis',
           formatter: (params) => {
-            const data = params[0].data;
-            return `时间: ${data.time}<br/>内存: ${data.value}%`;
+            const date = new Date(params[0].data.time);
+            return `时间: ${date.toLocaleTimeString()}\n使用率: ${params[0].data.y.toFixed(1)}%`;
           }
         },
         xAxis: {
           type: 'category',
           axisLine: { lineStyle: { color: '#666' } },
-          axisLabel: { show: false },
-          data: chartData.map(d => d.index)
+          axisLabel: { 
+            show: true, 
+            color: '#999',
+            formatter: (index) => `${index * 30}s` // 显示相对时间间隔
+          },
+          boundaryGap: false,
+          data: data.map(item => item.x)
         },
         yAxis: {
           type: 'value',
           min: 0,
           max: 100,
-          interval: 20, // 新增间隔配置
-          axisLabel: {
-            color: '#999',
-            formatter: (value) => `${value}%` // 新增百分比格式化
+          interval: 20,
+          axisLabel: { 
+            color: '#999', 
+            formatter: (value) => `${value}%` 
           },
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: '#333',
-              type: 'dashed' // 保持虚线样式
-            }
+          splitLine: { 
+            show: true, 
+            lineStyle: { color: '#333', type: 'dashed' } 
           }
         },
         series: [{
+          name: '内存使用率',
           type: 'line',
-          showSymbol: false,
+          showSymbol: false, // 显示数据点
+          symbol: 'circle', // 设置为圆形
+          symbolSize: 8,    // 调整圆点大小（推荐6-10）
           smooth: true,
-          data: chartData.map(d => ({
-            name: d.time,
-            value: [d.index, d.value],
-            time: d.time
-          })),
-          itemStyle: { color: '#2e86de' },
-          lineStyle: { width: 2 },
+          data: data.map(item => item.y),
+          itemStyle: {
+            color: '#fff',      // 圆点填充色
+            borderColor: '#6A67CE', // 圆点边框色
+            borderWidth: 2       // 边框粗细
+          },
+           emphasis: {  // 鼠标悬停时放大效果
+              itemStyle: {
+                borderColor: '#ffeb3b', // 悬停时边框变为黄色
+                borderWidth: 3,
+                symbolSize: 12
+              }
+            },
+          lineStyle: {
+            width: 2,
+            color: '#6A67CE'
+           },
           areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(46,134,222,0.4)' },
-              { offset: 1, color: 'rgba(46,134,222,0.05)' }
-            ])
+            // 渐变填充区域
+            color: new echarts.graphic.LinearGradient(
+              0, 0, 0, 1,
+              [
+                { offset: 0, color: 'rgba(46, 134, 222, 0.4)' }, // 起始颜色
+                { offset: 1, color: 'rgba(46, 134, 222, 0.05)' } // 结束颜色
+              ],
+              false
+            )
           }
         }],
         grid: { top: 40, bottom: 5, left: 5, right: 5 }
       };
 
-      this.memoryProcessChart.setOption(option);
+      this.memoryUsageChart.setOption(option, true); // 平滑更新图表
     },
 
 
@@ -727,7 +868,7 @@ methods: {
         animation: { duration: 300 }
       });
     }if (this.cpuProcessChart) this.cpuProcessChart.resize();
-      if (this.memoryProcessChart) this.memoryProcessChart.resize();
+      if (this.memoryUsageChart) this.memoryUsageChart.resize();
 
     },
 
@@ -745,9 +886,9 @@ methods: {
         this.cpuProcessChart.dispose();
         this.cpuProcessChart = null;
       }
-      if (this.memoryProcessChart) {
-        this.memoryProcessChart.dispose();
-        this.memoryProcessChart = null;
+      if (this.memoryUsageChart) {
+        this.memoryUsageChart.dispose();
+        this.memoryUsageChart = null;
       }
     },
 
@@ -769,13 +910,43 @@ model_name: cpuData.model_name || 'N/A',
 percent: cpuData.percent?.toFixed(1) || 0,
 cores_num: cpuData.cores_num || 0
 }
+ // 获取最新CPU使用率并添加到历史记录
+      const latestCpuPercent = this.cpuData.percent;
+      this.cpuUsageHistory.push({
+        value: latestCpuPercent,
+        time: Date.now() // 记录时间戳
+      });
+       // 限制历史记录长度
+      if (this.cpuUsageHistory.length > 100) {
+        this.cpuUsageHistory.shift();
+      }
 
+      // 更新趋势图表（无需重新初始化，直接更新数据）
+      if (this.cpuProcessChart) {
+        this.updateCpuUsageTrendChart();
+      }
 // 内存数据
 this.memoryData = {
 total:serverData.mem_info?.total || 'N/A',
 used: serverData.mem_info?.used || 'N/A',
 user_percent: serverData.mem_info?.user_percent?.toFixed(1) || 0.00
 }
+ const latestMemPercent = Number(this.memoryData.user_percent);
+      if (!isNaN(latestMemPercent)) {
+        this.memoryUsageHistory.push({
+          value: latestMemPercent,
+          time: Date.now()
+        });
+        // 限制历史记录长度
+        if (this.memoryUsageHistory.length > 100) {
+          this.memoryUsageHistory.shift();
+        }
+      }
+
+      // 更新内存趋势图表
+      if (this.memoryUsageChart) {
+        this.updateMemoryUsageTrendChart();
+      }
 
 // 网络数据处理
 const latestNetEntry = serverData.net_info?.slice(-1)[0] || {}
@@ -796,11 +967,6 @@ cmdline: processData.cmdline || '未知命令',
 cpu_percent: processData.cpu_percent?.toFixed(1) || 0,
 mem_percent: processData.mem_percent?.toFixed(1) || 0
 }]
-// const processHistory = serverData.pro_info || []
-
-// console.log('进程图表数据为：',processHistory )
-
-this.processHistory = serverData.pro_info || []
 
  // 新增强制重新初始化
     this.$nextTick(() => {
@@ -818,29 +984,30 @@ this.processHistory = serverData.pro_info || []
         this.updateMemoryChart();
       }
 
-      // CPU进程趋势图
-    if (!document.getElementById('cpuProcessChart')) {
-      this.initCpuProcessChart();
+      
+    // CPU使用率趋势图更新
+    if (!document.getElementById('cpuUsageTrend')) {
+      this.initCpuUsageTrendChart(); // 确保初始化方法被调用
     } else {
-      // 先销毁旧实例
-      if (this.cpuProcessChart && !this.cpuProcessChart.isDisposed) {
-        this.cpuProcessChart.dispose();
+      // 如果已初始化，直接更新数据
+      if (this.cpuUsageChart) {
+        this.updateCpuUsageTrendChart();
+      } else {
+        this.initCpuUsageTrendChart();
       }
-      // 重新初始化
-      this.cpuProcessChart = echarts.init(document.getElementById('cpuProcessChart'), 'dark');
-      this.updateCpuProcessChart(this.processHistory);
     }
+
 
     // 内存进程趋势图
     if (!document.getElementById('memoryProcessChart')) {
       this.initMemoryProcessChart();
     } else {
       // 先销毁旧实例
-      if (this.memoryProcessChart && !this.memoryProcessChart.isDisposed) {
-        this.memoryProcessChart.dispose();
+      if (this.memoryUsageChart && !this.memoryUsageChart.isDisposed) {
+        this.memoryUsageChart.dispose();
       }
       // 重新初始化
-      this.memoryProcessChart = echarts.init(document.getElementById('memoryProcessChart'), 'dark');
+      this.memoryUsageChart = echarts.init(document.getElementById('memoryProcessChart'), 'dark');
       this.updateMemoryProcessChart(this.processHistory);
     }
 
@@ -850,13 +1017,9 @@ this.processHistory = serverData.pro_info || []
 },
   startRefresh() {
     this.refreshInterval = setInterval(() => {
-      this.fetchServerDetail()
+      this.fetchServerDetail();
     }, 30000) 
   },
-  stopRefresh() {
-    clearInterval(this.refreshInterval)
-    this.refreshInterval = null
-  }
 },
 beforeDestroy() {
   // 在组件销毁前清除定时器
@@ -892,28 +1055,25 @@ beforeDestroy() {
 }
 .dashboard-container {
   display: grid;
-  grid-template-columns: minmax(500px, 1fr) 2fr; /* 调整列宽比例 */
+  grid-template-columns: 1fr 2fr; /* 左侧1份，右侧2份 */
   gap: 20px;
   padding: 20px;
-  max-width: 1200vw; /* 限制最大宽度 */
-  margin: 0 auto; /* 居中显示 */
-  margin-left: -30px;
+   height: calc(100vh - 160px); /* 根据导航栏高度调整 */
+  min-height: 600px; /* 最小高度保障 */
 }
 
-.instance-info {
-  grid-column: 1 / 2; /* 实例信息框在第一列 */
-  min-width: 400px; /* 设置最小宽度 */
-  background: #1e1e1e;
-  border-radius: 8px;
-  padding: 20px;
+.left-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .right-container {
   display: grid;
-  grid-template-columns: repeat(2, minmax(450px, 1fr)); /* 自适应列宽 */
-  grid-auto-rows: minmax(300px, auto);
-  gap: 10px;
-  width: 100%;
+  grid-template-columns: repeat(2, 1fr); /* 两列布局 */
+  gap: 20px;
+  align-items: start;
+  height: 100%;
 }
 
 
