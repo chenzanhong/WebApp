@@ -9,12 +9,13 @@
       <div class="server-details">
         <div class="details">
           <div>操作系统</div>
-          <div>架构</div>
+          <div>ip</div>
           <div>平台</div>
         </div>
         <div class="details">
+          <!-- <div class="details-a">{{ server[0] }}</div> -->
           <div class="details-a">{{ server[0].os }}</div>
-          <div class="details-a">{{ server[0].kernel_arch }}</div>
+          <div class="details-a">{{ server[0].ip }}</div>
           <div class="details-a">{{ server[0].platform }}</div>
         </div>
       </div>
