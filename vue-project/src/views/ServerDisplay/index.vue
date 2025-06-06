@@ -3,67 +3,40 @@
     <div class="server-left">
       <!-- 顶部导航栏 -->
       <div class="header">
-<!--        <div class="logo">-->
-<!--          <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt=""-->
-<!--               srcset="">-->
-<!--          <p class="logo-name">SeverM</p>-->
-<!--        </div>-->
-        <div class="search-bar">
-          <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
-          <el-icon
-              style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
-            <Search style="font-size: 1.2rem; color: #000000;"/>
-          </el-icon>
+        <div class="header-left">
+          <!-- <div class="logo">-->
+<!--            <img src="@/assets/display/icons/stLine-server-l.png" width="36" style="vertical-align: middle;" alt=""-->
+<!--                 srcset="">-->
+<!--            <p class="logo-name">SeverM</p>-->
+<!--          </div> -->
+          <div class="search-bar">
+            <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
+            <el-icon
+                style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
+              <Search style="font-size: 1.2rem; color: #000000;"/>
+            </el-icon>
+          </div>
+        </div>
+        <div class="header-right">
+          <WarningNotification ref="warningNotification" />
         </div>
       </div>
 
       <!-- 主内容区域 -->
       <div class="main-content">
         <div class="server-list">
-          <div class="server-count">服务器总数 {{ filteredServers.length }}</div>
+          <div class="server-count">服务器总数 {{ filteredServers?.hosts?.length || 0 }}</div>
           <div class="server-list-container">
             <div v-if="!searchQuery" class="server-add" style="margin-left: 1rem; margin-right: 0.1rem; margin-top: 1rem;"
                  @click="showDialog">
               <img src="@/assets/display/add_icon.png" alt="" srcset="">
             </div>
             <ServerCard v-for="server in filteredServers" :key="server.id" :server="server"
-                        @delete="openDeleteDialog(server)" @disable="handleDisable(server)"/>
+                        @delete="handleDelete(server)" @disable="handleDisable(server)"/>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- 右侧工具栏 -->
-<!--    <div class="toolbar">-->
-<!--      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">-->
-<!--        <el-icon size="32">-->
-<!--          <HomeFilled/>-->
-<!--        </el-icon>-->
-<!--      </div>-->
-<!--      <div class="tool-item" :class="{ active: selectedTool === 'settings' }"-->
-<!--           @click="handleToolClick('settings')">-->
-<!--        <el-icon size="32">-->
-<!--          <Setting/>-->
-<!--        </el-icon>-->
-<!--      </div>-->
-<!--      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"-->
-<!--           @click="handleToolClick('messages')">-->
-<!--        <el-icon size="32">-->
-<!--          <ChatDotRound/>-->
-<!--        </el-icon>-->
-<!--      </div>-->
-<!--      <div class="tool-item" :class="{ active: selectedTool === 'messages' }"-->
-<!--           @click="handleToolClick('messages')">-->
-<!--        &lt;!&ndash;        <img src="@/assets/display/icons/store.png" alt="" srcset="">&ndash;&gt;-->
-<!--        <IconEcosystem/>-->
-<!--      </div>-->
-<!--      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">-->
-<!--        <el-icon size="32">-->
-<!--          <QuestionFilled/>-->
-<!--        </el-icon>-->
-<!--      </div>-->
-<!--    </div>-->
-
 
     <ServerAddCard v-model:visible="show"
                    @submit="handleSubmit"/>
@@ -77,7 +50,9 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import WarningNotification from '@/components/WarningNotification.vue';
+import { WarningFilled } from '@element-plus/icons-vue';
 import {
   ElInput,
   ElMessageBox,
@@ -99,8 +74,43 @@ import {addServer, getServerInfo} from "@/api/server.js";
 
 const servers = ref([]);
 
+// 获取服务器列表
+const loadServers = async () => {
+  try {
+    const response = await getServerInfo();
+    if (response && response.data) {
+      servers.value = response.data;
+    }
+  } catch (error) {
+    console.error('获取服务器列表失败:', error);
+  }
+};
+
+// 在组件挂载时加载服务器列表
+onMounted(() => {
+  loadServers();
+});
+
 // 搜索功能
 const searchQuery = ref('');
+const warningNotification = ref(null);
+
+// 模拟警告数据更新
+const simulateWarningUpdate = () => {
+  // 模拟5秒后添加一条新警告
+  setTimeout(() => {
+    warningNotification.value?.addWarning({
+      title: '新警告',
+      message: '这是一条模拟的警告信息',
+      level: 'high'
+    });
+  }, 5000);
+};
+
+onMounted(() => {
+  // 启动模拟警告更新
+  simulateWarningUpdate();
+});
 const filteredServers = computed(() => {
   if (!searchQuery.value) {
     return servers.value;
@@ -129,26 +139,6 @@ const openDialog = () => {
   show.value = true;
 };
 
-const handleSubmit = (serverData) => {
-  console.log("收到表单数据:", serverData);
-  addServer(serverData)
-};
-
-// 添加服务器
-const handleAddServer = () => {
-  // 弹出添加表单
-};
-
-// 停用服务器
-const handleDisable = (server) => {
-  // 更新服务器状态
-};
-
-const showDialog = () => {
-  show.value = true;
-}
-
-
 const selectedTool = ref('home'); // 记录当前选中的工具
 const currentView = ref('home'); // 当前显示的视图
 
@@ -171,15 +161,35 @@ const handleToolClick = (tool) => {
   }
 };
 
+const handleSubmit = (serverData) => {
+  console.log("收到表单数据:", serverData);
+  addServer(serverData)
+};
+
+// 添加服务器
+const handleAddServer = () => {
+  // 弹出添加表单
+};
+
+// 停用服务器
+const handleDisable = (server) => {
+  // 更新服务器状态
+};
+
+const showDialog = () => {
+  show.value = true;
+}
+
+
 // 导航到首页（示例：重置视图）
 const navigateToHome = () => {
   currentView.value = 'home';
 };
 
 // 打开设置弹窗
-const openSettings = () => {
+// const openSettings = () => {
 
-};
+// };
 
 // 显示消息
 const showMessages = () => {
@@ -193,7 +203,7 @@ const showHelp = () => {
 
 onMounted(() => {
   getServerInfo().then(r => {
-    console.log(r)
+    //console.log(r)
     servers.value = r;
   })
 })

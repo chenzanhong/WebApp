@@ -2,7 +2,7 @@
 <template>
   <div>
     <div class="server-card">
-      <div class="">
+      <div class="server-card-header">
         <div class="status-dot" :class="statusClass"></div>
         <div class="server-name">{{ server.host_name }}</div>
       </div>
@@ -13,9 +13,9 @@
           <div>平台</div>
         </div>
         <div class="details">
-          <div class="details-a">{{ server.os }}</div>
-          <div class="details-a">{{ server.kernel_arch }}</div>
-          <div class="details-a">{{ server.platform }}</div>
+          <div class="details-a">{{ server[0].os }}</div>
+          <div class="details-a">{{ server[0].kernel_arch }}</div>
+          <div class="details-a">{{ server[0].platform }}</div>
         </div>
       </div>
       <div class="actions">
@@ -81,6 +81,8 @@ const statusClass = computed(() => {
 }
 
 .server-name {
+  margin-left: 1.5rem; /* 让出状态点空间 */
+  margin-top: 1.5rem; /* 让出状态点空间 */
   font-size: 1rem;
   font-weight: bold;
   color: white;
