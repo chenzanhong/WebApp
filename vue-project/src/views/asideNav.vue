@@ -75,7 +75,7 @@ export default {
      },
        async getserverList() {
           try {
-               const response = await fetch("http://47.86.232.20:8080/agent/list", {
+               const response = await fetch("http://113.44.170.52:8080/agent/list", {
                    method: 'GET',  
                    
                    headers: {

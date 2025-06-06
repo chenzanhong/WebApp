@@ -307,7 +307,7 @@ export default {
     },
     async loginClick() {
       try {
-        const response = await fetch('http://47.86.232.20:8080/agent/login', {
+        const response = await fetch('http://113.44.170.52:8080/agent/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -324,20 +324,16 @@ export default {
           console.log('[登录成功] 完整响应数据:', data); 
           const token = data.token;
           localStorage.setItem('token', token);//token存到本地
+          localStorage.setItem('userRole', data.role); // 存储用户角色
           ElMessage.success(data.message);
-//            if(data.role === 'USER')
-//          {
-//            this.$router.push('/home');
-//          }
-//          else if(data.role === 'ADMIN')
-//          {
-//            this.$router.push('/companyadmin');
-//          }
-//          else if(data.role === 'ROOT')
-//         {
-//           this.$router.push('/systemadmin');
-//         }
-          this.$router.push('/headbar');//暂时改为直接到headbar
+
+          if(data.role === 'ROOT') {
+            this.$router.push('/headbar/systemadmin');
+          } else if(data.role === 'ADMIN') {
+            this.$router.push('/headbar/companyadmin');
+          } else {
+            this.$router.push('/headbar/home');
+          }
         } else {
           ElMessage.error(data.message);
           this.email = '';
