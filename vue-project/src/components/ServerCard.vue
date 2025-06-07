@@ -14,9 +14,9 @@
         </div>
         <div class="details">
           <!-- <div class="details-a">{{ server[0] }}</div> -->
-          <div class="details-a">{{ server[0].os }}</div>
-          <div class="details-a">{{ server[0].ip }}</div>
-          <div class="details-a">{{ server[0].platform }}</div>
+          <div class="details-a">{{ server.os }}</div>
+          <div class="details-a">{{ server.ip }}</div>
+          <div class="details-a">{{ server.platform }}</div>
         </div>
       </div>
       <div class="actions">

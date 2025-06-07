@@ -25,18 +25,25 @@
       <!-- 主内容区域 -->
       <div class="main-content">
         <div class="server-list">
+          <!-- <div class="server-count">服务器总数 {{ filteredServers?.hosts || 0 }}</div> -->
           <div class="server-count">服务器总数 {{ filteredServers?.hosts?.length || 0 }}</div>
           <div class="server-list-container">
             <div v-if="!searchQuery" class="server-add" style="margin-left: 1rem; margin-right: 0.1rem; margin-top: 1rem;"
-                 @click="showDialog">
+                 @click="showAddServerDialog = true">
               <img src="@/assets/display/add_icon.png" alt="" srcset="">
             </div>
-            <ServerCard v-for="server in filteredServers" :key="server.id" :server="server"
+
+            <ServerCard v-for="server in filteredServers?.hosts" :key="server.id" :server="server"
                         @delete="handleDelete(server)" @disable="handleDisable(server)"/>
           </div>
         </div>
       </div>
     </div>
+
+    <AddServerDialog 
+      v-model:visible="showAddServerDialog"
+      @success="handleAddServerSuccess"
+    />
 
     <ServerAddCard v-model:visible="show"
                    @submit="handleSubmit"/>
@@ -50,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import WarningNotification from '@/components/WarningNotification.vue';
 import { WarningFilled } from '@element-plus/icons-vue';
 import {
@@ -67,22 +74,41 @@ import {
 } from '@element-plus/icons-vue';
 import ServerCard from "@/components/ServerCard.vue";
 import ServerAddCard from "@/components/ServerAddCard.vue";
+import AddServerDialog from "@/components/dialogs/AddServerDialog.vue";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
 import IconCommunity from "@/components/icons/IconCommunity.vue";
 import IconEcosystem from "@/components/icons/IconEcosystem.vue";
 import {addServer, getServerInfo} from "@/api/server.js";
+import { ElMessage } from 'element-plus';
 
 const servers = ref([]);
+const showAddServerDialog = ref(false);
 
 // 获取服务器列表
 const loadServers = async () => {
   try {
+    console.log('正在加载服务器列表...');
     const response = await getServerInfo();
-    if (response && response.data) {
-      servers.value = response.data;
+    if (response) {
+      // 确保正确处理不同响应格式
+      let serverData;
+      if (response.data) {
+        serverData = response.data;
+      } else if (Array.isArray(response)) {
+        serverData = { hosts: response };
+      } else if (response.hosts) {
+        serverData = response;
+      } else {
+        serverData = { hosts: [] };
+      }
+      
+      // 创建一个新对象确保响应式更新
+      servers.value = JSON.parse(JSON.stringify(serverData));
+      console.log('服务器列表加载成功:', servers.value);
     }
   } catch (error) {
     console.error('获取服务器列表失败:', error);
+    ElMessage.error('获取服务器列表失败: ' + (error.message || '未知错误'));
   }
 };
 
@@ -115,13 +141,21 @@ const filteredServers = computed(() => {
   if (!searchQuery.value) {
     return servers.value;
   }
-  return servers.value.filter(server =>
-      server.host_name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  
+  const filtered = [];
+  const query = searchQuery.value.toLowerCase();
+  
+  for (let i = 0; i < servers.value.length; i++) {
+    const server = servers.value[i];
+    if (server.host_name && server.host_name.toLowerCase().includes(query)) {
+      filtered.push(server);
+    }
+  }
+  
+  return filtered;
 });
 
 const show = ref(false);
-
 const deleteDialogVisible = ref(false);
 const serverToDelete = ref("");
 
@@ -166,6 +200,25 @@ const handleSubmit = (serverData) => {
   addServer(serverData)
 };
 
+// 添加服务器成功后的处理
+const handleAddServerSuccess = async (responseData) => {
+  try {
+    showAddServerDialog.value = false;
+    console.log('服务器添加成功，响应数据:', responseData);
+    
+    // 重新加载服务器列表
+    await loadServers();
+    
+    // 确保UI更新
+    await nextTick();
+    
+    ElMessage.success('服务器添加成功');
+  } catch (error) {
+    console.error('处理服务器添加成功时出错:', error);
+    ElMessage.error('刷新服务器列表失败: ' + (error.message || '未知错误'));
+  }
+};
+
 // 添加服务器
 const handleAddServer = () => {
   // 弹出添加表单
@@ -177,7 +230,7 @@ const handleDisable = (server) => {
 };
 
 const showDialog = () => {
-  show.value = true;
+  showAddServerDialog.value = true;
 }
 
 
