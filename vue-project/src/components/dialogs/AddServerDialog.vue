@@ -286,7 +286,7 @@ watch(() => props.visible, (newVal) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -294,14 +294,14 @@ watch(() => props.visible, (newVal) => {
 }
 
 .dialog-box {
-  background: #1e1e2d;
+  background: #222222;
   border-radius: 10px;
   width: 600px;
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   color: #fff;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
@@ -338,18 +338,24 @@ watch(() => props.visible, (newVal) => {
 .info-input {
   width: 100%;
   height: 40px;
-  background-color: #2a2a3c;
-  border: 1px solid #2a2a3c;
-  border-radius: 6px;
-  color: #fff;
+  background-color: rgba(74, 85, 104, 0.34);
+  border: 1px solid #2d2d3d;
+  border-radius: 4px;
+  color: #e0e0e0;
   padding: 0 12px;
   font-size: 14px;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .info-input:focus {
-  border-color: #5d78ff;
+  border-color: #4A5568;
+  background-color: #1e1e34;
+  box-shadow: 0 0 0 2px rgba(93, 120, 255, 0.2);
   outline: none;
+}
+
+.info-input::placeholder {
+  color: #5d5d7a;
 }
 
 .password-input-wrapper {
@@ -367,6 +373,7 @@ watch(() => props.visible, (newVal) => {
 
 .threshold-input {
   width: 100%;
+  background-color: rgba(74, 85, 104, 0.34);
 }
 
 .dialog-buttons {
@@ -382,6 +389,7 @@ watch(() => props.visible, (newVal) => {
 
 .confirm-button,
 .cancel-button {
+  margin-top: 20px;
   padding: 10px 24px;
   border: none;
   border-radius: 6px;
@@ -392,7 +400,8 @@ watch(() => props.visible, (newVal) => {
 }
 
 .confirm-button {
-  background-color: #5d78ff;
+  background-color: #27437C;
+  opacity: 0.71;
   color: #fff;
 }
 
@@ -406,7 +415,7 @@ watch(() => props.visible, (newVal) => {
 }
 
 .cancel-button {
-  background-color: #2a2a3c;
+  background-color: #636161;
   color: #a2a3b7;
 }
 

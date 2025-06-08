@@ -45,14 +45,10 @@
       @success="handleAddServerSuccess"
     />
 
-    <ServerAddCard v-model:visible="show"
-                   @submit="handleSubmit"/>
+    <!-- <ServerAddCard v-model:visible="show"
+                   @submit="handleSubmit"/> -->
 
-    <ConfirmDeleteDialog
-        v-model:visible="deleteDialogVisible"
-        :serverName="serverToDelete"
-        @confirm="openDeleteDialog"
-    />
+    <!-- Delete confirmation is now handled by ElMessageBox -->
   </div>
 </template>
 
@@ -75,10 +71,8 @@ import {
 import ServerCard from "@/components/ServerCard.vue";
 import ServerAddCard from "@/components/ServerAddCard.vue";
 import AddServerDialog from "@/components/dialogs/AddServerDialog.vue";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
-import IconCommunity from "@/components/icons/IconCommunity.vue";
-import IconEcosystem from "@/components/icons/IconEcosystem.vue";
-import {addServer, getServerInfo} from "@/api/server.js";
+// Cleaned up unused component imports
+import { addServer, getServerInfo, deleteServer } from "@/api/server.js";
 import { ElMessage } from 'element-plus';
 
 const servers = ref([]);
@@ -156,17 +150,65 @@ const filteredServers = computed(() => {
 });
 
 const show = ref(false);
-const deleteDialogVisible = ref(false);
-const serverToDelete = ref("");
+// Delete dialog is now handled by ElMessageBox
 
-const openDeleteDialog = (server) => {
-  serverToDelete.value = server.name;
-  deleteDialogVisible.value = true;
-};
-
-const handleDelete = () => {
-  console.log("删除服务器:", serverToDelete.value);
-  alert(`已删除服务器: ${serverToDelete.value}`);
+// 删除服务器
+const handleDelete = async (server) => {
+  try {
+    // 显示确认对话框
+    await ElMessageBox.confirm(
+      `确定要删除服务器 ${server.host_name || server.ip} 吗？`,
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    );
+    
+    // 显示加载中
+    const loading = ElMessage({
+      message: '正在删除服务器...',
+      type: 'info',
+      duration: 0, // 不自动关闭
+      showClose: false
+    });
+    
+    try {
+      // 调用删除API
+      const response = await deleteServer(server);
+      console.log('删除服务器响应:', response);
+      
+      // 关闭加载中
+      loading.close();
+      
+      // 显示成功消息
+      ElMessage.success('服务器删除成功');
+      
+      // 从当前列表中移除已删除的服务器
+      if (servers.value?.hosts) {
+        servers.value.hosts = servers.value.hosts.filter(s => s.id !== server.id);
+      }
+      
+      // 可选：重新加载服务器列表以确保数据最新
+      await loadServers();
+    } catch (apiError) {
+      loading.close();
+      console.error('删除服务器API错误:', apiError);
+      
+      // 检查是否是密码相关的错误
+      if (apiError.response?.data?.includes('password')) {
+        ElMessage.error('删除失败：密码错误，请检查服务器密码');
+      } else {
+        ElMessage.error(`删除服务器失败: ${apiError.message || '未知错误'}`);
+      }
+      throw apiError; // 重新抛出错误以便外部捕获
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除服务器失败:', error);
+    }
+  }
 };
 
 const openDialog = () => {
