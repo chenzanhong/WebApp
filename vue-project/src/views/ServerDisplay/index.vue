@@ -34,7 +34,7 @@
             </div>
 
             <ServerCard v-for="server in filteredServers?.hosts" :key="server.id" :server="server"
-                        @delete="handleDelete(server)" @disable="handleDisable(server)"/>
+                        @delete="handleDelete(server)" @disable="handleDisable(server)" @delete:success="loadServers"/>
           </div>
         </div>
       </div>

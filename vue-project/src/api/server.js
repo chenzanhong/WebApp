@@ -53,26 +53,13 @@ export async function getUserInfo(){
 
 // 删除服务器
 export async function deleteServer(serverData) {
-    // 使用完整的 API 地址
-    const fullUrl = 'http://113.44.170.52:8080/agent/delete';
-    
-    // 准备请求数据
     const requestData = {
-        host: serverData.ip,
-        user: serverData.user_name || 'root',
-        password: serverData.password || 'your_password_here', // 需要提供密码或从配置中获取
-        port: serverData.port || 22, // 默认 SSH 端口
-        Host_Name: serverData.platform || ''
+        ip: serverData.ip || serverData.host,
+        host_name: serverData.host_name || ''
     };
     
-    console.log('删除服务器请求数据:', requestData);
-    
-    return api(fullUrl, {
+    return api('/agent/delete', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': ''
-        },
         data: requestData
-    })
+    });
 }

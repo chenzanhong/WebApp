@@ -27,26 +27,27 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
     (response) => {
-        const { data } = response;
-        // if (data.code !== 200) {
-        //     ElMessage.error(data.message || '请求失败');
-        //     return Promise.reject(data);
-        // }
-        return data;
+        // 直接返回响应数据，由调用方处理具体业务逻辑
+        return response.data;
     },
     (error) => {
         const { response } = error;
+        // 如果请求被取消，不显示错误信息
+        if (axios.isCancel(error)) {
+            return Promise.reject(error);
+        }
+        
         if (response) {
-            switch (response.status) {
-                case 401:
-                    ElMessage.error('未授权，请重新登录');
-                    break;
-                case 404:
-                    ElMessage.error('资源不存在');
-                    break;
-                default:
-                    ElMessage.error(`错误码：${response.status}`);
+            // 400 错误由具体业务处理，不在拦截器中统一处理
+            if (response.status === 401) {
+                ElMessage.error('未授权，请重新登录');
+            } else if (response.status === 404) {
+                ElMessage.error('资源不存在');
+            } else if (response.status >= 500) {
+                ElMessage.error('服务器内部错误，请稍后重试');
             }
+            // 其他状态码由具体业务处理
+            return Promise.reject(response.data || error);
         } else {
             ElMessage.error('网络连接失败');
         }

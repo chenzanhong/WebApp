@@ -22,7 +22,7 @@
       </div>
       <div class="actions">
         <el-button style="background-color: #636161; color: #ffffff; border-radius: 2rem; border: 0;" plain
-                   @click="$emit('delete')">删除
+                   @click="deleteServer" :loading="deleting">删除
         </el-button>
         <el-button style="background-color: #215476; color: #ffffff; border-radius: 2rem; border: 0;"
                    @click="$emit('disable')">停用
@@ -79,6 +79,7 @@ import { EditPen } from '@element-plus/icons-vue';
 
 const editDialogVisible = ref(false);
 const isSaving = ref(false);
+const deleting = ref(false);
 const editForm = ref({
   cpu_threshold: 0,
   mem_threshold: 0
@@ -103,6 +104,55 @@ const openEditDialog = () => {
     mem_threshold: props.server.mem_threshold || 90
   };
   editDialogVisible.value = true;
+};
+
+const deleteServer = async () => {
+  try {
+    deleting.value = true;
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://113.44.170.52:8080/agent/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ` ${token}`
+      },
+      body: JSON.stringify({
+        ip: props.server.ip || props.server.host,
+        host_name: props.server.host_name
+      })
+    });
+    
+    const responseText = await response.text();
+    
+    if (!response.ok) {
+      throw new Error(`服务器请求失败: ${response.status}`);
+    }
+
+    try {
+      const data = responseText ? JSON.parse(responseText) : {};
+      ElMessage.success(data.msg || '服务器删除成功');
+      // 触发成功事件，通知父组件更新服务器列表
+      emit('delete:success', { 
+        success: true, 
+        message: data.msg || '服务器删除成功',
+        server: props.server
+      });
+    } catch (e) {
+      // 如果响应不是JSON但状态码是200，仍然认为删除成功
+      ElMessage.success('服务器删除成功');
+      emit('delete:success', { 
+        success: true, 
+        message: '服务器删除成功',
+        server: props.server
+      });
+    }
+  } catch (error) {
+    console.error('删除服务器失败:', error);
+    ElMessage.error('删除服务器失败: ' + error.message);
+    emit('delete', { success: false, error });
+  } finally {
+    deleting.value = false;
+  }
 };
 
 const saveThresholds = async () => {
