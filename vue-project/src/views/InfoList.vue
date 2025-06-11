@@ -46,6 +46,8 @@
 
 <script>
 import axios from 'axios';
+import { eventBus } from '@/utils/eventBus';
+
 
 export default {
     props: {
@@ -86,8 +88,20 @@ export default {
                 unconfirmed: '未确认',
                 expired: '已过期'
             };
-        }
-    },
+        },
+        // 添加未读消息计数
+    unreadMessageCount() {
+      return this.allInfo.filter(item => 
+        item.status === 'unconfirmed' && item.category === 'received'
+      ).length;
+    }
+},
+ watch: {
+    // 监视未读消息数量变化
+    unreadMessageCount(newCount) {
+      eventBus.emit('unread-count', newCount);
+    }
+  },
     methods: {
         // 映射状态显示文本
         getStatusText(item) {
@@ -108,6 +122,8 @@ export default {
                 // 发送确认请求
                 await this.processConfirm(item.id);
                 console.log(`确认请求发送成功，消息 ID: ${item.id}`);
+                // 确认成功后，触发更新事件
+      eventBus.emit('unread-count', this.unreadMessageCount);
             } catch (error) {
                 console.error(`确认操作失败，消息 ID: ${item.id}:`, error);
                 // 失败时回滚状态
@@ -128,10 +144,14 @@ export default {
 
                 // 并行获取收发通知
                 const [receiveRes, sendRes] = await Promise.all([
-                    fetch(`http://113.44.170.52:8080/agent/info/recivelist`, {
+                    fetch(`http://113.44.170.52:8080/agent/info/recivelist`, 
+                    //fetch(`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/info/recivelist`, 
+                    {
                         headers: { 'Authorization': ` ${token}` }
                     }),
-                    fetch(`http://113.44.170.52:8080/agent/info/sendlist`, {
+                    fetch(`http://113.44.170.52:8080/agent/info/sendlist`,
+                    //fetch(`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/info/sendlist`,
+                    {
                         headers: { 'Authorization': ` ${token}` }
                     })
                 ]);
@@ -145,7 +165,6 @@ export default {
                     status: this.mapProcessedStatus(notice.state),
                     rawData: notice
                 })) : [];
-
                 // 处理发送通知
                 const sendData = await sendRes.json();
                 console.log('后端传来发送信息:', sendData);
@@ -156,7 +175,6 @@ export default {
                     status: this.mapProcessedStatus(notice.state),
                     rawData: notice
                 })) : [];
-
                 this.allInfo = [...receiveNotices, ...sendNotices];
                 console.log('合并后的通知列表:', this.allInfo);
 
@@ -164,7 +182,7 @@ export default {
                 console.error('获取通知失败:', error);
             }
         },
-
+        
         // 完善后的状态映射
         mapProcessedStatus(processed) {
             if (typeof processed === 'boolean') {
@@ -190,7 +208,7 @@ export default {
         async processConfirm(id) {
             const token = localStorage.getItem('token');
             try {
-                const response = await axios.post(`http://120.79.200.209:8080/agent/info/manage`, { id }, {
+                const response = await axios.post(`http://113.44.170.52:8080/agent/info/manage`, { id }, {
                     headers: { Authorization: ` ${token}` }
                 });
                 console.log('后端响应:', response.data);
@@ -203,6 +221,7 @@ export default {
     },
     mounted() {
         this.fetchNotifications();
+        eventBus.emit('unread-count', this.unreadMessageCount);
     }
 };
 </script>

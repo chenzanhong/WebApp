@@ -17,6 +17,13 @@
           @click="toggleDropdown">
           <UserFilled />
         </el-icon>
+        <el-icon :class="{ active: activeButton === 'notice', 'user-active': isDropdownVisible }"
+        @click="navigateTo('notice')"
+        class="notification-icon-wrapper">
+        <ChatDotRound />
+        <!-- 小红点通知 -->
+        <span v-if="unreadCount > 0" class="notification-badge"></span>
+      </el-icon>
         <!-- <el-icon :class="{ active: activeButton ==='setting' }" @click="navigateTo('setting')">
           <Setting />
         </el-icon> -->
@@ -134,14 +141,14 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted, computed,onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { UserFilled, Setting, QuestionFilled, View, Hide, ArrowLeft, ArrowRight, Operation } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import ServerFileTransferDialog from '@/components/dialogs/ServerFileTransferDialog.vue';
 import LocalFileTransferDialog from '@/components/dialogs/LocalFileTransferDialog.vue';
 import ServerFileDownloadDialog from '@/components/dialogs/ServerFileDownloadDialog.vue';
-
+import { eventBus } from '@/utils/eventBus';
 const router = useRouter();
 const route = useRoute();
 
@@ -185,14 +192,22 @@ const checkUserRole = () => {
     isAdmin.value = false;
   }
 };
-
+const unreadCount = ref(0);
 // 在组件挂载时检查用户角色
 onMounted(() => {
   console.log('组件开始挂载');
   checkUserRole();
   console.log('组件挂载完成，最终管理员状态:', isAdmin.value);
+    // 监听未读消息数量变化
+  eventBus.on('unread-count', (count) => {
+    unreadCount.value = count;
+    console.log('收到未读消息更新:', count);
+  });
 });
-
+onUnmounted(() => {
+  // 组件卸载时取消监听
+  eventBus.off('unread-count');
+});
 // 修改导航函数
 const navigateTo = (target) => {
     switch (target) {
@@ -861,4 +876,28 @@ onMounted(() => {
     background-color: #484848;
     color: white;
   }
+.notification-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0px;
+  right: 1160px;
+  width: 12px;
+  height: 12px;
+  background-color: #ff4d4f;
+  border-radius: 50%;
+  border: 2px solid #29333E;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  z-index: 10;
+}
+/* 提高小红点的可见性 */
+.notification-badge {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
 </style>
