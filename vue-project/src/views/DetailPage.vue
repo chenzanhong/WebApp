@@ -197,6 +197,7 @@ data() {
     cpuUsageHistory: [],
     memoryUsageHistory:[],
     initialHistoryLoaded: false, // 标记是否已加载初始历史数据
+    dataRefreshInterval:null,
   }
 },
 watch: {
@@ -206,7 +207,7 @@ watch: {
         console.log('路由参数变化:', newVal)
         this.fetchServerDetail()
         // 启动定时刷新
-        this.startRefresh()
+        this.startDataRefresh()
       } else {
         this.error = "缺少主机名参数"
         // 清除定时器
@@ -220,7 +221,7 @@ created() {
   const hostname = this.$route.params.hostname;
   if (hostname) {
     this.fetchServerDetail();
-    this.startRefresh();
+    this.startDataRefresh();
   } else {
     this.error = "缺少主机名参数";
   }
@@ -344,6 +345,28 @@ methods: {
       this.loading = false
     }
   },
+
+  // 只刷新数据的方法
+    async refreshDataOnly() {
+      try {
+        const hostname = encodeURIComponent(this.$route.params.hostname)
+        const token = localStorage.getItem('token')
+        
+        const response = await fetch(
+          `http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
+          { headers: { 'Authorization': ` ${token}` } }
+        )
+
+        if (!response.ok) throw new Error(`请求失败: ${response.status}`)
+        
+        const serverData = await response.json()
+        this.updateData(serverData)
+        
+      } catch (error) {
+        console.error('数据刷新失败:', error)
+        // 错误处理可以更轻量级，不需要重置整个界面
+      }
+    },
 
 // 初始化CPU图表
  async initCpuChart() {
@@ -651,8 +674,8 @@ methods: {
     updateCpuUsageTrendChart() {
       if (!this.cpuUsageChart) return;
 
-      // 处理历史数据（最多保留100个点）
-      const cpuhistory = this.cpuUsageHistory.slice(-100);
+      // 处理历史数据
+      const cpuhistory = this.cpuUsageHistory.slice(-30);
       const data = cpuhistory.map((item, index) => ({
         x: index, // 使用索引作为X轴
         y: item.value,
@@ -670,6 +693,9 @@ methods: {
       backgroundColor: 'rgba(40, 40, 40, 0.9)', // 深色背景
       borderColor: '#4ECDC4', // 边框颜色匹配折线
       borderWidth: 1,
+      axisPointer: {
+    type: 'none' // 禁用指示线
+  },
       textStyle: {
         color: '#fff',
         fontSize: 12
@@ -763,8 +789,8 @@ methods: {
      updateMemoryUsageTrendChart() {
       if (!this.memoryUsageChart) return;
 
-      // 处理历史数据（最多保留100个点）
-      const memHistory = this.memoryUsageHistory.slice(-100);
+      // 处理历史数据
+      const memHistory = this.memoryUsageHistory.slice(-30);
       if (memHistory.length === 0) return;
 
       const data = memHistory.map((item, index) => ({
@@ -781,6 +807,9 @@ methods: {
         },
         tooltip: {
           trigger: 'axis',
+          axisPointer: {
+    type: 'none' // 禁用指示线
+  },
           formatter: (params) => {
             const date = new Date(params[0].data.time);
             return `时间: ${date.toLocaleTimeString()}\n使用率: ${params[0].data.y.toFixed(1)}%`;
@@ -892,6 +921,30 @@ methods: {
       }
     },
 
+
+    // 新增：只刷新数据的定时器
+    startDataRefresh() {
+      // 先停止可能存在的旧定时器
+      this.stopRefresh()
+      
+      // 启动新的数据刷新定时器
+      this.dataRefreshInterval = setInterval(() => {
+        this.refreshDataOnly();
+      }, 3000)
+    },
+    
+    // 修改停止刷新方法
+    stopRefresh() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval)
+        this.refreshInterval = null
+      }
+      if (this.dataRefreshInterval) {
+        clearInterval(this.dataRefreshInterval)
+        this.dataRefreshInterval = null
+      }
+    }, 
+
   updateData(serverData) {
 // 主机信息
 this.hostInfo = {
@@ -968,63 +1021,28 @@ cpu_percent: processData.cpu_percent?.toFixed(1) || 0,
 mem_percent: processData.mem_percent?.toFixed(1) || 0
 }]
 
- // 新增强制重新初始化
-    this.$nextTick(() => {
-      //CPU图表更新
-      if (!document.getElementById('cpuChart')) {
-        this.initCpuChart();
-      } else {
-        this.updateCpuChart();
-      }
-
-       // 内存图表更新
-      if (!document.getElementById('memoryChart')) {
-        this.initMemoryChart();
-      } else {
-        this.updateMemoryChart();
-      }
-
+// 只更新图表，不重新初始化组件
+      this.updateCpuChart();
+      this.updateMemoryChart();
       
-    // CPU使用率趋势图更新
-    if (!document.getElementById('cpuUsageTrend')) {
-      this.initCpuUsageTrendChart(); // 确保初始化方法被调用
-    } else {
-      // 如果已初始化，直接更新数据
       if (this.cpuUsageChart) {
         this.updateCpuUsageTrendChart();
-      } else {
-        this.initCpuUsageTrendChart();
       }
-    }
-
-
-    // 内存进程趋势图
-    if (!document.getElementById('memoryProcessChart')) {
-      this.initMemoryProcessChart();
-    } else {
-      // 先销毁旧实例
-      if (this.memoryUsageChart && !this.memoryUsageChart.isDisposed) {
-        this.memoryUsageChart.dispose();
+      
+      if (this.memoryUsageChart) {
+        this.updateMemoryUsageTrendChart();
       }
-      // 重新初始化
-      this.memoryUsageChart = echarts.init(document.getElementById('memoryProcessChart'), 'dark');
-      this.updateMemoryProcessChart(this.processHistory);
-    }
-
-    });
+    },
 
 
 },
-  startRefresh() {
-    this.refreshInterval = setInterval(() => {
-      this.fetchServerDetail();
-    }, 3000) 
-  },
-},
+
 beforeDestroy() {
   // 在组件销毁前清除定时器
   this.stopRefresh()
 }
+
+
 }
 </script>
 
