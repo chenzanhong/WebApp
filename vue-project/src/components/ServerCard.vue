@@ -1,7 +1,7 @@
 <!-- ServerCard.vue -->
 <template>
   <div>
-    <div class="server-card">
+    <div class="server-card" @dblclick="handleDblClick">
       <div class="server-card-header">
         <div class="status-dot" :class="statusClass"></div>
         <div class="server-name">{{ server.host_name }}</div>
@@ -92,11 +92,15 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['delete', 'disable', 'update:thresholds']);
+const emit = defineEmits(['delete', 'disable', 'update:thresholds', 'card-dblclick']);
 
 const statusClass = computed(() => {
   return `dot-${props.server.status}`;
 });
+
+const handleDblClick = () => {
+  emit('card-dblclick', props.server.host_name);
+};
 
 const openEditDialog = () => {
   editForm.value = {

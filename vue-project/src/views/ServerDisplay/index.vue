@@ -34,7 +34,7 @@
             </div>
 
             <ServerCard v-for="server in filteredServers?.hosts" :key="server.id" :server="server"
-                        @delete="handleDelete(server)" @disable="handleDisable(server)" @delete:success="loadServers"/>
+                        @delete="handleDelete(server)" @disable="handleDisable(server)" @delete:success="loadServers" @card-dblclick="handleCardDblClick"/>
           </div>
         </div>
       </div>
@@ -54,6 +54,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import WarningNotification from '@/components/WarningNotification.vue';
 import { WarningFilled } from '@element-plus/icons-vue';
 import {
@@ -76,6 +77,12 @@ import { addServer, getServerInfo, deleteServer } from "@/api/server.js";
 import { ElMessage } from 'element-plus';
 
 const servers = ref([]);
+const router = useRouter();
+const handleCardDblClick = (hostName) => {
+  if (hostName) {
+    router.push(`/headbar/monitor/${hostName}`);
+  }
+};
 const showAddServerDialog = ref(false);
 
 // 获取服务器列表
