@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+//const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = 'http://113.44.170.52:8080';
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -17,7 +18,6 @@ api.interceptors.request.use(
         
         // 添加ngrok绕过头部
         config.headers['ngrok-skip-browser-warning'] = 'true';
-        config.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
         
         return config;
     },

@@ -6,6 +6,7 @@
         <p>SeverM</p>
       </div>
       <div class="nav-buttons">
+        <button v-if="isAdmin" :class="{ active: activeButton === 'admin' }" @click="navigateTo('admin')">管理</button>
         <button :class="{ active: activeButton === 'home' }" @click="navigateTo('home')">主页面</button>
         <button :class="{ active: activeButton === 'notice' }" @click="navigateTo('notice')">通知</button>
         <button :class="{ active: activeButton === 'teambusiness' }" @click="navigateTo('teambusiness')">团队业务</button>
@@ -162,21 +163,48 @@ const toggleSidebar = () => {
 const activeButton = ref('home');
 const isDropdownVisible = ref(false);
 
-const updateActiveState = () => {
-    const path = route.path;
-    if (path.includes('home')) activeButton.value = 'home';
-    else if (path.includes('notice')) activeButton.value = 'notice';
-    else if (path.includes('teambusiness')) activeButton.value = 'teambusiness';
-    else if (path.includes('log')) activeButton.value = 'log';
-    else if (path.includes('setting')) activeButton.value = 'setting';
-    else if (path.includes('help')) activeButton.value = 'help';
+// 添加管理员角色判断
+const isAdmin = ref(false);
+
+// 检查用户角色
+const checkUserRole = () => {
+  try {
+    const userRole = localStorage.getItem('userRole');
+    console.log('从localStorage获取的用户角色:', userRole);
+
+    if (!userRole) {
+      console.log('未找到用户角色信息，设置isAdmin为false');
+      isAdmin.value = false;
+      return;
+    }
+
+    isAdmin.value = userRole === 'ADMIN' || userRole === 'ROOT';
+    console.log('最终isAdmin值:', isAdmin.value);
+  } catch (error) {
+    console.error('检查用户角色失败:', error);
+    isAdmin.value = false;
+  }
 };
 
-watch(() => route.path, updateActiveState);
-updateActiveState();
+// 在组件挂载时检查用户角色
+onMounted(() => {
+  console.log('组件开始挂载');
+  checkUserRole();
+  console.log('组件挂载完成，最终管理员状态:', isAdmin.value);
+});
 
+// 修改导航函数
 const navigateTo = (target) => {
     switch (target) {
+        case 'admin':
+            // 根据用户角色决定跳转到哪个管理页面
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === 'ROOT') {
+                router.push('/headbar/systemadmin');
+            } else if (userRole === 'ADMIN') {
+                router.push('/headbar/companyadmin');
+            }
+            break;
         case 'home':
             router.push('/headbar/home');
             break;
@@ -197,6 +225,21 @@ const navigateTo = (target) => {
             break;
     }
 };
+
+// 修改活动状态更新函数
+const updateActiveState = () => {
+    const path = route.path;
+    if (path.includes('admin')) activeButton.value = 'admin';
+    else if (path.includes('home')) activeButton.value = 'home';
+    else if (path.includes('notice')) activeButton.value = 'notice';
+    else if (path.includes('teambusiness')) activeButton.value = 'teambusiness';
+    else if (path.includes('log')) activeButton.value = 'log';
+    else if (path.includes('setting')) activeButton.value = 'setting';
+    else if (path.includes('help')) activeButton.value = 'help';
+};
+
+watch(() => route.path, updateActiveState);
+updateActiveState();
 
 // 下拉栏
 const toggleDropdown = () => {
@@ -228,7 +271,7 @@ const fetchUserInfo = async () => {
             throw new Error('未找到登录凭证');
         }
 
-        const response = await fetch('http://47.86.232.20:8080/agent/userInfo', {
+        const response = await fetch('http://113.44.170.52:8080/agent/userInfo  ', {
             method: 'GET',
             headers: {
                 'Authorization': token
@@ -286,7 +329,7 @@ const confirmEdit = async () => {
             realname: userInfo.value.name
         };
 
-        const response = await fetch('http://47.86.232.20:8080/agent/updateUserInfo', {
+        const response = await fetch('http://113.44.170.52:8080/agent/updateUserInfo  ', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

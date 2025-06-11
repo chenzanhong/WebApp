@@ -217,7 +217,7 @@ const refreshLogs = async (isSearch = false) => {
     console.log('发送到后端的时间参数 fromTime:', requestBody.fromTime);
     console.log('发送到后端的时间参数 toTime:', requestBody.toTime);
 
-    const response = await fetch('http://47.86.232.20:8080/agent/getuseroperationlogs', {
+    const response = await fetch('http://113.44.170.52:8080/agent/getuseroperationlogs', {
       method: 'POST',
       headers: {
         'Authorization': token,

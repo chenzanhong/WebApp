@@ -129,6 +129,18 @@ const routes = [
         name: "Home",
         component: Home,
       },
+      // 系统管理员界面
+      {
+        path: "systemadmin",
+        name: "SystemAdmin",
+        component: SystemAdmin,
+      },
+      // 公司管理员界面
+      {
+        path: "companyadmin",
+        name: "CompanyAdmin",
+        component: CompanyAdmin,
+      },
       {
         path: "display/server",
         name: "Server",

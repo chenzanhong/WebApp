@@ -2,24 +2,30 @@
   <div class="companyadmin">
     <!-- 左侧管理 -->
     <div class="left">
-      <div class="header">
-        <div class="logo">
-          <img src="@/assets/display/icons/stLine-server-l.png" width="36">
-          <p>SeverM</p>
-        </div>
-      </div>
       <div class="company-info" v-if="companyData">
         <div class="company-info-content">
-          <el-button type="text" class="back-button" @click="handleToolClick('systemadmin')">< 返回管理页面</el-button>
+          <div class="button-group">
+            <template v-if="isRoot">
+              <el-button 
+                type="text" 
+                class="back-button"
+                @click="goBackToSystemAdmin"
+              >
+                < 返回管理页面
+              </el-button>
+            </template>
+            <template v-else>
+              <div style="width: 120px; height: 35px;"></div>
+            </template>
+          </div>
           <div class="company-middle-info">
-        <!-- 更改为动态绑定公司信息 -->
         <div class="company-name">{{ companyData.name  || ''}}</div>
         <div class="count-info">
           <span>成员总数 {{ companyData.member_num || ''}}</span>
           <span>服务器总数 {{ companyData.system_num || '' }}</span>
         </div>
       </div>
-          <el-button type="text" class="forward-button" @click="handleToolClick('home')"> 进入主页面 ></el-button>
+          <el-button type="text" class="forward-button" @click="handleToolClick('home')"> 查看服务器详情 ></el-button>
         </div>
       </div>
       <div class="main-content">
@@ -58,34 +64,7 @@
         </div>
       </div>
     </div>
-    <!-- 右侧工具栏 -->
-    <div class="toolbar">
-      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-        <el-icon size="32">
-          <HomeFilled />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'notice' }" @click="handleToolClick('notice')">
-        <el-icon size="32">
-          <ChatDotRound />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool ==='setting' }" @click="handleToolClick('setting')">
-        <el-icon size="32">
-          <Setting />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'teambusiness' }" @click="handleToolClick('teambusiness')">
-        <el-icon size="32">
-          <Briefcase />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-        <el-icon size="32">
-          <QuestionFilled />
-        </el-icon>
-      </div>
-    </div>
+   
     <!-- 添加成员弹窗 -->
     <div v-if="showAddMemberDialog" class="addbox">
       <div class="box-title">添加成员</div>
@@ -148,38 +127,11 @@
 }
 
 .left {
-  width: calc(100% - 6rem);
+  width: 100%;
   display: flex;
   flex-direction: column;
   padding: 0;
   background-color: #000000;
-}
-
-.header {
-  width: 100%;
-  padding-top: 12px;
-  padding-left: 20px;
-  background-color: #000000;
-}
-
-.logo {
-  width: 100%;
-  font-size: 1.2rem;
-  color: white;
-  text-align: start;
-  font-family: "Poppins", serif;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  font-size: 28px;
-  justify-content: start;
-  font-family: 'PangMenZhengDao', sans-serif;
-}
-
-.logo p {
-  margin-left: 10px;
-  margin-top: 0.2rem;
-  font-weight: bold;
 }
 
 .company-info {
@@ -191,7 +143,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 25px;
-  margin: 13px 15px 13px 30px;
+  margin: 23px 30px 15px 30px;
 }
 
 .company-info-content {
@@ -199,10 +151,8 @@
   justify-content: space-between;
   width: 100%;
   align-items: center;
-  /* 添加垂直居中属性 */
 }
 
-/* 提高选择器优先级 */
 .el-button.back-button {
   background-color: rgb(123, 136, 150, 0.73);
   width: 150px;
@@ -255,18 +205,15 @@
   font-size: 16px;
   display: flex;
   justify-content: center;
-  /* 整体水平居中 */
   gap: 100px;
-  /* 成员总数和服务器总数中间间距为20px ，可按需调整 */
 }
 
 .main-content {
   background-color: rgb(94, 118, 144, 0.34);
   border-radius: 1rem;
   padding: 25px;
-  margin: 13px 15px 13px 30px;
+  margin: 3px 30px 900px 30px;
   border: 1px solid #374151;
-  /* 移除 flex: 1; 避免影响布局 */
 }
 
 .top {
@@ -662,6 +609,22 @@
   background-color: rgb(25, 49, 74);
   color: white;
 }
+
+.company-admin {
+  padding: 20px;
+  min-height: calc(100vh - 60px);
+  background-color: #f5f7fa;
+  margin-top: 20px; /* 增加与顶栏的间距 */
+}
+
+.content-container {
+  max-width: 1400px; /* 增加最大宽度 */
+  margin: 0 auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
 </style>
 
 
@@ -675,20 +638,24 @@ import { Search, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase, U
 const route = useRoute(); // 新增路由参数获取
 
 const companyData = ref(null); // 初始化为null
-
-// 模拟数据移除，改为空数组
 const members = ref([]);
+const isRoot = ref(false);
 
+// 检查用户角色
+const checkUserRole = () => {
+  const userRole = localStorage.getItem('userRole');
+  isRoot.value = userRole === 'ROOT';
+};
 
 // 新增获取公司信息方法
 const fetchCompanyInfo = async () => {
   try {
     const token = localStorage.getItem('token'); 
     console.log('token:', token);
-    let apiUrl = 'http://120.79.200.209:8080/agent/get-company-info';
+    let apiUrl = 'http://113.44.170.52:8080/agent/get-company-info';
     
-    // 根据路由参数动态构造请求URL
-    const companyName = route.params.companyName;
+    // 从路由查询参数获取公司名称
+    const companyName = route.query.companyName;
     if (companyName) {
       apiUrl += `?company-name=${encodeURIComponent(companyName)}`;
     }
@@ -728,6 +695,7 @@ const fetchCompanyInfo = async () => {
 };
 // 在组件挂载时自动获取数据
 onMounted(() => {
+  checkUserRole();
   fetchCompanyInfo();
 });
 
@@ -753,22 +721,10 @@ const handleToolClick = (tool) => {
   selectedTool.value = tool;
   switch (tool) {
     case 'home':
-      router.push('/home');
-      break;
-    case 'notice':
-      router.push('/info');
-      break;
-    case'setting':
-      router.push('/setting');
-      break;
-    case 'teambusiness':
-      router.push('/display/teambusiness');
-      break;
-    case 'help':
-      router.push('/help');
+      router.push('/headbar/home');
       break;
     case 'systemadmin':
-      router.push('/systemadmin');
+      router.push('/headbar/systemadmin');
       break;
   }
 };
@@ -888,5 +844,10 @@ const togglePasswordVisibility = () => {
 
 const handlePasswordInput = () => {
   // 处理密码输入逻辑
+};
+
+// 返回系统管理页面
+const goBackToSystemAdmin = () => {
+  router.push('/headbar/systemadmin');
 };
 </script>      

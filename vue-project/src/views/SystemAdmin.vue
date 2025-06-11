@@ -2,13 +2,6 @@
   <div class="systemadmin">
     <!-- 左侧管理 -->
     <div class="left">
-      <div class="header">
-        <div class="logo">
-          <img src="@/assets/display/icons/stLine-server-l.png" width="36">
-          <p>SeverM</p>
-        </div>
-      </div>
-
       <div class="main-content">
         <div class="top">
           <el-button 
@@ -43,7 +36,7 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">管理员邮箱</span>
-                  <span class="info-value" style="width:250px;">{{ company.email }}</span>
+                  <span class="info-value" style="width:170px;">{{ company.email }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">人员总数</span>
@@ -76,38 +69,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 右侧工具栏 -->
-    <div class="toolbar">
-      <div class="tool-item" :class="{ active: selectedTool === 'home' }" @click="handleToolClick('home')">
-        <el-icon size="32">
-          <HomeFilled />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'notice' }" @click="handleToolClick('notice')">
-        <el-icon size="32">
-          <ChatDotRound />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool ==='setting' }" @click="handleToolClick('setting')">
-        <el-icon size="32">
-          <Setting />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'teambusiness' }" @click="handleToolClick('teambusiness')">
-        <el-icon size="32">
-          <Briefcase />
-        </el-icon>
-      </div>
-      <div class="tool-item" :class="{ active: selectedTool === 'help' }" @click="handleToolClick('help')">
-        <el-icon size="32">
-          <QuestionFilled />
-        </el-icon>
-      </div>
-    </div>
-
-    <ServerAddCard v-model:visible="show" @submit="handleSubmit" />
-    <ConfirmDeleteDialog v-model:visible="deleteDialogVisible" :serverName="serverToDelete" @confirm="openDeleteDialog" />
   </div>
 </template>
 
@@ -126,56 +87,47 @@
   font-style: normal;
 }
 
+.system-admin {
+  padding: 20px;
+  min-height: calc(100vh - 60px);
+  background-color: #f5f7fa;
+  margin-top: 20px; /* 增加与顶栏的间距 */
+}
+
+.content-container {
+  max-width: 1400px; /* 增加最大宽度 */
+  margin: 0 auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
 .systemadmin {
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  height: 100vh;
+  min-height: calc(100vh - 60px); /* 修改为min-height */
+  padding-bottom: 100px; /* 增加底部间隙 */
   background-color: #000000;
 }
 
 .left {
-  width: calc(100% - 6rem);
+  width: 100%; /* 修改为100%宽度 */
   display: flex;
   flex-direction: column;
   padding: 0;
   background-color: #000000;
 }
 
-.header {
-  width: 100%;
-  padding-top: 12px;
-  padding-left: 20px;
-  background-color: #000000;
-}
-
-.logo {
-  width: 100%;
-  font-size: 1.2rem;
-  color: white;
-  text-align: start;
-  font-family: "Poppins", serif;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  font-size: 28px;
-  justify-content: start;
-  font-family: 'PangMenZhengDao', sans-serif;
-}
-
-.logo p {
-  margin-left: 10px;
-  margin-top: 0.2rem;
-  font-weight: bold;
-}
 
 .main-content {
   flex: 1;
   background-color: rgb(94, 118, 144, 0.34);
   border-radius: 1rem;
   padding: 25px;
-  margin: 13px 15px 28px 30px;
+  margin: 23px 30px 80px 30px; /* 顶部间距改为23px，底部间距增加到80px */
   border: 1px solid #374151;
 }
 
@@ -279,7 +231,7 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 5px;
 }
 
 .info-item {
@@ -368,10 +320,7 @@
 import { ref, onMounted } from 'vue';
 import { ElInput, ElMessageBox, ElButton, ElMessage } from 'element-plus';
 import { Search, Plus, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase } from '@element-plus/icons-vue';
-import ServerAddCard from "@/components/ServerAddCard.vue";
-import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog.vue";
 import { useRouter } from 'vue-router';
-
 const router = useRouter();
 
 // 初始化公司列表
@@ -383,7 +332,7 @@ const deleteDialogVisible = ref(false);
 const serverToDelete = ref("");
 const selectedTool = ref('home');
 
-// 获取公司列表的API调用
+// 获取公司列表
 const fetchCompanyList = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -393,11 +342,11 @@ const fetchCompanyList = async () => {
       return;
     }
 
-    const response = await fetch('http://47.86.232.20:8080/agent/get-company-list', {
+    const response = await fetch('http://113.44.170.52:8080/agent/get-company-list', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `${token}` // JWT令牌格式
+        'Authorization': `${token}` 
       }
     });
 
@@ -408,18 +357,24 @@ const fetchCompanyList = async () => {
     }
 
     const data = await response.json();
+    console.log('获取公司列表接口返回的原始数据:', data);
+    console.log('data.data:', data.data);
+
     if (data.message === '查询成功') {
-      // 数据映射处理：将API数据转换为组件需要的格式
-      const mappedCompanies = data.data.map(company => ({
-        id: company.id,
-        name: company.name,
-        manager: company.admin_id, // 假设admin_id为管理员标识（需根据实际接口调整）
-        email: '暂无邮箱信息', // 示例API中没有邮箱字段，可根据实际接口补充
-        staffCount: company.membernum,
-        serverCount: company.systemnum,
-        isDisabled: false // 假设初始状态为启用，如需同步状态需从API获取
-      }));
+      const mappedCompanies = data.data.map(company => {
+        console.log('单个公司数据:', company);
+        return {
+          id: company.id,
+          name: company.name,
+          manager: company.adminName,
+          email: company.adminEmail,
+          staffCount: company.membernum,
+          serverCount: company.systemnum,
+          isDisabled: false
+        };
+      });
       
+      console.log('映射后的公司数据:', mappedCompanies);
       companies.value = mappedCompanies;
       // 更新全选状态
       isAllDisabled.value = companies.value.every(c => c.isDisabled);
@@ -475,22 +430,25 @@ const handleToolClick = (tool, companyName) => {
   selectedTool.value = tool;
   switch (tool) {
     case 'home':
-      router.push('/home');
+      router.push('/headbar/home');
       break;
     case 'notice':
-      router.push('/info');
+      router.push('/headbar/notice');
       break;
     case 'setting':
-      router.push('/setting');
+      router.push('/headbar/setting');
       break;
     case 'teambusiness':
-      router.push('/display/teambusiness');
+      router.push('/headbar/display/teambusiness');
       break;
     case 'help':
-      router.push('/help');
+      router.push('/headbar/help');
       break;
     case 'companyadmin':
-      router.push({ name: 'companyadmin', params: { companyName: companyName } });// 将公司名传到companyadmin页面
+      router.push({ 
+        path: '/headbar/companyadmin',
+        query: { companyName: companyName }
+      });
       break;
   }
 };
