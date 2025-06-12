@@ -220,40 +220,42 @@ const submitForm = async () => {
       body: JSON.stringify(requestData)
     });
     
-    const responseData = await response.json().catch(() => ({}));
-    
-    if (response.ok) {
-      // 服务器创建成功，现在设置阈值
-      try {
-        const token = localStorage.getItem('token');
-        const thresholdResponse = await fetch('http://113.44.170.52:8080/agent/setthreshold', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': ` ${token}`
-          },
-          body: JSON.stringify({
-            ip: formData.value.host,
-            cpu_threshold: formData.value.cpuThreshold,
-            mem_threshold: formData.value.memoryThreshold
-          })
-        });
+     // 第一步：先以 blob 形式读取响应
+    const blob = await response.blob();
 
-        if (!thresholdResponse.ok) {
-          const errorData = await thresholdResponse.json().catch(() => ({}));
-          throw new Error(errorData.message || '设置阈值失败');
-        }
-        
-        ElMessage.success('服务器添加成功，阈值设置完成');
-        emit('success', responseData);
-        closeDialog();
-      } catch (thresholdError) {
-        console.error('设置阈值时出错:', thresholdError);
-        // 即使阈值设置失败，仍然认为服务器添加成功
-        ElMessage.warning('服务器添加成功，但阈值设置失败: ' + (thresholdError.message || '未知错误'));
-        emit('success', responseData);
-        closeDialog();
+    if (response.ok) {
+      // 下载脚本
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'install_agent.sh');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // 服务器创建成功，现在设置阈值
+      // 第二步：如果需要获取 JSON 数据，可单独发起请求或从 blob 解析（不推荐）
+      // 这里假设你不需要 JSON 响应数据，继续设置阈值
+      const thresholdResponse = await fetch('http://113.44.170.52:8080/agent/setthreshold', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': ` ${token}`
+        },
+        body: JSON.stringify({
+          ip: formData.value.host,
+          cpu_threshold: formData.value.cpuThreshold,
+          mem_threshold: formData.value.memoryThreshold
+        })
+      });
+
+      if (!thresholdResponse.ok) {
+        throw new Error('设置阈值失败');
       }
+
+      ElMessage.success('服务器添加成功，阈值设置完成');
+      emit('success', {});
+      closeDialog();
     } else {
       console.error('Server error details:', {
         status: response.status,
