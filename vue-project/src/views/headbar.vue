@@ -8,7 +8,12 @@
       <div class="nav-buttons">
         <button v-if="isAdmin" :class="{ active: activeButton === 'admin' }" @click="navigateTo('admin')">管理</button>
         <button :class="{ active: activeButton === 'home' }" @click="navigateTo('home')">主页面</button>
-        <button :class="{ active: activeButton === 'notice' }" @click="navigateTo('notice')">通知</button>
+        <button :class="{ active: activeButton === 'notice' }" class="notice-button-container" @click="navigateTo('notice')">
+    <span>通知</span>
+    <div v-if="unreadCount > 0" class="notification-badge">
+      {{ unreadCount }}
+    </div>
+        </button>
         <button :class="{ active: activeButton === 'teambusiness' }" @click="navigateTo('teambusiness')">团队业务</button>
         <button :class="{ active: activeButton === 'log' }" @click="navigateTo('log')">日志</button>
       </div>
@@ -17,13 +22,7 @@
           @click="toggleDropdown">
           <UserFilled />
         </el-icon>
-        <el-icon :class="{ active: activeButton === 'notice', 'user-active': isDropdownVisible }"
-        @click="navigateTo('notice')"
-        class="notification-icon-wrapper">
-        <ChatDotRound />
-        <!-- 小红点通知 -->
-        <span v-if="unreadCount > 0" class="notification-badge"></span>
-      </el-icon>
+        
         <!-- <el-icon :class="{ active: activeButton ==='setting' }" @click="navigateTo('setting')">
           <Setting />
         </el-icon> -->
@@ -149,6 +148,7 @@ import ServerFileTransferDialog from '@/components/dialogs/ServerFileTransferDia
 import LocalFileTransferDialog from '@/components/dialogs/LocalFileTransferDialog.vue';
 import ServerFileDownloadDialog from '@/components/dialogs/ServerFileDownloadDialog.vue';
 import { eventBus } from '@/utils/eventBus';
+import axios from 'axios';
 const router = useRouter();
 const route = useRoute();
 
@@ -192,18 +192,69 @@ const checkUserRole = () => {
     isAdmin.value = false;
   }
 };
+
+
 const unreadCount = ref(0);
+// 获取未读通知数量
+async function fetchUnreadCount() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    const response = await axios.get(
+      'http://113.44.170.52:8080/agent/info/recivelist', 
+      { headers: { Authorization: ` ${token}` } }
+    );
+    
+    if (response.data && response.data.receiveNotices) {
+      // 计算未确认的通知数量
+      unreadCount.value = response.data.receiveNotices.filter(
+        notice => mapProcessedStatus(notice.state) === 'unconfirmed'
+      ).length;
+      
+      // 发送事件让其他组件知道未读数量
+      eventBus.emit('unread-count', unreadCount.value);
+    }
+  } catch (error) {
+    console.error('获取未读通知数量失败:', error);
+    unreadCount.value = 0;
+  }
+}
+
+// 复制通知界面中的状态映射逻辑
+function mapProcessedStatus(state) {
+  if (typeof state === 'boolean') {
+    return state ? 'confirmed' : 'unconfirmed';
+  }
+  const statusMap = {
+    unprocessed: 'unconfirmed',
+    processed: 'confirmed',
+    expired: 'expired'
+  };
+  return statusMap[state?.toLowerCase()] || 'expired';
+}
+
+// 监听事件更新未读数量
+eventBus.on('unread-count', (count) => {
+  unreadCount.value = count;
+});
+
 // 在组件挂载时检查用户角色
 onMounted(() => {
   console.log('组件开始挂载');
   checkUserRole();
   console.log('组件挂载完成，最终管理员状态:', isAdmin.value);
     // 监听未读消息数量变化
-  eventBus.on('unread-count', (count) => {
-    unreadCount.value = count;
-    console.log('收到未读消息更新:', count);
+  if (localStorage.getItem('token')) {
+    fetchUnreadCount();
+  }
+  // 监听登录状态变化
+  watch(() => localStorage.getItem('token'), (newToken) => {
+    if (newToken) fetchUnreadCount();
+    else unreadCount.value = 0;
   });
 });
+ 
 onUnmounted(() => {
   // 组件卸载时取消监听
   eventBus.off('unread-count');
@@ -398,6 +449,8 @@ const togglePasswordVisibility = () => {
 // 退出登录
 const logout = () => {
     localStorage.removeItem('token');
+    unreadCount.value = 0; // 重置计数
+  eventBus.emit('unread-count', 0); // 通知其他组件
     router.push('/login');
 };
 
@@ -876,28 +929,29 @@ onMounted(() => {
     background-color: #484848;
     color: white;
   }
-.notification-icon-wrapper {
+
+.notice-button-container {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 5px 0;
+  cursor: pointer;
 }
 
 .notification-badge {
   position: absolute;
-  top: 0px;
-  right: 1160px;
-  width: 12px;
-  height: 12px;
+  top: -8px;
+  right: -12px;
   background-color: #ff4d4f;
+  color: white;
   border-radius: 50%;
-  border: 2px solid #29333E;
+  min-width: 18px;
+  height: 18px;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 2px;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
-  z-index: 10;
-}
-/* 提高小红点的可见性 */
-.notification-badge {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+  animation: pulse 1.5s infinite;
 }
 
 </style>

@@ -123,7 +123,11 @@ export default {
                 await this.processConfirm(item.id);
                 console.log(`确认请求发送成功，消息 ID: ${item.id}`);
                 // 确认成功后，触发更新事件
-      eventBus.emit('unread-count', this.unreadMessageCount);
+                // 触发事件更新全局计数（数量减少1）
+                eventBus.emit('decrement-unread', 1);
+                
+                // 显示确认成功提示
+                ElMessage.success('通知已确认');
             } catch (error) {
                 console.error(`确认操作失败，消息 ID: ${item.id}:`, error);
                 // 失败时回滚状态
@@ -219,10 +223,20 @@ export default {
             }
         }
     },
-    mounted() {
-        this.fetchNotifications();
-        eventBus.emit('unread-count', this.unreadMessageCount);
-    }
+   mounted() {
+  // 监听消息减少事件
+  eventBus.on('decrement-unread', (count) => {
+    const newCount = this.unreadCount > count ? this.unreadCount - count : 0;
+    eventBus.emit('unread-count', newCount);
+  });
+  
+  // 初始获取数据
+  this.fetchNotifications();
+},
+beforeUnmount() {
+  // 清理事件监听器
+  eventBus.off('decrement-unread');
+}
 };
 </script>
 
