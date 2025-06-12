@@ -14,10 +14,9 @@
           <div>内存告警阈值</div>
         </div>
         <div class="details">
-          <!-- <div class="details-a">{{ server[0] }}</div> -->
           <div class="details-a">{{ server.os }}</div>
-          <div class="details-a">{{ server.cpu_threshold }}</div>
-          <div class="details-a">{{ server.mem_threshold }}</div>
+          <div class="details-a">{{ formatThreshold(server.cpu_threshold) }}</div>
+          <div class="details-a">{{ formatThreshold(server.mem_threshold) }}</div>
         </div>
       </div>
       <div class="actions">
@@ -197,6 +196,12 @@ const saveThresholds = async () => {
   } finally {
     isSaving.value = false;
   }
+};
+
+// 告警阈值以百分比形式展示
+const formatThreshold = (threshold) => {
+  if (threshold === undefined || threshold === null) return '未设置';
+  return `${threshold*100}%`;
 };
 </script>
 

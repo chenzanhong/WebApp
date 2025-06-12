@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="header-right">
-          <WarningNotification ref="warningNotification" />
+          <!-- <WarningNotification ref="warningNotification" /> -->
         </div>
       </div>
 
@@ -55,7 +55,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import WarningNotification from '@/components/WarningNotification.vue';
 import { WarningFilled } from '@element-plus/icons-vue';
 import {
   ElInput,
@@ -120,24 +119,7 @@ onMounted(() => {
 
 // 搜索功能
 const searchQuery = ref('');
-const warningNotification = ref(null);
 
-// 模拟警告数据更新
-const simulateWarningUpdate = () => {
-  // 模拟5秒后添加一条新警告
-  setTimeout(() => {
-    warningNotification.value?.addWarning({
-      title: '新警告',
-      message: '这是一条模拟的警告信息',
-      level: 'high'
-    });
-  }, 5000);
-};
-
-onMounted(() => {
-  // 启动模拟警告更新
-  simulateWarningUpdate();
-});
 const filteredServers = computed(() => {
   if (!searchQuery.value) {
     return servers.value;

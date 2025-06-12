@@ -63,16 +63,21 @@
         :border="false"
         class="log-table"
       >
-        <el-table-column type="index" label="序号" min-width="80" />
-        <el-table-column prop="timestamp" label="操作时间" min-width="180">
-           <template #default="scope">
+        <el-table-column type="index" label="序号" width="60" />
+        <el-table-column prop="timestamp" label="操作时间" :min-width="12 + 'vw'">
+          <template #default="scope">
             {{ formatDate(scope.row.timestamp) }}
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="操作类型" min-width="120" />
-        <el-table-column prop="server_name" label="相关服务器" min-width="150" />
-        <el-table-column prop="result" label="操作结果" min-width="150" />
-        <el-table-column prop="detail" label="操作详情" min-width="200" />
+        <el-table-column v-if="showOperatorColumn" prop="username" label="操作人" :min-width="8 + 'vw'" />
+        <el-table-column prop="type" label="操作类型" :min-width="10 + 'vw'" />
+        <el-table-column prop="server_name" label="相关服务器" :min-width="10 + 'vw'" />
+        <el-table-column prop="result" label="操作结果" :min-width="8 + 'vw'" />
+        <el-table-column prop="detail" label="操作详情" :min-width="15 + 'vw'" show-overflow-tooltip>
+          <template #default="scope">
+            <div style="white-space: normal; word-break: break-all;">{{ scope.row.detail }}</div>
+          </template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination-container">
@@ -105,6 +110,26 @@ const currentPage = ref(1);
 const pageSize = ref(20);
 const total = ref(0);
 const logs = ref([]);
+
+// 添加用户角色状态
+const userRole = ref('');
+
+// 计算属性：判断是否显示操作人列
+const showOperatorColumn = computed(() => {
+  return userRole.value === 'ROOT' || userRole.value === 'ADMIN';
+});
+
+// 检查用户角色
+const checkUserRole = () => {
+  const role = localStorage.getItem('userRole');
+  userRole.value = role || '';
+  console.log('当前用户角色:', userRole.value);
+};
+
+// 在组件挂载时检查用户角色
+onMounted(() => {
+  checkUserRole();
+});
 
 // 计算属性：过滤后的日志数据
 const filteredLogs = computed(() => {
@@ -184,14 +209,18 @@ const convertToISO8601WithOffset = (date) => {
 const refreshLogs = async (isSearch = false) => {
   try {
     const token = localStorage.getItem('token');
+    if (!token) {
+      ElMessage.error('未找到登录凭证，请重新登录');
+      return;
+    }
     
-    // 从token中获取用户角色
-    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-    const username = tokenPayload.role === 'admin' || tokenPayload.role === 'root' ? 'root' : '';
+    // 从localStorage获取用户角色
+    const role = localStorage.getItem('userRole');
+    userRole.value = role || '';
     
     // 构建请求体
     const requestBody = {
-      username: username,
+      username: '',  // 不设置默认值，让后端处理
       fromTime: '',
       toTime: '',
       operation: '',
@@ -212,10 +241,6 @@ const refreshLogs = async (isSearch = false) => {
     }
 
     console.log('完整的请求参数:', requestBody);
-
-    // 打印发送到后端的时间参数
-    console.log('发送到后端的时间参数 fromTime:', requestBody.fromTime);
-    console.log('发送到后端的时间参数 toTime:', requestBody.toTime);
 
     const response = await fetch('http://113.44.170.52:8080/agent/getuseroperationlogs', {
       method: 'POST',
@@ -251,7 +276,8 @@ const refreshLogs = async (isSearch = false) => {
       type: log.msg,
       result: log.level === 'error' ? '失败' : '成功',
       server_name: log.username,
-      detail: log.detail
+      detail: log.detail,
+      username: log.username
     })) || [];
 
     total.value = logs.value.length;
@@ -292,12 +318,12 @@ onMounted(() => {
   background-color: #1a1a1a;
   color: white;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 
 .log-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
 
 .log-header {
@@ -319,9 +345,9 @@ onMounted(() => {
   display: flex;
   gap: 20px;
   align-items: center;
-  flex-wrap: wrap; /* 允许换行 */
-  justify-content: center; /* 居中 */
-  background-color: transparent; /* 透明背景 */
+  flex-wrap: wrap; 
+  justify-content: center; 
+  background-color: transparent;
 }
 
 .filter-group {
@@ -331,33 +357,29 @@ onMounted(() => {
 }
 
 .filter-label {
-    color: white; /* 文字颜色为白色 */
+    color: white; 
     font-size: 14px;
-    flex-shrink: 0; /* 防止标签收缩 */
-    font-weight: bold; /* 加粗 */
-}
-
-.date-range-group {
-    /* align-items: stretch; */ /* 确保日期选择器高度一致 */
+    flex-shrink: 0; 
+    font-weight: bold; 
 }
 
 .date-picker-item {
-    width: 180px; /* 调整单个日期选择器宽度 */
+    width: 180px;
 }
 
 .date-separator {
     color: white;
     margin: 0 5px;
-    font-size: 20px; /* 加大字体 */
-    font-weight: bold; /* 加粗 */
+    font-size: 20px; 
+    font-weight: bold; 
 }
 
 .filter-select {
-  width: 150px; /* 调整选择器宽度 */
+  width: 150px;
 }
 
 .server-input {
-  width: 200px; /* 调整输入框宽度 */
+  width: 200px; 
 }
 
 .log-content {
@@ -368,8 +390,10 @@ onMounted(() => {
   margin: 13px 15px 28px 30px;
   border: 1px solid #374151;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none; 
   -ms-overflow-style: none; /* IE and Edge */
+  min-width: 60vw; /* 设置最小宽度为视窗宽度的60% */
+  max-width: 95vw; /* 设置最大宽度为视窗宽度的95% */
 }
 
 .log-content::-webkit-scrollbar {
@@ -391,8 +415,10 @@ onMounted(() => {
   color: white;
   border-collapse: collapse; 
   border: none !important;
-  table-layout: auto !important;
+  table-layout: fixed !important; 
   width: 100% !important;
+  min-width: 60vw !important; /* 设置表格最小宽度 */
+  max-width: 95vw !important; /* 设置表格最大宽度 */
 }
 
 :deep(.el-table__header) {
@@ -436,17 +462,21 @@ onMounted(() => {
 
 :deep(.el-table__header th) {
   background-color: transparent !important;
-  padding: 12px 0 !important;
+  padding: 12px 8px !important;
   text-align: center !important;
   border-bottom: 2px solid #ffffff !important;
   border-right: none !important;
   color: white !important;
+  white-space: nowrap !important;
+  font-size: 14px !important; /* 固定字体大小 */
 }
 
 :deep(.el-table__body td) {
-  padding: 12px 0 !important;
+  padding: 12px 8px !important;
   text-align: center !important;
   background-color: transparent !important;
+  white-space: nowrap !important;
+  font-size: 14px !important; /* 固定字体大小 */
 }
 
 :deep(.el-table__row) {
@@ -469,8 +499,9 @@ onMounted(() => {
   background-color: transparent !important;
 }
 
-:deep(.el-table__fixed-body-wrapper) {
-  background-color: transparent !important;
+:deep(.el-table__body td.el-table__cell) {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 :deep(.el-pagination) {

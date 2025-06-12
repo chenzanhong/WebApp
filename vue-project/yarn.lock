@@ -784,10 +784,10 @@ asynckit@^0.4.0:
   resolved "https://registry.npmmirror.com/asynckit/-/asynckit-0.4.0.tgz"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-axios@^1.8.3:
-  version "1.8.3"
-  resolved "https://registry.npmmirror.com/axios/-/axios-1.8.3.tgz"
-  integrity sha512-iP4DebzoNlP/YN2dpwCgb8zoCmhtkajzS48JvwmkSkXvPI3DHc7m+XYL5tGnSlJtR6nImXZmdCuN5aP8dh1d8A==
+axios@^1.9.0:
+  version "1.9.0"
+  resolved "https://registry.npmmirror.com/axios/-/axios-1.9.0.tgz"
+  integrity sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.0"
@@ -1790,7 +1790,7 @@ vue-demi@*:
   resolved "file:"
   dependencies:
     "@element-plus/icons-vue" "^2.3.1"
-    axios "^1.8.3"
+    axios "^1.9.0"
     echarts "^5.6.0"
     element-plus "^2.9.7"
     vue "^3.5.13"
