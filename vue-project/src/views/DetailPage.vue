@@ -258,11 +258,10 @@ methods: {
   try {
     const hostname = encodeURIComponent(this.$route.params.hostname)
     const token = localStorage.getItem('token')
-    
     // 请求历史数据接口
     const response = await fetch(
       //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/1`,
-      `http://113.44.170.52:8080//agent/monitor/{hostname}`,
+      `http://113.44.170.52:8080/agent/monitor/${hostname}`,
       { headers: { 'Authorization': ` ${token}` } }
     )
 
@@ -272,12 +271,12 @@ methods: {
     console.log('获取到的历史监控数据:', historyData)
     
     // 检查并处理CPU历史数据
-    if (historyData.cpu_info && Array.isArray(historyData.cpu_info)) {
+    if (historyData.cpu && Array.isArray(historyData.cpu_info)) {
       // 将历史数据存入数组
-      const allCpuData = historyData.cpu_info.map(item => ({
-        value: item.percent,
-        time: new Date(item.cpu_info_created_at).getTime(),
-        created_at: item.cpu_info_created_at
+      const allCpuData = historyData.cpu.map(item => ({
+        value: item.data?.percent||0,
+        time: new Date(item.time || item.data?.cpu_info_created_at || 0).getTime(), 
+        created_at: item.data?.cpu_info_created_at
       }))
       
       // 按时间戳排序（从新到旧）
@@ -292,11 +291,11 @@ methods: {
     }
     
      // 处理内存历史数据
-        if (historyData.mem_info && Array.isArray(historyData.mem_info)) {
-          const allMemData = historyData.mem_info.map(item => ({
-            value: item.user_percent,
-            time: new Date(item.mem_info_created_at).getTime(),
-            created_at: item.mem_info_created_at
+        if (historyData.memory && Array.isArray(historyData.mem_info)) {
+          const allMemData = historyData.memory.map(item => ({
+            value: item.data?.user_percent || 0,
+            time: new Date(item.time || item.data?.mem_info_created_at || 0).getTime(),
+            created_at: item.data?.mem_info_created_at
           }))
           
           // 按时间戳排序（从新到旧）
@@ -327,7 +326,7 @@ methods: {
         }
       const hostname = encodeURIComponent(this.$route.params.hostname)
       const token = localStorage.getItem('token')
-      
+      console.log('实时路由:', hostname);
       const response = await fetch(
         `http://113.44.170.52:8080/agent/monitor/status/${hostname}`,
         //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
@@ -353,7 +352,7 @@ methods: {
       try {
         const hostname = encodeURIComponent(this.$route.params.hostname)
         const token = localStorage.getItem('token')
-        
+         console.log('刷新路由:', hostname);
         const response = await fetch(
           //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
           `http://113.44.170.52:8080/agent/monitor/status/${hostname}`,
@@ -951,15 +950,15 @@ methods: {
   updateData(serverData) {
 // 主机信息
 this.hostInfo = {
-hostname: serverData.host_info?.host_name || 'N/A',
-os: serverData.host_info?.os || 'N/A',
-platform: serverData.host_info?.platform || 'N/A',
-kernel_arch: serverData.host_info?.kernel_arch || 'N/A',
-last_report: serverData.host_info?.host_info_created_at
+hostname: serverData.data.host?.hostname || 'N/A',
+    os: serverData.data.host?.os || 'N/A',
+    platform: serverData.data.host?.platform || 'N/A',
+    kernel_arch: serverData.data.host?.kernel_arch || 'N/A',
+    last_report: serverData.data.host?.host_info_created_at
 }
 
 // CPU数据（取最新时间点的数据）
-const latestCpuEntry = serverData.cpu_info?.slice(-1)[0] || {}
+const latestCpuEntry = serverData.data.cpu?.slice(-1)[0]?.data || {}
 const cpuData = latestCpuEntry || {}
 this.cpuData = {
 model_name: cpuData.model_name || 'N/A',
@@ -982,11 +981,12 @@ cores_num: cpuData.cores_num || 0
         this.updateCpuUsageTrendChart();
       }
 // 内存数据
-this.memoryData = {
-total:serverData.mem_info?.total || 'N/A',
-used: serverData.mem_info?.used || 'N/A',
-user_percent: serverData.mem_info?.user_percent?.toFixed(1) || 0.00
-}
+const latestMemEntry = serverData.data.memory?.slice(-1)[0]?.data || {}
+  this.memoryData = {
+    total: latestMemEntry.total || 'N/A',
+    used: latestMemEntry.used || 'N/A',
+    user_percent: latestMemEntry.user_percent?.toFixed(1) || 0.00
+  }
  const latestMemPercent = Number(this.memoryData.user_percent);
       if (!isNaN(latestMemPercent)) {
         this.memoryUsageHistory.push({
@@ -1005,7 +1005,7 @@ user_percent: serverData.mem_info?.user_percent?.toFixed(1) || 0.00
       }
 
 // 网络数据处理
-const latestNetEntry = serverData.net_info?.slice(-1)[0] || {}
+const latestNetEntry = serverData.data.net?.slice(-1)[0]?.data || {}
 const netData = latestNetEntry || {}
 this.netData = [{
 name: netData.name || '未知接口',
@@ -1015,7 +1015,7 @@ update_time: netData.net_info_created_at
 }]
 
 // 进程数据处理
-const latestProcessEntry = serverData.pro_info?.slice(-1)[0] || {}
+const latestProcessEntry = serverData.data.process?.slice(-1)[0]?.data || {}
 const processData = latestProcessEntry || {}
 this.processData = [{
 pid: processData.pid || 'N/A',
@@ -1023,7 +1023,8 @@ cmdline: processData.cmdline || '未知命令',
 cpu_percent: processData.cpu_percent?.toFixed(1) || 0,
 mem_percent: processData.mem_percent?.toFixed(1) || 0
 }]
-
+// 告警信息
+  this.alertMessages = serverData.alert_messages || '' // 存储告警信息
 // 只更新图表，不重新初始化组件
       this.updateCpuChart();
       this.updateMemoryChart();
