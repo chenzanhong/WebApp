@@ -271,12 +271,12 @@ methods: {
     console.log('获取到的历史监控数据:', historyData)
     
     // 检查并处理CPU历史数据
-    if (historyData.cpu && Array.isArray(historyData.cpu_info)) {
+    if (historyData.cpu_info && Array.isArray(historyData.cpu_info)) {
       // 将历史数据存入数组
-      const allCpuData = historyData.cpu.map(item => ({
-        value: item.data?.percent||0,
-        time: new Date(item.time || item.data?.cpu_info_created_at || 0).getTime(), 
-        created_at: item.data?.cpu_info_created_at
+      const allCpuData = historyData.cpu_info.map(item => ({
+        value: item.percent,
+        time: new Date(item.cpu_info_created_at).getTime(),
+        created_at: item.cpu_info_created_at
       }))
       
       // 按时间戳排序（从新到旧）
@@ -291,11 +291,11 @@ methods: {
     }
     
      // 处理内存历史数据
-        if (historyData.memory && Array.isArray(historyData.mem_info)) {
-          const allMemData = historyData.memory.map(item => ({
-            value: item.data?.user_percent || 0,
-            time: new Date(item.time || item.data?.mem_info_created_at || 0).getTime(),
-            created_at: item.data?.mem_info_created_at
+          if (historyData.mem_info && Array.isArray(historyData.mem_info)) {
+          const allMemData = historyData.mem_info.map(item => ({
+            value: item.user_percent,
+            time: new Date(item.mem_info_created_at).getTime(),
+            created_at: item.mem_info_created_at
           }))
           
           // 按时间戳排序（从新到旧）
@@ -950,62 +950,61 @@ methods: {
   updateData(serverData) {
 // 主机信息
 this.hostInfo = {
-hostname: serverData.data.host?.hostname || 'N/A',
-    os: serverData.data.host?.os || 'N/A',
-    platform: serverData.data.host?.platform || 'N/A',
-    kernel_arch: serverData.data.host?.kernel_arch || 'N/A',
-    last_report: serverData.data.host?.host_info_created_at
+hostname: serverData.data.host_info?.host_name || 'N/A',
+os: serverData.data.host_info?.os || 'N/A',
+platform: serverData.data.host_info?.platform || 'N/A',
+kernel_arch: serverData.data.host_info?.kernel_arch || 'N/A',
+last_report: serverData.data.ost_info?.host_info_created_at
 }
 
 // CPU数据（取最新时间点的数据）
-const latestCpuEntry = serverData.data.cpu?.slice(-1)[0]?.data || {}
+const latestCpuEntry = serverData.data.cpu_info?.slice(-1)[0] || {}
 const cpuData = latestCpuEntry || {}
 this.cpuData = {
 model_name: cpuData.model_name || 'N/A',
 percent: cpuData.percent?.toFixed(1) || 0,
 cores_num: cpuData.cores_num || 0
 }
- // 获取最新CPU使用率并添加到历史记录
-      const latestCpuPercent = this.cpuData.percent;
-      this.cpuUsageHistory.push({
-        value: latestCpuPercent,
-        time: Date.now() // 记录时间戳
-      });
-       // 限制历史记录长度
-      if (this.cpuUsageHistory.length > 100) {
-        this.cpuUsageHistory.shift();
-      }
+ // 获取最新CPU使用率并添加到历史记录
+      const latestCpuPercent = this.cpuData.percent;
+      this.cpuUsageHistory.push({
+        value: latestCpuPercent,
+        time: Date.now() // 记录时间戳
+      });
+       // 限制历史记录长度
+      if (this.cpuUsageHistory.length > 100) {
+        this.cpuUsageHistory.shift();
+      }
 
-      // 更新趋势图表（无需重新初始化，直接更新数据）
-      if (this.cpuProcessChart) {
-        this.updateCpuUsageTrendChart();
-      }
+      // 更新趋势图表（无需重新初始化，直接更新数据）
+      if (this.cpuProcessChart) {
+        this.updateCpuUsageTrendChart();
+      }
 // 内存数据
-const latestMemEntry = serverData.data.memory?.slice(-1)[0]?.data || {}
-  this.memoryData = {
-    total: latestMemEntry.total || 'N/A',
-    used: latestMemEntry.used || 'N/A',
-    user_percent: latestMemEntry.user_percent?.toFixed(1) || 0.00
-  }
- const latestMemPercent = Number(this.memoryData.user_percent);
-      if (!isNaN(latestMemPercent)) {
-        this.memoryUsageHistory.push({
-          value: latestMemPercent,
-          time: Date.now()
-        });
-        // 限制历史记录长度
-        if (this.memoryUsageHistory.length > 100) {
-          this.memoryUsageHistory.shift();
-        }
-      }
+this.memoryData = {
+total:serverData.data.mem_info?.total || 'N/A',
+used: serverData.data.mem_info?.used || 'N/A',
+user_percent: serverData.data.mem_info?.user_percent?.toFixed(1) || 0.00
+}
+ const latestMemPercent = Number(this.memoryData.user_percent);
+      if (!isNaN(latestMemPercent)) {
+        this.memoryUsageHistory.push({
+          value: latestMemPercent,
+          time: Date.now()
+        });
+        // 限制历史记录长度
+        if (this.memoryUsageHistory.length > 100) {
+          this.memoryUsageHistory.shift();
+        }
+      }
 
-      // 更新内存趋势图表
-      if (this.memoryUsageChart) {
-        this.updateMemoryUsageTrendChart();
-      }
+      // 更新内存趋势图表
+      if (this.memoryUsageChart) {
+        this.updateMemoryUsageTrendChart();
+      }
 
 // 网络数据处理
-const latestNetEntry = serverData.data.net?.slice(-1)[0]?.data || {}
+const latestNetEntry = serverData.data.net_info?.slice(-1)[0] || {}
 const netData = latestNetEntry || {}
 this.netData = [{
 name: netData.name || '未知接口',
@@ -1014,8 +1013,9 @@ bytes_recv: formatTraffic(netData.bytes_recv),
 update_time: netData.net_info_created_at
 }]
 
+
 // 进程数据处理
-const latestProcessEntry = serverData.data.process?.slice(-1)[0]?.data || {}
+const latestProcessEntry = serverData.data.pro_info?.slice(-1)[0] || {}
 const processData = latestProcessEntry || {}
 this.processData = [{
 pid: processData.pid || 'N/A',
