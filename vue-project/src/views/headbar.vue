@@ -74,14 +74,14 @@
       <div class="sidebar2">
         <div class="sidebar-header2">告警</div>
         <div class="sidebar-menu2">
-          <div v-for="(warning, index) in warnings" :key="index" class="warning-item">
+          <div v-if="noAlertsFlag === 0" v-for="(warning, index) in warnings" :key="index" class="warning-item">
             <div class="warning-content">
               <div class="warning-title">{{ formatWarningTitle(warning.warning_title, warning.warning_type) }}</div>
               <div class="warning-message">{{ warning.warning_message }}</div>
               <div class="warning-time">{{ warning.warning_time }}</div>
             </div>
           </div>
-          <el-empty v-if="warnings.length === 0" description="服务器都在正常运作中！" />
+          <el-empty v-if="noAlertsFlag === 1 || warnings.length === 0" description="服务器都在正常运作中！" />
         </div>
       </div>
     </div>
@@ -91,7 +91,7 @@
       <el-icon class="warning-icon-button">
         <WarningFilled />
       </el-icon>
-      <span class="warning-count-text">{{ warnings.length }}</span>
+      <span class="warning-count-text">{{ noAlertsFlag === 0 ? warnings.length : 0 }}</span>
     </div>
        
       <!-- 主内容区 -->
@@ -103,6 +103,7 @@
       </div>
       <!-- 告警悬浮框 -->
       <div v-for="(alert, index) in activeAlerts" 
+           v-if="noAlertsFlag === 0"
            :key="index" 
            class="alert-popup" 
            :style="{ top: `${index * 60 + 90}px` }">
@@ -219,16 +220,28 @@ const warnings = ref([
 
 // 活跃告警列表
 const activeAlerts = ref([]);
-// 最近告警集合
-const recentAlerts = ref(new Set());
+
+// 添加告警显示控制标识
+const noAlertsFlag = ref(0);
+
+// 清空所有告警显示的函数
+const clearAllAlerts = () => {
+  warnings.value = [];
+  activeAlerts.value = [];
+  noAlertsFlag.value = 1;
+};
 
 // 获取预警信息
 const fetchWarnings = async () => {
   try {
     const token = localStorage.getItem('token');
     console.log('使用的token:', token);
+    console.log('请求URL:', 'http://113.44.170.52:8080/agent/getwarning');
+    console.log('请求头:', {
+      'Authorization': token
+    });
     
-    const response = await axios.get(`http://113.44.170.52:8080/agent/getwarning/${host}`, {
+    const response = await axios.get('http://113.44.170.52:8080/agent/getwarning', {
       headers: {
         'Authorization': token 
       }
@@ -241,9 +254,21 @@ const fetchWarnings = async () => {
       console.log('响应头:', response.headers);
       console.log('响应数据:', response.data);
       
-      // 如果返回的是单个对象，将其转换为数组
-      const warningData = Array.isArray(response.data) ? response.data : [response.data];
+      // 提取实际的告警数据
+      const rawResponseData = response.data && response.data.data ? response.data.data : response.data;
+      const warningData = Array.isArray(rawResponseData) ? rawResponseData : (rawResponseData ? [rawResponseData] : []);
+      console.log('处理后的warningData:', warningData);
       
+      // 如果数据为空数组，立即清空所有显示
+      if (!warningData || warningData.length === 1) {
+        clearAllAlerts();
+        return;
+      }
+      
+      // 重置标识
+      noAlertsFlag.value = 0;
+      
+      // 更新warnings数组
       warnings.value = warningData.map(warning => ({
         id: warning.id,
         host_name: warning.host_name,
@@ -252,31 +277,35 @@ const fetchWarnings = async () => {
         warning_time: warning.warning_time
       }));
 
-      // 处理新告警
+      // 清空之前的活跃告警
+      activeAlerts.value = [];
+      
+      // 处理每条告警
       warningData.forEach(alert => {
-        handleNewAlert(alert);
+        if (alert) {  // 确保alert不为空
+          handleNewAlert(alert);
+        }
       });
       
       console.log('处理后的预警数据:', warnings.value);
+      console.log('当前活跃告警:', activeAlerts.value);
     }
   } catch (error) {
     console.error('获取预警信息失败:', error);
+    // 发生错误时也清空所有显示
+    clearAllAlerts();
     if (error.response) {
-      // 服务器返回了错误状态码
       console.error('错误状态码:', error.response.status);
       console.error('错误响应头:', error.response.headers);
       console.error('错误响应数据:', error.response.data);
       
-      // 如果是 401 未授权错误，可能是 token 问题
       if (error.response.status === 401) {
         console.error('Token 可能已过期或无效');
         ElMessage.error('登录已过期，请重新登录');
       }
     } else if (error.request) {
-      // 请求已发送但没有收到响应
       console.error('未收到响应，请求信息:', error.request);
     } else {
-      // 请求配置出错
       console.error('请求配置错误:', error.message);
     }
     ElMessage.error('获取预警信息失败，请检查网络连接');
@@ -375,6 +404,7 @@ onMounted(() => {
   
   // 如果当前是主页面，开始获取预警信息
   if (isHomeRoute.value) {
+    clearAllAlerts(); // 初始化时清空所有显示
     fetchWarnings();
   }
 
@@ -621,14 +651,15 @@ const handleServerFileDownload = (data) => {
 
 // 处理新告警
 const handleNewAlert = (alert) => {
-  const alertId = `${alert.host_name}-${alert.warning_type}-${alert.warning_time}`;
-  
-  // 检查是否在最近5分钟内收到过相同告警
-  if (recentAlerts.value.has(alertId)) {
+  // 如果标识为1或alert为空，直接返回
+  if (noAlertsFlag.value === 1 || !alert) {
+    console.log('noAlertsFlag为1或收到空告警，跳过处理');
     return;
   }
   
-  // 添加到活跃告警列表
+  console.log('处理新告警:', alert);
+  
+  // 直接添加到活跃告警列表
   activeAlerts.value.push({
     host_name: alert.host_name,
     warning_type: alert.warning_type,
@@ -636,11 +667,9 @@ const handleNewAlert = (alert) => {
     warning_title: alert.warning_title
   });
   
-  // 添加到最近告警集合
-  recentAlerts.value.add(alertId);
-  
   // 3秒后从活跃告警列表中移除
   setTimeout(() => {
+    if (noAlertsFlag.value === 1) return; // 如果flag为1，不执行移除操作
     const index = activeAlerts.value.findIndex(a => 
       a.host_name === alert.host_name && 
       a.warning_type === alert.warning_type && 
@@ -648,13 +677,9 @@ const handleNewAlert = (alert) => {
     );
     if (index !== -1) {
       activeAlerts.value.splice(index, 1);
+      console.log('移除告警:', alert);
     }
   }, 3000);
-  
-  // 5分钟后从最近告警集合中移除
-  setTimeout(() => {
-    recentAlerts.value.delete(alertId);
-  }, 300000);
 };
 
 // 查看告警详情
@@ -664,57 +689,12 @@ const viewAlert = (alert) => {
   // 可以打开一个详情弹窗或跳转到详情页面
 };
 
-// 模拟获取告警数据
-const fetchAlerts = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    console.log('使用的token:', token);
-    
-    // 使用静态数据演示
-    const mockAlerts = [
-      {
-        host_name: 'host1',
-        warning_type: 'CPU使用率',
-        timestamp: Date.now(),
-        message: 'CPU使用率超过90%'
-      },
-      {
-        host_name: 'host2',
-        warning_type: '内存使用率',
-        timestamp: Date.now(),
-        message: '内存使用率超过85%'
-      }
-    ];
-
-    // 处理每条告警
-    mockAlerts.forEach(alert => {
-      handleNewAlert(alert);
-    });
-
-    // 实际API调用（已注释）
-    /*
-    const response = await axios.get(`http://113.44.170.52:8080/agent/getwarning/${host}`, {
-      headers: {
-        'Authorization': token 
-      }
-    });
-
-    if (response.data && Array.isArray(response.data)) {
-      response.data.forEach(alert => {
-        handleNewAlert(alert);
-      });
-    }
-    */
-  } catch (error) {
-    console.error('获取告警失败:', error);
-  }
-};
-
 // 定期获取告警
 let alertInterval;
 onMounted(() => {
-  fetchAlerts(); // 初始获取
-  alertInterval = setInterval(fetchAlerts, 30000); // 每30秒获取一次
+  clearAllAlerts(); // 初始化时清空所有显示
+  fetchWarnings(); // 初始获取
+  alertInterval = setInterval(fetchWarnings, 60000); // 每60秒获取一次
 });
 
 onUnmounted(() => {
@@ -723,7 +703,7 @@ onUnmounted(() => {
   }
   // 组件卸载时取消监听
   eventBus.off('unread-count');
-  
+  clearAllAlerts(); // 组件卸载时清空所有显示
 });
 
 // 格式化警告标题，根据warning_type显示相应的使用率数据
