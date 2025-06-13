@@ -110,8 +110,13 @@
         <div class="alert-content">
           <el-icon class="warning-icon"><Warning /></el-icon>
           <div class="alert-text">
-            <div class="alert-title">{{ alert.host_name }} {{ alert.warning_type }}告警</div>
-            <div class="alert-detail">{{ formatWarningTitle(alert.warning_title, alert.warning_type) }}</div>
+            <template v-if="alert.warning_type === '通用告警'">
+              <div class="alert-title">{{ alert.warning_title }}</div>
+            </template>
+            <template v-else>
+              <div class="alert-title">{{ alert.host_name }} {{ alert.warning_type }}告警</div>
+              <div class="alert-detail">{{ formatWarningTitle(alert.warning_title, alert.warning_type) }}</div>
+            </template>
           </div>
           <button class="view-button" @click="viewAlert(alert)">查看</button>
         </div>
@@ -226,9 +231,84 @@ const noAlertsFlag = ref(0);
 
 // 清空所有告警显示的函数
 const clearAllAlerts = () => {
+  console.log('清空所有告警显示');
   warnings.value = [];
   activeAlerts.value = [];
   noAlertsFlag.value = 1;
+};
+
+// 处理新告警
+const handleNewAlert = (alert) => {
+  // 如果标识为1或alert为空，直接返回
+  if (noAlertsFlag.value === 1 || !alert) {
+    console.log('noAlertsFlag为1或收到空告警，跳过处理');
+    return;
+  }
+  
+  console.log('处理新告警:', alert);
+  
+  // 直接添加到活跃告警列表
+  activeAlerts.value.push({
+    id: alert.id, // Ensure ID is passed for removal
+    host_name: alert.host_name,
+    warning_type: alert.warning_type,
+    warning_time: alert.warning_time,
+    warning_title: alert.warning_title
+  });
+  
+  // 3秒后从活跃告警列表中移除
+  setTimeout(() => {
+    if (noAlertsFlag.value === 1) return; // 如果flag为1，不执行移除操作
+    const index = activeAlerts.value.findIndex(a => 
+      a.id === alert.id // Use unique ID for generic alert
+    );
+    if (index !== -1) {
+      activeAlerts.value.splice(index, 1);
+      console.log('移除告警:', alert);
+    }
+  }, 3000);
+};
+
+// 查看告警详情
+const viewAlert = (alert) => {
+  if (alert.warning_type === '通用告警') {
+    console.log('点击通用告警查看按钮，打开告警侧边栏');
+    toggleSidebar2(); // Open the warning sidebar
+  } else {
+    // 这里可以添加查看告警详情的逻辑
+    console.log('查看具体告警:', alert);
+    // 可以打开一个详情弹窗或跳转到详情页面
+  }
+};
+
+// 格式化警告标题，根据warning_type显示相应的使用率数据
+const formatWarningTitle = (title, warning_type) => {
+  if (!title) return '';
+  
+  // 提取主机名和告警类型
+  const hostMatch = title.match(/主机\s+([^\s]+)\s+发生\s+([^，]+)/);
+  // 对于通用告警，不尝试解析
+  if (warning_type === '通用告警' || !hostMatch) return title;
+  
+  const hostName = hostMatch[1];
+  const alertType = hostMatch[2];
+  
+  // 提取使用率数据
+  const cpuMatch = title.match(/CPU使用率:\s*(\d+\.\d+)%/);
+  const memoryMatch = title.match(/内存使用率:\s*(\d+\.\d+)%/);
+  
+  // 构建格式化后的标题
+  let formattedTitle = `${hostName} 发生 ${alertType}告警\n`;
+  
+  // 根据warning_type添加相应的使用率数据
+  if (warning_type.includes('CPU') && cpuMatch) {
+    formattedTitle += `CPU使用率: ${cpuMatch[1]}%\n`;
+  }
+  if (warning_type.includes('内存') && memoryMatch) {
+    formattedTitle += `内存使用率: ${memoryMatch[1]}%`;
+  }
+  
+  return formattedTitle;
 };
 
 // 获取预警信息
@@ -260,7 +340,7 @@ const fetchWarnings = async () => {
       console.log('处理后的warningData:', warningData);
       
       // 如果数据为空数组，立即清空所有显示
-      if (!warningData || warningData.length === 1) {
+      if (!warningData || warningData.length === 0) {
         clearAllAlerts();
         return;
       }
@@ -280,12 +360,22 @@ const fetchWarnings = async () => {
       // 清空之前的活跃告警
       activeAlerts.value = [];
       
-      // 处理每条告警
-      warningData.forEach(alert => {
-        if (alert) {  // 确保alert不为空
-          handleNewAlert(alert);
+      // 区分处理：单个告警显示详情，多个告警显示通用提示
+      if (warningData.length > 1) {
+        console.log('检测到多条告警，显示一条通用悬浮窗');
+        handleNewAlert({
+          id: 'generic-multiple-alerts', // Unique ID for generic alert
+          host_name: '', // Not relevant for generic
+          warning_type: '通用告警', // Special type for generic message
+          warning_title: '有新的告警！', // The generic message
+          warning_time: new Date().toISOString() // Current time for generic
+        });
+      } else if (warningData.length === 1) { // Only one alert
+        console.log('检测到单条告警，显示具体悬浮窗');
+        if (warningData[0]) {
+          handleNewAlert(warningData[0]);
         }
-      });
+      }
       
       console.log('处理后的预警数据:', warnings.value);
       console.log('当前活跃告警:', activeAlerts.value);
@@ -326,7 +416,6 @@ const toggleSidebar = () => {
 const toggleSidebar2 = () => {
     sidebarOpen2.value = !sidebarOpen2.value;
 };
-//////////////////////////////////////////////////////////////////
 
 const activeButton = ref('home');
 const isDropdownVisible = ref(false);
@@ -396,7 +485,7 @@ eventBus.on('unread-count', (count) => {
   unreadCount.value = count;
 });
 
-// 在组件挂载时检查用户角色
+// 在组件挂载时初始化
 onMounted(() => {
   console.log('组件开始挂载');
   checkUserRole();
@@ -417,6 +506,23 @@ onMounted(() => {
     if (newToken) fetchUnreadCount();
     else unreadCount.value = 0;
      });
+});
+
+// 定期获取告警
+let alertInterval;
+onMounted(() => {
+  clearAllAlerts(); // 初始化时清空所有显示
+  fetchWarnings(); // 初始获取
+  alertInterval = setInterval(fetchWarnings, 60000); // 每60秒获取一次
+});
+
+onUnmounted(() => {
+  if (alertInterval) {
+    clearInterval(alertInterval);
+  }
+  // 组件卸载时取消监听
+  eventBus.off('unread-count');
+  clearAllAlerts(); // 组件卸载时清空所有显示
 });
 
 // 修改导航函数
@@ -647,92 +753,6 @@ const handleLocalFileTransfer = (data) => {
 const handleServerFileDownload = (data) => {
   console.log('服务器文件下载完成:', data);
   ElMessage.success('服务器文件下载成功！');
-};
-
-// 处理新告警
-const handleNewAlert = (alert) => {
-  // 如果标识为1或alert为空，直接返回
-  if (noAlertsFlag.value === 1 || !alert) {
-    console.log('noAlertsFlag为1或收到空告警，跳过处理');
-    return;
-  }
-  
-  console.log('处理新告警:', alert);
-  
-  // 直接添加到活跃告警列表
-  activeAlerts.value.push({
-    host_name: alert.host_name,
-    warning_type: alert.warning_type,
-    warning_time: alert.warning_time,
-    warning_title: alert.warning_title
-  });
-  
-  // 3秒后从活跃告警列表中移除
-  setTimeout(() => {
-    if (noAlertsFlag.value === 1) return; // 如果flag为1，不执行移除操作
-    const index = activeAlerts.value.findIndex(a => 
-      a.host_name === alert.host_name && 
-      a.warning_type === alert.warning_type && 
-      a.warning_time === alert.warning_time
-    );
-    if (index !== -1) {
-      activeAlerts.value.splice(index, 1);
-      console.log('移除告警:', alert);
-    }
-  }, 3000);
-};
-
-// 查看告警详情
-const viewAlert = (alert) => {
-  // 这里可以添加查看告警详情的逻辑
-  console.log('查看告警:', alert);
-  // 可以打开一个详情弹窗或跳转到详情页面
-};
-
-// 定期获取告警
-let alertInterval;
-onMounted(() => {
-  clearAllAlerts(); // 初始化时清空所有显示
-  fetchWarnings(); // 初始获取
-  alertInterval = setInterval(fetchWarnings, 60000); // 每60秒获取一次
-});
-
-onUnmounted(() => {
-  if (alertInterval) {
-    clearInterval(alertInterval);
-  }
-  // 组件卸载时取消监听
-  eventBus.off('unread-count');
-  clearAllAlerts(); // 组件卸载时清空所有显示
-});
-
-// 格式化警告标题，根据warning_type显示相应的使用率数据
-const formatWarningTitle = (title, warning_type) => {
-  if (!title) return '';
-  
-  // 提取主机名和告警类型
-  const hostMatch = title.match(/主机\s+([^\s]+)\s+发生\s+([^，]+)/);
-  if (!hostMatch) return title;
-  
-  const hostName = hostMatch[1];
-  const alertType = hostMatch[2];
-  
-  // 提取使用率数据
-  const cpuMatch = title.match(/CPU使用率:\s*(\d+\.\d+)%/);
-  const memoryMatch = title.match(/内存使用率:\s*(\d+\.\d+)%/);
-  
-  // 构建格式化后的标题
-  let formattedTitle = `${hostName} 发生 ${alertType}告警\n`;
-  
-  // 根据warning_type添加相应的使用率数据
-  if (warning_type.includes('CPU') && cpuMatch) {
-    formattedTitle += `CPU使用率: ${cpuMatch[1]}%\n`;
-  }
-  if (warning_type.includes('内存') && memoryMatch) {
-    formattedTitle += `内存使用率: ${memoryMatch[1]}%`;
-  }
-  
-  return formattedTitle;
 };
 </script>
 
