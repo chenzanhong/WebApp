@@ -48,10 +48,7 @@
           <!-- 进程信息区域 -->
           <div class="metric-box">
               <h2>运行进程</h2>
-              <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>命令行：</span>
-                      <span>{{ process.cmdline }}</span>
-                  </div>
+             
               <div  v-for="(process, index) in processData" :key="index" class="info-item">
                       <span>PID：</span>
                       <span>{{ process.pid }}</span>
@@ -1015,11 +1012,10 @@ update_time: netData.net_info_created_at
 
 
 // 进程数据处理
-const latestProcessEntry = serverData.data.pro_info?.slice(-1)[0] || {}
+const latestProcessEntry = serverData.data.pro_info?.[0] || {}
 const processData = latestProcessEntry || {}
 this.processData = [{
 pid: processData.pid || 'N/A',
-cmdline: processData.cmdline || '未知命令',
 cpu_percent: processData.cpu_percent?.toFixed(1) || 0,
 mem_percent: processData.mem_percent?.toFixed(1) || 0
 }]
@@ -1087,7 +1083,7 @@ beforeDestroy() {
 .left-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 45px;
 }
 
 .right-container {
