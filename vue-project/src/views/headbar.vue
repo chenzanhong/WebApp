@@ -74,7 +74,7 @@
       <div class="sidebar2">
         <div class="sidebar-header2">告警</div>
         <div class="sidebar-menu2">
-          <div v-if="noAlertsFlag === 0" v-for="(warning, index) in warnings" :key="index" class="warning-item">
+          <div v-if="noAlertsFlag === 0" v-for="(warning, index) in warnings" :key="index" class="warning-item" @click="viewAlert(warning)">
             <div class="warning-content">
               <div class="warning-title">{{ formatWarningTitle(warning.warning_title, warning.warning_type) }}</div>
               <div class="warning-message">{{ warning.warning_message }}</div>
@@ -279,9 +279,16 @@ const viewAlert = (alert) => {
     console.log('点击通用告警查看按钮，打开告警侧边栏');
     toggleSidebar2(); // Open the warning sidebar
   } else {
-    // 这里可以添加查看告警详情的逻辑
+    // 这是针对具体告警的逻辑
     console.log('查看具体告警:', alert);
-    // 可以打开一个详情弹窗或跳转到详情页面
+    if (alert.host_name) {
+      router.push(`/headbar/monitor/${alert.host_name}`);
+      console.log(`导航到: /headbar/monitor/${alert.host_name}`);
+      // 可以选择在导航后关闭侧边栏
+      // sidebarOpen2.value = false;
+    } else {
+      console.warn('告警缺少host_name，无法导航到监控页面。告警数据:', alert);
+    }
   }
 };
 
@@ -1099,6 +1106,7 @@ const handleServerFileDownload = (data) => {
   background-color: #414951;
   border-radius: 8px;
   color: white;
+  cursor: pointer;
 }
 
 
