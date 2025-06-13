@@ -293,14 +293,14 @@ watch(() => props.visible, (newVal) => {
   if (newVal) {
     // 重置表单
     formData.value = {
-      host: '120.79.200.1',
-        user: 'user1',
-        password: '123456',
-        port: 8500,
-        Host_Name: 'ljn',
-        os: 'linux',
-        platform: 'ubuntu',
-        kernel_arch: 'amd64',
+      host: '',
+        user: '',
+        password: '',
+        port: 22,
+        Host_Name: '',
+        os: '',
+        platform: '',
+        kernel_arch: '',
         cpuThreshold: 90,
         memoryThreshold: 90
     };
