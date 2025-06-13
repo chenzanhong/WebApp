@@ -229,12 +229,16 @@ const activeAlerts = ref([]);
 // 添加告警显示控制标识
 const noAlertsFlag = ref(0);
 
+// 存储上一次获取到的告警数量
+const previousWarningCount = ref(0);
+
 // 清空所有告警显示的函数
 const clearAllAlerts = () => {
   console.log('清空所有告警显示');
   warnings.value = [];
   activeAlerts.value = [];
   noAlertsFlag.value = 1;
+  previousWarningCount.value = 0; // 重置上一次告警数量
 };
 
 // 处理新告警
@@ -340,15 +344,22 @@ const fetchWarnings = async () => {
       console.log('处理后的warningData:', warningData);
       
       // 如果数据为空数组，立即清空所有显示
-      if (!warningData || warningData.length === 0) {
+      if (!warningData || warningData.length === 0) { 
         clearAllAlerts();
+        // 更新上一次的告警数量
+        previousWarningCount.value = 0; 
         return;
       }
       
+      // 检查告警数量是否增加，如果增加才显示悬浮窗
+      const currentWarningCount = warningData.length;
+      const shouldShowPopup = currentWarningCount > previousWarningCount.value;
+      console.log(`当前告警数量: ${currentWarningCount}, 上次告警数量: ${previousWarningCount.value}, 是否显示悬浮窗: ${shouldShowPopup}`);
+
       // 重置标识
       noAlertsFlag.value = 0;
       
-      // 更新warnings数组
+      // 更新warnings数组 (侧边栏始终显示所有告警)
       warnings.value = warningData.map(warning => ({
         id: warning.id,
         host_name: warning.host_name,
@@ -360,30 +371,39 @@ const fetchWarnings = async () => {
       // 清空之前的活跃告警
       activeAlerts.value = [];
       
-      // 区分处理：单个告警显示详情，多个告警显示通用提示
-      if (warningData.length > 1) {
-        console.log('检测到多条告警，显示一条通用悬浮窗');
-        handleNewAlert({
-          id: 'generic-multiple-alerts', // Unique ID for generic alert
-          host_name: '', // Not relevant for generic
-          warning_type: '通用告警', // Special type for generic message
-          warning_title: '有新的告警！', // The generic message
-          warning_time: new Date().toISOString() // Current time for generic
-        });
-      } else if (warningData.length === 1) { // Only one alert
-        console.log('检测到单条告警，显示具体悬浮窗');
-        if (warningData[0]) {
-          handleNewAlert(warningData[0]);
+      // 只有当告警数量增加时才处理悬浮窗
+      if (shouldShowPopup) {
+        // 区分处理：单个告警显示详情，多个告警显示通用提示
+        if (warningData.length > 1) {
+          console.log('检测到多条告警，显示一条通用悬浮窗');
+          handleNewAlert({
+            id: 'generic-multiple-alerts', // Unique ID for generic alert
+            host_name: '', // Not relevant for generic
+            warning_type: '通用告警', // Special type for generic message
+            warning_title: '有新的告警！', // The generic message
+            warning_time: new Date().toISOString() // Current time for generic
+          });
+        } else if (warningData.length === 1) { // Only one alert
+          console.log('检测到单条告警，显示具体悬浮窗');
+          if (warningData[0]) {
+            handleNewAlert(warningData[0]);
+          }
         }
       }
       
       console.log('处理后的预警数据:', warnings.value);
       console.log('当前活跃告警:', activeAlerts.value);
+
+      // 更新上一次的告警数量
+      previousWarningCount.value = currentWarningCount; 
+
     }
   } catch (error) {
     console.error('获取预警信息失败:', error);
     // 发生错误时也清空所有显示
     clearAllAlerts();
+    // 确保错误时也重置上一次告警数量
+    previousWarningCount.value = 0; 
     if (error.response) {
       console.error('错误状态码:', error.response.status);
       console.error('错误响应头:', error.response.headers);
