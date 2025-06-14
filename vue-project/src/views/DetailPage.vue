@@ -929,7 +929,7 @@ methods: {
       // 启动新的数据刷新定时器
       this.dataRefreshInterval = setInterval(() => {
         this.refreshDataOnly();
-      }, 10000)
+      }, 4000)
     },
     
     // 修改停止刷新方法
@@ -954,62 +954,77 @@ kernel_arch: serverData.data.host_info?.kernel_arch || 'N/A',
 last_report: serverData.data.ost_info?.host_info_created_at
 }
 
-// CPU数据（取最新时间点的数据）
-const latestCpuEntry = serverData.data.cpu_info?.slice(-1)[0] || {}
-const cpuData = latestCpuEntry || {}
-this.cpuData = {
-model_name: cpuData.model_name || 'N/A',
-percent: cpuData.percent?.toFixed(1) || 0,
-cores_num: cpuData.cores_num || 0
-}
- // 获取最新CPU使用率并添加到历史记录
-      const latestCpuPercent = this.cpuData.percent;
-      this.cpuUsageHistory.push({
-        value: latestCpuPercent,
-        time: Date.now() // 记录时间戳
-      });
-       // 限制历史记录长度
-      if (this.cpuUsageHistory.length > 100) {
-        this.cpuUsageHistory.shift();
-      }
+ // 计算总的CPU使用率和平均值
+  const cpuInfos = serverData.data.cpu_info || [];
+  let totalCpuPercent = 0;
+  cpuInfos.forEach(cpuInfo => {
+    if (cpuInfo.percent !== undefined) {
+      totalCpuPercent += parseFloat(cpuInfo.percent);
+    }
+  });
+  const avgCpuPercent = cpuInfos.length > 0 ? (totalCpuPercent / cpuInfos.length).toFixed(1) : 0;
 
-      // 更新趋势图表（无需重新初始化，直接更新数据）
-      if (this.cpuProcessChart) {
-        this.updateCpuUsageTrendChart();
-      }
+  // 更新CPU数据
+  this.cpuData = {
+    model_name: cpuInfos.length > 0 ? cpuInfos[0].model_name || 'N/A' : 'N/A', // 假设所有CPU核心型号相同，取第一个
+    percent: avgCpuPercent, // 使用平均百分比
+    cores_num: cpuInfos.length // 核心数量
+  }
+
+  // 获取最新CPU使用率并添加到历史记录
+  this.cpuUsageHistory.push({
+    value: avgCpuPercent,
+    time: Date.now() // 记录时间戳
+  });
+  // 限制历史记录长度
+  if (this.cpuUsageHistory.length > 100) {
+    this.cpuUsageHistory.shift();
+  }
+
+      // 更新趋势图表（无需重新初始化，直接更新数据）
+      if (this.cpuProcessChart) {
+        this.updateCpuUsageTrendChart();
+      }
 // 内存数据
 this.memoryData = {
 total:serverData.data.mem_info?.total || 'N/A',
 used: serverData.data.mem_info?.used || 'N/A',
 user_percent: serverData.data.mem_info?.user_percent?.toFixed(1) || 0.00
 }
- const latestMemPercent = Number(this.memoryData.user_percent);
-      if (!isNaN(latestMemPercent)) {
-        this.memoryUsageHistory.push({
-          value: latestMemPercent,
-          time: Date.now()
-        });
-        // 限制历史记录长度
-        if (this.memoryUsageHistory.length > 100) {
-          this.memoryUsageHistory.shift();
-        }
-      }
+ const latestMemPercent = Number(this.memoryData.user_percent);
+      if (!isNaN(latestMemPercent)) {
+        this.memoryUsageHistory.push({
+          value: latestMemPercent,
+          time: Date.now()
+        });
+        // 限制历史记录长度
+        if (this.memoryUsageHistory.length > 100) {
+          this.memoryUsageHistory.shift();
+        }
+      }
 
-      // 更新内存趋势图表
-      if (this.memoryUsageChart) {
-        this.updateMemoryUsageTrendChart();
-      }
+      // 更新内存趋势图表
+      if (this.memoryUsageChart) {
+        this.updateMemoryUsageTrendChart();
+      }
 
 // 网络数据处理
-const latestNetEntry = serverData.data.net_info?.slice(-1)[0] || {}
-const netData = latestNetEntry || {}
+const netInfos = serverData.data.net_info || [];
+let totalBytesSent = 0;
+let totalBytesRecv = 0;
+for (const net of netInfos) {
+  totalBytesSent += parseInt(net.bytes_sent) || 0;
+  totalBytesRecv += parseInt(net.bytes_recv) || 0;
+}
+const avgBytesSent = netInfos.length > 0 ? (totalBytesSent / netInfos.length).toFixed(2) : 0;
+const avgBytesRecv = netInfos.length > 0 ? (totalBytesRecv / netInfos.length).toFixed(2) : 0;
+const latestUpdateTime = new Date().toLocaleString(); // 所有网卡都是当前时间，可以统一显示
 this.netData = [{
-name: netData.name || '未知接口',
-bytes_sent: formatTraffic(netData.bytes_sent),
-bytes_recv: formatTraffic(netData.bytes_recv),
-update_time: netData.net_info_created_at
-}]
-
+  name: '总流量',
+  bytes_sent: formatTraffic(totalBytesSent),
+  bytes_recv: formatTraffic(totalBytesRecv),
+  update_time: latestUpdateTime
+}];
 
 // 进程数据处理
 const latestProcessEntry = serverData.data.pro_info?.[0] || {}
@@ -1020,7 +1035,7 @@ cpu_percent: processData.cpu_percent?.toFixed(1) || 0,
 mem_percent: processData.mem_percent?.toFixed(1) || 0
 }]
 // 告警信息
-  this.alertMessages = serverData.alert_messages || '' // 存储告警信息
+// this.alertMessages = serverData.alert_messages || '' // 存储告警信息
 // 只更新图表，不重新初始化组件
       this.updateCpuChart();
       this.updateMemoryChart();
