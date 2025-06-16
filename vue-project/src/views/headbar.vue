@@ -1212,7 +1212,8 @@ const handleServerFileDownload = (data) => {
       transform: translate(-50%, -50%);
       width: 60vw;
       max-width: 550px;
-      height: 320px;
+      height: %40;
+      max-width: 500px;
       background-color: #222222;
       border: 1px solid #636161;
       color: white;

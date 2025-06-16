@@ -72,6 +72,155 @@
   </div>
 </template>
 
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { ElInput, ElMessageBox, ElButton, ElMessage } from 'element-plus';
+import { Search, Plus, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase } from '@element-plus/icons-vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+// 初始化公司列表
+const companies = ref([]);
+const isAllDisabled = ref(false);
+const searchQuery = ref('');
+const show = ref(false);
+const deleteDialogVisible = ref(false);
+const serverToDelete = ref("");
+const selectedTool = ref('home');
+
+// 获取公司列表
+const fetchCompanyList = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      ElMessage.error('请先登录');
+      router.push('/login');
+      return;
+    }
+
+    const response = await fetch('http://113.44.170.52:8080/agent/get-company-list', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}` 
+      }
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      ElMessage.error(data.message || '获取公司列表失败');
+      return;
+    }
+
+    const data = await response.json();
+    console.log('获取公司列表接口返回的原始数据:', data);
+    console.log('data.data:', data.data);
+
+    if (data.message === '查询成功') {
+      const mappedCompanies = data.data.map(company => {
+        console.log('单个公司数据:', company);
+        return {
+          id: company.id,
+          name: company.name,
+          manager: company.adminName,
+          email: company.adminEmail,
+          staffCount: company.membernum,
+          serverCount: company.systemnum,
+          isDisabled: false
+        };
+      });
+      
+      console.log('映射后的公司数据:', mappedCompanies);
+      companies.value = mappedCompanies;
+      // 更新全选状态
+      isAllDisabled.value = companies.value.every(c => c.isDisabled);
+    }
+  } catch (error) {
+    console.error('获取公司列表出错:', error);
+    ElMessage.error('网络请求失败，请检查网络或稍后重试');
+  }
+};
+
+// 组件挂载后获取数据
+onMounted(() => {
+  fetchCompanyList();
+});
+
+// 切换全部状态
+const toggleAllDisable = () => {
+  const newState = !isAllDisabled.value;
+  companies.value.forEach(company => {
+    company.isDisabled = newState;
+  });
+  isAllDisabled.value = newState;
+};
+
+// 切换单个公司状态
+const toggleDisable = (company) => {
+  company.isDisabled = !company.isDisabled;
+  isAllDisabled.value = companies.value.every(c => c.isDisabled);
+  console.log(`切换公司状态：${company.name} 现在为 ${company.isDisabled ? '停用' : '启用'}`);
+};
+
+// 其他功能函数（删除、添加、工具栏处理等）保持不变
+const openDeleteDialog = (server) => {
+  serverToDelete.value = server.name;
+  deleteDialogVisible.value = true;
+};
+
+const handleDelete = () => {
+  console.log("删除服务器:", serverToDelete.value);
+  alert(`已删除服务器: ${serverToDelete.value}`);
+};
+
+const openDialog = () => {
+  show.value = true;
+};
+
+const handleSubmit = (serverData) => {
+  console.log("收到表单数据:", serverData);
+  alert("服务器信息提交成功！");
+};
+
+const handleToolClick = (tool, companyName) => {
+  selectedTool.value = tool;
+  switch (tool) {
+    case 'home':
+      router.push('/headbar/home');
+      break;
+    case 'notice':
+      router.push('/headbar/notice');
+      break;
+    case 'setting':
+      router.push('/headbar/setting');
+      break;
+    case 'teambusiness':
+      router.push('/headbar/display/teambusiness');
+      break;
+    case 'help':
+      router.push('/headbar/help');
+      break;
+    case 'companyadmin':
+      router.push({ 
+        path: '/headbar/companyadmin',
+        query: { companyName: companyName }
+      });
+      break;
+  }
+};
+
+const navigateToHome = () => {
+  currentView.value = 'home';
+};
+
+const openSettings = () => {};
+const showMessages = () => {};
+const showBriefcase = () => {};
+const showHelp = () => {};
+</script>
+
+
 <style scoped>
 @font-face {
   font-family: 'PangMenZhengDao';
@@ -315,150 +464,3 @@
   border: #636161;
 }
 </style>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import { ElInput, ElMessageBox, ElButton, ElMessage } from 'element-plus';
-import { Search, Plus, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase } from '@element-plus/icons-vue';
-import { useRouter } from 'vue-router';
-const router = useRouter();
-
-// 初始化公司列表
-const companies = ref([]);
-const isAllDisabled = ref(false);
-const searchQuery = ref('');
-const show = ref(false);
-const deleteDialogVisible = ref(false);
-const serverToDelete = ref("");
-const selectedTool = ref('home');
-
-// 获取公司列表
-const fetchCompanyList = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      ElMessage.error('请先登录');
-      router.push('/login');
-      return;
-    }
-
-    const response = await fetch('http://113.44.170.52:8080/agent/get-company-list', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `${token}` 
-      }
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      ElMessage.error(data.message || '获取公司列表失败');
-      return;
-    }
-
-    const data = await response.json();
-    console.log('获取公司列表接口返回的原始数据:', data);
-    console.log('data.data:', data.data);
-
-    if (data.message === '查询成功') {
-      const mappedCompanies = data.data.map(company => {
-        console.log('单个公司数据:', company);
-        return {
-          id: company.id,
-          name: company.name,
-          manager: company.adminName,
-          email: company.adminEmail,
-          staffCount: company.membernum,
-          serverCount: company.systemnum,
-          isDisabled: false
-        };
-      });
-      
-      console.log('映射后的公司数据:', mappedCompanies);
-      companies.value = mappedCompanies;
-      // 更新全选状态
-      isAllDisabled.value = companies.value.every(c => c.isDisabled);
-    }
-  } catch (error) {
-    console.error('获取公司列表出错:', error);
-    ElMessage.error('网络请求失败，请检查网络或稍后重试');
-  }
-};
-
-// 组件挂载后获取数据
-onMounted(() => {
-  fetchCompanyList();
-});
-
-// 切换全部状态
-const toggleAllDisable = () => {
-  const newState = !isAllDisabled.value;
-  companies.value.forEach(company => {
-    company.isDisabled = newState;
-  });
-  isAllDisabled.value = newState;
-};
-
-// 切换单个公司状态
-const toggleDisable = (company) => {
-  company.isDisabled = !company.isDisabled;
-  isAllDisabled.value = companies.value.every(c => c.isDisabled);
-  console.log(`切换公司状态：${company.name} 现在为 ${company.isDisabled ? '停用' : '启用'}`);
-};
-
-// 其他功能函数（删除、添加、工具栏处理等）保持不变
-const openDeleteDialog = (server) => {
-  serverToDelete.value = server.name;
-  deleteDialogVisible.value = true;
-};
-
-const handleDelete = () => {
-  console.log("删除服务器:", serverToDelete.value);
-  alert(`已删除服务器: ${serverToDelete.value}`);
-};
-
-const openDialog = () => {
-  show.value = true;
-};
-
-const handleSubmit = (serverData) => {
-  console.log("收到表单数据:", serverData);
-  alert("服务器信息提交成功！");
-};
-
-const handleToolClick = (tool, companyName) => {
-  selectedTool.value = tool;
-  switch (tool) {
-    case 'home':
-      router.push('/headbar/home');
-      break;
-    case 'notice':
-      router.push('/headbar/notice');
-      break;
-    case 'setting':
-      router.push('/headbar/setting');
-      break;
-    case 'teambusiness':
-      router.push('/headbar/display/teambusiness');
-      break;
-    case 'help':
-      router.push('/headbar/help');
-      break;
-    case 'companyadmin':
-      router.push({ 
-        path: '/headbar/companyadmin',
-        query: { companyName: companyName }
-      });
-      break;
-  }
-};
-
-const navigateToHome = () => {
-  currentView.value = 'home';
-};
-
-const openSettings = () => {};
-const showMessages = () => {};
-const showBriefcase = () => {};
-const showHelp = () => {};
-</script>
