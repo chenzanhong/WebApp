@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="dialog-overlay" @click.self="closeDialog">
     <div class="dialog-box">
-      <div class="box-title">本机文件传输</div>
+      <div class="box-title">本地文件上传</div>
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
