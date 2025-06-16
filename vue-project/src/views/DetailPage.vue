@@ -48,21 +48,19 @@
           <!-- 进程信息区域 -->
           <div class="metric-box">
               <h2>运行进程</h2>
-             
-              <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>PID：</span>
-                      <span>{{ process.pid }}</span>
-                  </div>
-                  <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>CPU占用：</span>
-                      <span>{{ process.cpu_percent }}%</span>
-                  </div>
-                  <div  v-for="(process, index) in processData" :key="index" class="info-item">
-                      <span>内存占用：</span>
-                      <span>{{ process.mem_percent }}%</span>
-                  </div>
+              <div class="info-item">
+                  <span>总进程数：</span>
+                  <span>{{ processData.processCount }}</span>
+              </div>
+              <div class="info-item">
+                  <span>CPU总和：</span>
+                  <span>{{ processData.cpuTotal }}%</span>
+              </div>
+              <div class="info-item">
+                  <span>内存总和：</span>
+                  <span>{{ processData.memTotal }}%</span>
+              </div>
           </div>
-
           </div>
       <!-- 右侧容器 -->
       <div class="right-container">
@@ -199,18 +197,23 @@ data() {
 },
 watch: {
   '$route.params.hostname': {
-    handler(newVal) {
-      if (newVal) {
-        console.log('路由参数变化:', newVal)
-        this.fetchServerDetail()
-        // 启动定时刷新
-        this.startDataRefresh()
-      } else {
-        this.error = "缺少主机名参数"
-        // 清除定时器
-        this.stopRefresh()
-      }
-    }
+    handler(newVal, oldVal) {
+      if (!newVal || newVal === oldVal) return;
+      
+      // 清理旧资源
+      this.cleanupCharts();
+      this.stopRefresh();
+      
+      // 加载新数据
+      this.fetchServerDetail();
+      
+      // 重新初始化
+      this.$nextTick(() => {
+        this.initCharts();
+        this.startDataRefresh();
+      });
+    },
+    immediate: true
   }
 },
 created() {
@@ -330,7 +333,7 @@ methods: {
         {  headers: { 'Authorization': ` ${token}` } }
       )
 
-      if (!response.ok) throw new Error(`服务器实时数据获取失败: ${response.status}\n请确保已在被监控服务器上执行了添加该服务器时所给的脚本`)
+      if (!response.ok) throw new Error(`服务器实时数据获取失败\n请确保已在被监控服务器上执行了添加该服务器时所给的脚本`)
       
       const serverData = await response.json()
       console.log('后端系统信息:', serverData);
@@ -359,14 +362,19 @@ methods: {
         if (!response.ok) throw new Error(`请求失败: ${response.status}`)
         
         const serverData = await response.json()
+        console.log('后端最新信息:', serverData);
         this.updateData(serverData)
         
       } catch (error) {
         console.error('数据刷新失败:', error)
-        // 错误处理可以更轻量级，不需要重置整个界面
       }
     },
-
+ initCharts() {
+    this.initCpuChart();
+    this.initMemoryChart();
+    this.initCpuUsageTrendChart();
+    this.initMemoryProcessChart();
+  },
 // 初始化CPU图表
  async initCpuChart() {
     let retryCount = 0;
@@ -951,7 +959,7 @@ hostname: serverData.data.host_info?.host_name || 'N/A',
 os: serverData.data.host_info?.os || 'N/A',
 platform: serverData.data.host_info?.platform || 'N/A',
 kernel_arch: serverData.data.host_info?.kernel_arch || 'N/A',
-last_report: serverData.data.ost_info?.host_info_created_at
+last_report: serverData.data.host_info?.host_info_created_at
 }
 
  // 计算总的CPU使用率和平均值
@@ -1027,18 +1035,31 @@ this.netData = [{
 }];
 
 // 进程数据处理
-const latestProcessEntry = serverData.data.pro_info?.[0] || {}
-const processData = latestProcessEntry || {}
-this.processData = [{
-pid: processData.pid || 'N/A',
-cpu_percent: processData.cpu_percent?.toFixed(1) || 0,
-mem_percent: processData.mem_percent?.toFixed(1) || 0
-}]
+const proInfoArray = serverData.data.pro_info || [];
+
+// 计算总和并保留1位小数
+const calculateTotal = (key) => {
+    return proInfoArray.reduce((sum, process) => {
+        const value = process[key];
+        return sum + (typeof value === 'number' ? value : 0);
+    }, 0).toFixed(1);
+};
+
+this.processData = {
+    processCount: proInfoArray.length,
+    cpuTotal: calculateTotal('cpu_percent'),
+    memTotal: calculateTotal('mem_percent')
+};
 // 告警信息
 // this.alertMessages = serverData.alert_messages || '' // 存储告警信息
 // 只更新图表，不重新初始化组件
-      this.updateCpuChart();
-      this.updateMemoryChart();
+     // 只更新存在的图表实例
+  if (this.cpuChart && !this.cpuChart.isDisposed()) {
+    this.updateCpuChart();
+  }
+      if (this.memoryChart && !this.memoryChart.isDisposed()) {
+    this.updateMemoryChart();
+  }
       
       if (this.cpuUsageChart) {
         this.updateCpuUsageTrendChart();
@@ -1051,10 +1072,40 @@ mem_percent: processData.mem_percent?.toFixed(1) || 0
 
 
 },
-
+// 添加 activated 钩子
+  activated() {
+    console.log('组件被激活')
+    // 在这里重新初始化图表并刷新数据
+    this.$nextTick(() => {
+      this.initCharts();
+      this.startDataRefresh();
+    });
+  },
+  
+  // 添加 deactivated 钩子
+  deactivated() {
+    console.log('组件被停用')
+    // 在这里清理资源
+    this.cleanupCharts();
+    this.stopRefresh();
+  },
 beforeDestroy() {
   // 在组件销毁前清除定时器
-  this.stopRefresh()
+  this.stopRefresh();
+  // 安全销毁图表
+  const destroyChart = (chart) => {
+    if (chart && !chart.isDisposed()) {
+      chart.dispose();
+    }
+  };
+  
+  destroyChart(this.cpuChart);
+  destroyChart(this.memoryChart);
+  destroyChart(this.cpuUsageChart);
+  destroyChart(this.memoryUsageChart);
+  
+  // 移除事件监听器
+  window.removeEventListener('resize', this.handleChartResize);
 }
 
 
