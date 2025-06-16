@@ -113,7 +113,7 @@ export default {
             return statusMap[item.status] || '';
         },
 
-        // 修改后的确认处理方法
+        // 确认处理方法
         async handleConfirm(item, index) {
             try {
                 // 先更新本地状态
@@ -123,6 +123,7 @@ export default {
                 await this.processConfirm(item.id);
                 console.log(`确认请求发送成功，消息 ID: ${item.id}`);
                 // 确认成功后，触发更新事件
+                await this.fetchNotifications();
                 // 触发事件更新全局计数（数量减少1）
                 eventBus.emit('decrement-unread', 1);
                 
