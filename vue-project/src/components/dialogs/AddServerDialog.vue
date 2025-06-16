@@ -198,7 +198,9 @@ const submitForm = async () => {
       Host_Name: formData.value.Host_Name, // Fixed: Changed from hostName to Host_Name to match the form binding
       os: formData.value.os,
       platform: formData.value.platform,
-      kernel_arch: formData.value.kernel_arch
+      kernel_arch: formData.value.kernel_arch,
+      cpu_threshold: formData.value.cpuThreshold,
+      mem_threshold: formData.value.memoryThreshold
     };
     
     console.log('Submitting server data:', requestData); // Add debug log
@@ -236,24 +238,24 @@ const submitForm = async () => {
       // 服务器创建成功，现在设置阈值
       // 第二步：如果需要获取 JSON 数据，可单独发起请求或从 blob 解析（不推荐）
       // 这里假设你不需要 JSON 响应数据，继续设置阈值
-      const thresholdResponse = await fetch('http://113.44.170.52:8080/agent/setthreshold', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': ` ${token}`
-        },
-        body: JSON.stringify({
-          ip: formData.value.host,
-          cpu_threshold: formData.value.cpuThreshold,
-          mem_threshold: formData.value.memoryThreshold
-        })
-      });
+      // const thresholdResponse = await fetch('http://113.44.170.52:8080/agent/setthreshold', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': ` ${token}`
+      //   },
+      //   body: JSON.stringify({
+      //     hostname: formData.value.Host_Name,
+      //     cpu_threshold: formData.value.cpuThreshold,
+      //     mem_threshold: formData.value.memoryThreshold
+      //   })
+      // });
 
-      if (!thresholdResponse.ok) {
-        throw new Error('设置阈值失败');
-      }
+      // if (!thresholdResponse.ok) {
+      //   throw new Error('设置阈值失败');
+      // }
 
-      ElMessage.success('服务器添加成功，阈值设置完成');
+      ElMessage.success('服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行！');
       emit('success', {});
       closeDialog();
     } else {

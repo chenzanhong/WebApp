@@ -330,7 +330,7 @@ methods: {
         {  headers: { 'Authorization': ` ${token}` } }
       )
 
-      if (!response.ok) throw new Error(`请求失败: ${response.status}`)
+      if (!response.ok) throw new Error(`服务器实时数据获取失败: ${response.status}\n请确保已在被监控服务器上执行了添加该服务器时所给的脚本`)
       
       const serverData = await response.json()
       console.log('后端系统信息:', serverData);
@@ -929,7 +929,7 @@ methods: {
       // 启动新的数据刷新定时器
       this.dataRefreshInterval = setInterval(() => {
         this.refreshDataOnly();
-      }, 4000)
+      }, 3000)
     },
     
     // 修改停止刷新方法

@@ -120,16 +120,16 @@ const submitForm = async () => {
       "company": form.companyName,
       "social_credit_code": form.creditCode,
       "legal_name": form.legalPerson,
-      //"admin_name": form.monitorName,
-      "admin_name":'root',
-      // "admin_email": form.monitorEmail
-      "admin_email": 'root@example.com'
+      "admin_name": form.monitorName,
+      // "admin_name":'root',
+      "admin_email": form.monitorEmail
+      // "admin_email": 'root@example.com'
     };
 
     console.log('Submitting form:', requestBody); // 打印表单数据
 
     // 发送请求到后端
-    const response = await fetch('http://120.79.200.209:8080/agent/registercompany', {
+    const response = await fetch('http://113.44.170.52:8080/agent/registercompany', {
       method: 'POST',
       body: JSON.stringify(requestBody), // 将请求体转换为 JSON 字符串
       headers: {
@@ -143,7 +143,7 @@ const submitForm = async () => {
     } else {
       const errorData = await response.json(); // 获取错误信息
       console.error('Error response:', errorData);
-      ElMessage.error('提交失败，请重试');
+      ElMessage.error('提交失败，请重试'+ errorData);
     }
   } catch (error) {
     console.error('Validation failed:', error); // 添加调试信息
