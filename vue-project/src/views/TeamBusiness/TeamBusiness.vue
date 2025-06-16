@@ -79,11 +79,12 @@ h2{
   background: black;
   min-height: 100vh;
   display: flex;
-  padding: 20px;
+  padding: 0;
+  margin: 0;
 }
 
 .left-nav {
-  width: 200px;
+  width: 240px;
   background: rgba(94, 118, 144, 0.34);
   padding: 20px;
   border-radius: 4px;
@@ -112,9 +113,10 @@ h2{
 .main-content {
   flex: 1;
   display: flex;
-  background:  rgba(94, 118, 144, 0.34);
+  background: rgba(94, 118, 144, 0.34);
   border-radius: 4px;
   padding: 30px;
+  margin: 20px 20px 0px 0;
 }
 
 .form-section {

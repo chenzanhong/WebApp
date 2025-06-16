@@ -31,21 +31,9 @@
             <el-option label="文件上传" value="文件上传" />
             <el-option label="文件下载" value="文件下载" />
             <el-option label="两服务器间单文件传输" value="两服务器间单文件传输" />
+            <el-option label="申请注册公司" value="申请注册公司" />
+            <el-option label="邀请公司成员" value="邀请公司成员" />
           </el-select>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">操作结果:</span>
-          <el-select v-model="resultType" placeholder="请选择结果类型" class="filter-select">
-            <el-option label="全部" value="all" />
-            <el-option label="成功" value="成功" />
-            <el-option label="失败" value="失败" />
-          </el-select>
-        </div>
-
-         <div class="filter-group">
-          <span class="filter-label">相关服务器:</span>
-          <el-input v-model="serverName" placeholder="请输入服务器ip/名称" class="server-input"></el-input>
         </div>
 
         <el-icon
@@ -63,7 +51,7 @@
         :border="false"
         class="log-table"
       >
-        <el-table-column type="index" label="序号" width="60" />
+        <el-table-column type="index" label="序号" width="80" />
         <el-table-column prop="timestamp" label="操作时间" :min-width="12 + 'vw'">
           <template #default="scope">
             {{ formatDate(scope.row.timestamp) }}
@@ -71,8 +59,6 @@
         </el-table-column>
         <el-table-column v-if="showOperatorColumn" prop="username" label="操作人" :min-width="8 + 'vw'" />
         <el-table-column prop="type" label="操作类型" :min-width="10 + 'vw'" />
-        <el-table-column prop="server_name" label="相关服务器" :min-width="10 + 'vw'" />
-        <el-table-column prop="result" label="操作结果" :min-width="8 + 'vw'" />
         <el-table-column prop="detail" label="操作详情" :min-width="15 + 'vw'" show-overflow-tooltip>
           <template #default="scope">
             <div style="white-space: normal; word-break: break-all;">{{ scope.row.detail }}</div>
@@ -102,8 +88,6 @@ import { Search } from '@element-plus/icons-vue';
 
 // 状态变量
 const logType = ref('all');
-const resultType = ref('all');
-const serverName = ref('');
 const dateRangeStart = ref(null);
 const dateRangeEnd = ref(null);
 const currentPage = ref(1);
@@ -136,10 +120,9 @@ const filteredLogs = computed(() => {
   let currentLogs = logs.value;
 
   // 根据操作结果进行前端过滤
-  if (resultType.value !== 'all') {
+  if (logType.value !== 'all') {
     currentLogs = currentLogs.filter(log => {
-      const result = log.level === 'error' ? '失败' : '成功';
-      return result === resultType.value;
+      return log.type === logType.value;
     });
   }
 
@@ -320,6 +303,8 @@ onMounted(() => {
   overflow-y: auto;
   scrollbar-width: none; 
   -ms-overflow-style: none; 
+  display: flex;
+  flex-direction: column;
 }
 
 .log-container::-webkit-scrollbar {
@@ -332,7 +317,7 @@ onMounted(() => {
   top: 0;
   background-color: #1a1a1a;
   z-index: 1;
-  padding: 10px 0;
+  padding: 10px 0 3px 0;
 }
 
 .log-header h2 {
@@ -378,22 +363,21 @@ onMounted(() => {
   width: 150px;
 }
 
-.server-input {
-  width: 200px; 
-}
-
 .log-content {
   flex: 1;
-  background-color: transparent;
+  background-color:  #212831;
   border-radius: 1rem;
-  padding: 25px;
-  margin: 13px 15px 28px 30px;
+  padding: 5px 25px;
+  margin: 13px 15px 6px 30px;
   border: 1px solid #374151;
   overflow-x: auto;
   scrollbar-width: none; 
-  -ms-overflow-style: none; /* IE and Edge */
-  min-width: 60vw; /* 设置最小宽度为视窗宽度的60% */
-  max-width: 95vw; /* 设置最大宽度为视窗宽度的95% */
+  -ms-overflow-style: none;
+  min-width: 60vw;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 220px);
 }
 
 .log-content::-webkit-scrollbar {
@@ -408,6 +392,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
+  padding-bottom: 20px;
 }
 
 :deep(.el-table) {
@@ -448,12 +433,12 @@ onMounted(() => {
   background-color: transparent !important;
   overflow-y: auto !important;
   max-height: calc(100vh - 300px) !important;
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 :deep(.el-table__body-wrapper::-webkit-scrollbar) {
-  display: none !important; /* Chrome, Safari, Opera */
+  display: none !important;
 }
 
 :deep(.el-table__header tr) {

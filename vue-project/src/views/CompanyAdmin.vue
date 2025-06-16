@@ -765,7 +765,7 @@ const confirmDelete = async () => {
     const token = localStorage.getItem('token');
     const usernames = selectedMembersToDelete.value.map(m => m.username);
     
-    const response = await fetch('http://113.44.170.52:8080/agent/deleteMembers', {
+    const response = await fetch('http://120.79.200.209:8080/agent/deleteMembers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -808,7 +808,7 @@ const addMember = async () => {
     }
 
     const token = localStorage.getItem('token');
-     const response = await fetch('http://113.44.170.52:8080/agent/addMember', {
+     const response = await fetch('http://120.79.200.209:8080/agent/addMember', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

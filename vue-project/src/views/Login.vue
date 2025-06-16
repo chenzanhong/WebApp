@@ -40,6 +40,87 @@
   </div>
 </template>
 
+<script>
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import { UserFilled, GoodsFilled,  InfoFilled,CircleCloseFilled } from '@element-plus/icons-vue';
+import { View, Hide } from '@element-plus/icons-vue' // 必须添加这行
+
+export default {
+  name: 'LoginPage',
+  components: {
+    UserFilled,
+    GoodsFilled,
+    View,
+    Hide,
+    InfoFilled,
+    CircleCloseFilled
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      passwordType: 'password'
+    };
+  },
+   methods: {
+    resetClick(){
+      const router = useRouter();
+      this.$router.push('/resetpassword');
+    },
+    async loginClick() {
+      try {
+        const response = await fetch('http://113.44.170.52:8080/agent/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: this.email,
+            password: this.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.message === '登录成功') {
+          console.log('[登录成功] 完整响应数据:', data); 
+          const token = data.token;
+          localStorage.setItem('token', token);//token存到本地
+          localStorage.setItem('userRole', data.role); // 存储用户角色
+          ElMessage.success(data.message);
+
+          if(data.role === 'ROOT') {
+            this.$router.push('/headbar/systemadmin');
+          } else if(data.role === 'ADMIN') {
+            this.$router.push('/headbar/companyadmin');
+          } else {
+            this.$router.push('/headbar/home');
+          }
+        } else {
+          ElMessage.error(data.message);
+          this.email = '';
+          this.password = '';
+        }
+      } catch (error) {
+        console.error('登录请求出错:', error);
+        ElMessage.error('登录失败，请检查网络或稍后重试');
+      }
+    },
+    togglePasswordVisibility() {
+      this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
+    },
+    closeLoginBox() {
+            const router = useRouter();
+            this.$router.push('/');
+        }
+  },
+  mounted() {}
+};
+</script>
+
+
+
 <style scoped>
 @font-face {
   font-family: 'PangMenZhengDao';
@@ -276,82 +357,3 @@ a span {
 }
 
 </style>
-
-<script>
-import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
-import { UserFilled, GoodsFilled,  InfoFilled,CircleCloseFilled } from '@element-plus/icons-vue';
-import { View, Hide } from '@element-plus/icons-vue' // 必须添加这行
-
-export default {
-  name: 'LoginPage',
-  components: {
-    UserFilled,
-    GoodsFilled,
-    View,
-    Hide,
-    InfoFilled,
-    CircleCloseFilled
-  },
-  data() {
-    return {
-      email: '',
-      password: '',
-      passwordType: 'password'
-    };
-  },
-   methods: {
-    resetClick(){
-      const router = useRouter();
-      this.$router.push('/resetpassword');
-    },
-    async loginClick() {
-      try {
-        const response = await fetch('http://113.44.170.52:8080/agent/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: this.email,
-            password: this.password
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.message === '登录成功') {
-          console.log('[登录成功] 完整响应数据:', data); 
-          const token = data.token;
-          localStorage.setItem('token', token);//token存到本地
-          localStorage.setItem('userRole', data.role); // 存储用户角色
-          ElMessage.success(data.message);
-
-          if(data.role === 'ROOT') {
-            this.$router.push('/headbar/systemadmin');
-          } else if(data.role === 'ADMIN') {
-            this.$router.push('/headbar/companyadmin');
-          } else {
-            this.$router.push('/headbar/home');
-          }
-        } else {
-          ElMessage.error(data.message);
-          this.email = '';
-          this.password = '';
-        }
-      } catch (error) {
-        console.error('登录请求出错:', error);
-        ElMessage.error('登录失败，请检查网络或稍后重试');
-      }
-    },
-    togglePasswordVisibility() {
-      this.passwordType = this.passwordType === 'password' ? 'text' : 'password';
-    },
-    closeLoginBox() {
-            const router = useRouter();
-            this.$router.push('/');
-        }
-  },
-  mounted() {}
-};
-</script>

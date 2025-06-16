@@ -87,12 +87,6 @@
   font-style: normal;
 }
 
-.system-admin {
-  padding: 20px;
-  min-height: calc(100vh - 60px);
-  background-color: #f5f7fa;
-  margin-top: 20px; /* 增加与顶栏的间距 */
-}
 
 .content-container {
   max-width: 1400px; /* 增加最大宽度 */
@@ -101,16 +95,6 @@
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   padding: 20px;
-}
-
-.systemadmin {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  min-height: calc(100vh - 60px); /* 修改为min-height */
-  padding-bottom: 100px; /* 增加底部间隙 */
-  background-color: #000000;
 }
 
 .left {
@@ -124,10 +108,10 @@
 
 .main-content {
   flex: 1;
-  background-color: rgb(94, 118, 144, 0.34);
+  background-color:  rgb(94, 118, 144, 0.34);
   border-radius: 1rem;
   padding: 25px;
-  margin: 23px 30px 80px 30px; /* 顶部间距改为23px，底部间距增加到80px */
+  margin: 23px 30px 80px 30px; 
   border: 1px solid #374151;
 }
 

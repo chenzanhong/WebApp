@@ -68,11 +68,13 @@ export default {
   display: flex;
   height: 100vh;
   background-color: #000000;
+  margin: 0;
+  padding: 0;
 }
-/* 调整侧边栏样式 */
+
 .sidebar-menu li {
   font-size: 16px;
-  padding: 14px 20px;
+  padding: 14px 10px;
   margin: 8px 0;
   border-left: 4px solid transparent;
   transition: all 0.3s ease;
@@ -86,8 +88,9 @@ export default {
 .left-sidebar {
   width: 240px;
   background-color: #1f2931;
-  padding: 20px;
+  padding: 0;
   color: white;
+  margin: 0;
 }
 
 /* 添加 logo 样式 */
@@ -105,21 +108,46 @@ export default {
 }
 
 .sidebar-title {
-  padding: 15px;
+  padding: 15px 10px;
   margin: 0 0 20px;
   border-bottom: 1px solid #374151;
   font-family: "Poppins", sans-serif;
+  text-align: center;
+}
+
+.sidebar-menu {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar-menu li {
+  font-size: 16px;
+  padding: 14px 10px;
+  margin: 8px 0;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+  width: 80%;
+  text-align: center;
+}
+
+.sidebar-menu li.active {
+  border-left-color: #4299e1;
+  background-color: rgba(66, 153, 225, 0.1);
 }
 
 .sidebar-menu li {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
+  justify-content: center;
+  padding: 12px 10px;
   margin: 6px 0;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   font-family: "Poppins", sans-serif;
+  width: 80%;
 }
 
 .sidebar-menu li:hover {
@@ -140,8 +168,8 @@ export default {
   flex: 1;
   padding: 20px;
   background-color: rgba(31, 41, 49, 0.7);
-  margin: 20px;
-  border-radius: 1rem;
+  margin: 0;
+  border-radius: 0;
 }
 
 /* 右侧工具栏（与主界面完全一致） */

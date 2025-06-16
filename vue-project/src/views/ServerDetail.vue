@@ -12,7 +12,7 @@
               <asideNav  @serverListUpdated="updateServerList"></asideNav>
           </el-aside>
           <!-- 主页面 -->
-          <el-main style="flex: 1; margin-left: 350px;">
+          <el-main style="flex: 1; margin-left: 0px;">
               <DetailPage :serverList="serverList"></DetailPage>
           </el-main>
           

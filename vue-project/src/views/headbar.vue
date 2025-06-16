@@ -8,6 +8,7 @@
       <div class="nav-buttons">
         <button v-if="isAdmin" :class="{ active: activeButton === 'admin' }" @click="navigateTo('admin')">管理</button>
         <button :class="{ active: activeButton === 'home' }" @click="navigateTo('home')">主页面</button>
+        <div v-if="isMonitorRoute" class="detail-page-indicator"> > 详情页</div>
         <button :class="{ active: activeButton === 'notice' }" class="notice-button-container" @click="navigateTo('notice')">
     <span>通知</span>
     <div v-if="unreadCount > 0" class="notification-badge">
@@ -23,9 +24,9 @@
           <UserFilled />
         </el-icon>
 
-        <el-icon :class="{ active: activeButton === 'help' }" @click="navigateTo('help')">
+        <!-- <el-icon :class="{ active: activeButton === 'help' }" @click="navigateTo('help')">
           <QuestionFilled />
-        </el-icon>
+        </el-icon> -->
       </div>
     </div>
 
@@ -38,7 +39,7 @@
     <!-- 内容区 -->
     <div class="content-container">
       <!-- 功能侧边栏+按钮 -->
-      <div v-if="isHomeRoute" class="sidebar-wrapper">
+      <div v-if="isHomeRoute" class="sidebar-wrapper" :class="{ 'monitor-sidebar': isMonitorRoute }">
         <div class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen }">
           <div class="sidebar-header">功能</div>
           <div class="sidebar-menu">
@@ -52,7 +53,7 @@
               <el-icon>
                 <ArrowRight />
               </el-icon>
-              <span>本地文件上传</span>
+              <span>本机文件传输</span>
             </button>
             <button class="sidebar-button" @click="openServerFileDownloadDialog">
               <el-icon>
@@ -70,7 +71,7 @@
       </div>
       
       <!-- 告警侧边栏内容 -->
-    <div v-if="isHomeRoute" class="warning-sidebar-content-wrapper" :class="{ 'sidebar-open': sidebarOpen2 }">
+    <div v-if="isHomeRoute_warning" class="warning-sidebar-content-wrapper" :class="{ 'sidebar-open': sidebarOpen2 }">
       <div class="sidebar2">
         <div class="sidebar-header2">告警</div>
         <div class="sidebar-menu2">
@@ -87,7 +88,7 @@
     </div>
 
     <!-- 告警侧边栏激活按钮 -->
-    <div v-if="isHomeRoute" class="warning-sidebar-toggle-button" :class="{ 'button-open': sidebarOpen2 }" @click="toggleSidebar2">
+    <div v-if="isHomeRoute_warning" class="warning-sidebar-toggle-button" :class="{ 'button-open': sidebarOpen2 }" @click="toggleSidebar2">
       <el-icon class="warning-icon-button">
         <WarningFilled />
       </el-icon>
@@ -154,14 +155,6 @@
                 </span>
               </div>
             </div>
-
-            <div class="info-item">
-              <span class="input-title">真实姓名：</span>
-              <template v-if="!isEditing">
-                <span class="info-value">{{ userInfo.realname || '未填写' }}</span>
-              </template>
-              <input v-else v-model="userInfo.realname" class="info-input" type="text" placeholder="请输入真实姓名">
-            </div>
           </div>
           <div class="dialog-buttons">
             <button v-if="!isEditing" class="edit-button" @click="startEditing">修改</button>
@@ -177,7 +170,7 @@
       @transfer="handleServerFileTransfer"
     />
 
-    <!-- 本地文件上传弹窗 -->
+    <!-- 本机文件传输弹窗 -->
     <LocalFileTransferDialog
       v-model:visible="showLocalFileDialog"
       @transfer="handleLocalFileTransfer"
@@ -439,7 +432,15 @@ const fetchWarnings = async () => {
 
 // 检查当前是否是home路由
 const isHomeRoute = computed(() => {
-    return route.path.includes('/headbar/home') || route.path === '/headbar';
+    return route.path.includes('/headbar/home') || 
+           route.path.includes('/headbar/monitor') || 
+           route.path === '/headbar';
+});
+
+// 检查当前是否是home路由
+const isHomeRoute_warning = computed(() => {
+    return route.path.includes('/headbar/home') || 
+           route.path === '/headbar';
 });
 
 // 切换功能侧边栏
@@ -608,9 +609,29 @@ const updateActiveState = () => {
 watch(() => route.path, updateActiveState);
 updateActiveState();
 
+// 添加点击事件处理函数
+const handleClickOutside = (event) => {
+  const dropdown = document.querySelector('.dropdown');
+  const userIcon = document.querySelector('.user-active');
+  
+  if (isDropdownVisible.value && dropdown && !dropdown.contains(event.target) && !userIcon?.contains(event.target)) {
+    isDropdownVisible.value = false;
+  }
+};
+
+// 在组件挂载时添加事件监听
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+// 在组件卸载时移除事件监听
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
 // 下拉栏
 const toggleDropdown = () => {
-    isDropdownVisible.value = !isDropdownVisible.value;
+  isDropdownVisible.value = !isDropdownVisible.value;
 };
 
 // 个人信息弹窗
@@ -620,8 +641,7 @@ const passwordType = ref('password');
 const userInfo = ref({
   name: '',
   email: '',
-  password: '',
-  realname: ''
+  password: ''
 });
 
 // 切换密码可见性
@@ -633,6 +653,7 @@ const togglePasswordVisibility = () => {
 const showUserInfoPopup = async () => {
   showEditDialog.value = true;
   isEditing.value = false;
+  isDropdownVisible.value = false;
   await fetchUserInfo();
 };
 
@@ -672,8 +693,7 @@ const fetchUserInfo = async () => {
     userInfo.value = {
       name: result.user.name || '',
       email: result.user.email || '',
-      password: result.user.password || '',
-      realname: result.user.realname || ''
+      password: result.user.password || ''
     };
 
     ElMessage.success(result.message || '用户信息加载成功');
@@ -700,7 +720,7 @@ const confirmEdit = async () => {
       new_name: userInfo.value.name,
       new_password: userInfo.value.password,
       new_email: userInfo.value.email,
-      realname: userInfo.value.realname
+      realname: userInfo.value.name
     };
 
     const response = await fetch('http://113.44.170.52:8080/agent/updateUserInfo  ', {
@@ -767,7 +787,7 @@ const showServerFileTransferDialog = () => {
   showServerFileDialog.value = true;
 };
 
-// 显示本地文件上传弹窗
+// 显示本机文件传输弹窗
 const showLocalFileTransferDialog = () => {
   showLocalFileDialog.value = true;
 };
@@ -783,14 +803,19 @@ const handleServerFileTransfer = (data) => {
 };
 
 const handleLocalFileTransfer = (data) => {
-  console.log('本地文件上传完成:', data);
-  ElMessage.success('本地文件上传成功！');
+  console.log('本机文件传输完成:', data);
+  ElMessage.success('本机文件传输成功！');
 };
 
 const handleServerFileDownload = (data) => {
   console.log('服务器文件下载完成:', data);
   ElMessage.success('服务器文件下载成功！');
 };
+
+// 检查当前是否是monitor路由
+const isMonitorRoute = computed(() => {
+    return route.path.includes('/headbar/monitor');
+});
 </script>
 
 <style scoped>
@@ -923,7 +948,7 @@ const handleServerFileDownload = (data) => {
   .dropdown {
     position: absolute;
     top: 65px;
-    right: 80px;
+    right: 34px;
     background-color: #29333E;
     box-shadow: 0 0 5px rgb(172, 194, 255);
     padding: 6px;
@@ -965,6 +990,31 @@ const handleServerFileDownload = (data) => {
 
   /* /////////////////////////////////////////////////////////////////////////////////// */
 /* 功能侧边栏 */
+  /* 侧边栏弹出按钮 */
+  .sidebar-toggle {
+    position: absolute;
+    right: -25px;
+    top: 20px;
+    width: 25px;
+    height: 40px;
+    background-color: #29333E;
+    border-radius: 0 5px 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2001;
+  }
+
+  .sidebar-toggle:hover {
+    background-color: #3d4b5a;
+  }
+
+  .sidebar-toggle .el-icon {
+    color: white;
+    font-size: 16px;
+  }
   /* 侧边栏包装器 */
   .sidebar-wrapper {
     position: relative;
@@ -981,6 +1031,15 @@ const handleServerFileDownload = (data) => {
     flex-shrink: 0;
     height: 100%;
     z-index: 100;
+  }
+
+  /* 在 monitor 页面时的样式 */
+  .monitor-sidebar {
+    margin-left: 300px; /* 服务器列表侧边栏的宽度 */
+  }
+
+  .monitor-sidebar .sidebar-toggle {
+    right: -25px;
   }
 
   .sidebar-collapsed {
@@ -1020,32 +1079,6 @@ const handleServerFileDownload = (data) => {
   .sidebar-button .el-icon {
     margin-right: 10px;
     font-size: 14px;
-  }
-
-  /* 侧边栏弹出按钮 */
-  .sidebar-toggle {
-    position: absolute;
-    right: -25px;
-    top: 20px;
-    width: 25px;
-    height: 40px;
-    background-color: #29333E;
-    border-radius: 0 5px 5px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 200;
-  }
-
-  .sidebar-toggle:hover {
-    background-color: #3d4b5a;
-  }
-
-  .sidebar-toggle .el-icon {
-    color: white;
-    font-size: 16px;
   }
 
   /* /////////////////////////////////////////////////////////////////////////////////// */
@@ -1465,5 +1498,18 @@ const handleServerFileDownload = (data) => {
   padding: 0 2px;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   animation: pulse 1.5s infinite;
+}
+
+.detail-page-indicator {
+  color: white;
+  font-size: 16px;
+  padding: 5px 0;
+  margin-left: -8vw;
+  margin-top: 0.6vh;
+  transition: all 0.3s ease;
+}
+
+.detail-page-indicator:hover {
+  color: white;
 }
 </style>
