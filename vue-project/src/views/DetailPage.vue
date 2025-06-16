@@ -189,10 +189,14 @@ data() {
     memoryChart: null,
     memoryUsageChart: null,
     cpuUsageChart:null,
-    cpuUsageHistory: [],
-    memoryUsageHistory:[],
+    cpuHistoryData: {}, // { [hostname]: historyArray }
+    memoryHistoryData: {},
     initialHistoryLoaded: false, // 标记是否已加载初始历史数据
     dataRefreshInterval:null,
+    // 当前服务器的上下文数据
+    currentHostname: null,
+    currentCpuHistory: [],
+    currentMemHistory: [],
   }
 },
 watch: {
@@ -203,7 +207,10 @@ watch: {
       // 清理旧资源
       this.cleanupCharts();
       this.stopRefresh();
-      
+
+      // 切换到新服务器的上下文
+      this.setupServerContext(newVal);
+
       // 加载新数据
       this.fetchServerDetail();
       
@@ -238,6 +245,24 @@ mounted() {
     window.removeEventListener('resize', this.handleChartResize);
   },
 methods: {
+  // 初始化或更新当前服务器的上下文
+    setupServerContext(hostname) {
+      this.currentHostname = hostname;
+      
+      // 如果首次访问该服务器，初始化数据
+      if (!this.cpuHistoryData[hostname]) {
+        this.cpuHistoryData[hostname] = [];
+      }
+      if (!this.memoryHistoryData[hostname]) {
+        this.memoryHistoryData[hostname] = [];
+      }
+      
+      // 更新当前历史数据引用
+      this.currentCpuHistory = this.cpuHistoryData[hostname];
+      this.currentMemHistory = this.memoryHistoryData[hostname];
+      
+      console.log(`已切换至服务器: ${hostname}`);
+    },
   formatTime(isoString) {
   try {
     return isoString ? new Date(isoString).toLocaleString('zh-CN', { 
@@ -255,6 +280,13 @@ methods: {
 },
 //获取历史数据
    async fetchHistoryData() {
+    const hostname = this.$route.params.hostname;
+      if (!hostname) return;
+      
+      // 确保该服务器的上下文已设置
+      if (hostname !== this.currentHostname) {
+        this.setupServerContext(hostname);
+      }
   try {
     const hostname = encodeURIComponent(this.$route.params.hostname)
     const token = localStorage.getItem('token')
@@ -283,7 +315,7 @@ methods: {
       allCpuData.sort((a, b) => b.time - a.time)
       
       // 取最近的30个数据点
-      this.cpuUsageHistory = allCpuData.slice(0, 30)
+      this.cpuHistoryData[hostname] = allCpuData.slice(0, 30)
       
       console.log('已加载初始历史数据点:', this.cpuUsageHistory.length)
     } else {
@@ -302,7 +334,7 @@ methods: {
           allMemData.sort((a, b) => b.time - a.time)
           
           // 取最近的30个数据点
-          this.memoryUsageHistory = allMemData.slice(0, 30)
+          this.memoryHistoryData[hostname] = allMemData.slice(0, 30)
           console.log('已加载初始内存历史数据点:', this.memoryUsageHistory.length)
         } else {
           console.warn('返回的历史数据中没有有效的mem_info数组')
@@ -682,7 +714,7 @@ methods: {
       if (!this.cpuUsageChart) return;
 
       // 处理历史数据
-      const cpuhistory = this.cpuUsageHistory.slice(-30);
+      const cpuhistory = [...this.currentCpuHistory].slice(-30);
       const data = cpuhistory.map((item, index) => ({
         x: index, // 使用索引作为X轴
         y: item.value,
@@ -797,7 +829,7 @@ methods: {
       if (!this.memoryUsageChart) return;
 
       // 处理历史数据
-      const memHistory = this.memoryUsageHistory.slice(-30);
+      const memHistory = [...this.currentMemHistory].slice(-30);
       if (memHistory.length === 0) return;
 
       const data = memHistory.map((item, index) => ({
@@ -929,7 +961,7 @@ methods: {
     },
 
 
-    // 新增：只刷新数据的定时器
+    // 只刷新数据的定时器
     startDataRefresh() {
       // 先停止可能存在的旧定时器
       this.stopRefresh()
@@ -937,7 +969,7 @@ methods: {
       // 启动新的数据刷新定时器
       this.dataRefreshInterval = setInterval(() => {
         this.refreshDataOnly();
-      }, 3000)
+      }, 5000)
     },
     
     // 修改停止刷新方法
@@ -953,6 +985,11 @@ methods: {
     }, 
 
   updateData(serverData) {
+    // 确保在正确的上下文中
+      const hostname = this.$route.params.hostname;
+      if (hostname !== this.currentHostname) {
+        this.setupServerContext(hostname);
+      }
 // 主机信息
 this.hostInfo = {
 hostname: serverData.data.host_info?.host_name || 'N/A',
@@ -979,15 +1016,15 @@ last_report: serverData.data.host_info?.host_info_created_at
     cores_num: cpuInfos.length // 核心数量
   }
 
-  // 获取最新CPU使用率并添加到历史记录
-  this.cpuUsageHistory.push({
-    value: avgCpuPercent,
-    time: Date.now() // 记录时间戳
-  });
+// 使用当前服务器的历史记录数组
+      this.currentCpuHistory.push({
+        value: avgCpuPercent,
+        time: Date.now()
+      });
   // 限制历史记录长度
-  if (this.cpuUsageHistory.length > 100) {
-    this.cpuUsageHistory.shift();
-  }
+ if (this.currentCpuHistory.length > 30) {
+        this.currentCpuHistory.shift();
+      }
 
       // 更新趋势图表（无需重新初始化，直接更新数据）
       if (this.cpuProcessChart) {
@@ -1001,13 +1038,13 @@ user_percent: serverData.data.mem_info?.user_percent?.toFixed(1) || 0.00
 }
  const latestMemPercent = Number(this.memoryData.user_percent);
       if (!isNaN(latestMemPercent)) {
-        this.memoryUsageHistory.push({
+        this.currentMemHistory.push({
           value: latestMemPercent,
           time: Date.now()
         });
         // 限制历史记录长度
-        if (this.memoryUsageHistory.length > 100) {
-          this.memoryUsageHistory.shift();
+         if (this.currentMemHistory.length > 30) {
+          this.currentMemHistory.shift();
         }
       }
 
