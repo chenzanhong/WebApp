@@ -52,7 +52,7 @@
               <el-icon>
                 <ArrowRight />
               </el-icon>
-              <span>本机文件传输</span>
+              <span>本地文件上传</span>
             </button>
             <button class="sidebar-button" @click="openServerFileDownloadDialog">
               <el-icon>
@@ -154,6 +154,14 @@
                 </span>
               </div>
             </div>
+
+            <div class="info-item">
+              <span class="input-title">真实姓名：</span>
+              <template v-if="!isEditing">
+                <span class="info-value">{{ userInfo.realname || '未填写' }}</span>
+              </template>
+              <input v-else v-model="userInfo.realname" class="info-input" type="text" placeholder="请输入真实姓名">
+            </div>
           </div>
           <div class="dialog-buttons">
             <button v-if="!isEditing" class="edit-button" @click="startEditing">修改</button>
@@ -169,7 +177,7 @@
       @transfer="handleServerFileTransfer"
     />
 
-    <!-- 本机文件传输弹窗 -->
+    <!-- 本地文件上传弹窗 -->
     <LocalFileTransferDialog
       v-model:visible="showLocalFileDialog"
       @transfer="handleLocalFileTransfer"
@@ -612,7 +620,8 @@ const passwordType = ref('password');
 const userInfo = ref({
   name: '',
   email: '',
-  password: ''
+  password: '',
+  realname: ''
 });
 
 // 切换密码可见性
@@ -663,7 +672,8 @@ const fetchUserInfo = async () => {
     userInfo.value = {
       name: result.user.name || '',
       email: result.user.email || '',
-      password: result.user.password || ''
+      password: result.user.password || '',
+      realname: result.user.realname || ''
     };
 
     ElMessage.success(result.message || '用户信息加载成功');
@@ -690,7 +700,7 @@ const confirmEdit = async () => {
       new_name: userInfo.value.name,
       new_password: userInfo.value.password,
       new_email: userInfo.value.email,
-      realname: userInfo.value.name
+      realname: userInfo.value.realname
     };
 
     const response = await fetch('http://113.44.170.52:8080/agent/updateUserInfo  ', {
@@ -757,7 +767,7 @@ const showServerFileTransferDialog = () => {
   showServerFileDialog.value = true;
 };
 
-// 显示本机文件传输弹窗
+// 显示本地文件上传弹窗
 const showLocalFileTransferDialog = () => {
   showLocalFileDialog.value = true;
 };
@@ -773,8 +783,8 @@ const handleServerFileTransfer = (data) => {
 };
 
 const handleLocalFileTransfer = (data) => {
-  console.log('本机文件传输完成:', data);
-  ElMessage.success('本机文件传输成功！');
+  console.log('本地文件上传完成:', data);
+  ElMessage.success('本地文件上传成功！');
 };
 
 const handleServerFileDownload = (data) => {

@@ -227,10 +227,10 @@ created() {
   }
 },
 mounted() {
-    this.initCpuChart();
-    this.initMemoryChart();
     this.initCpuUsageTrendChart();
     this.initMemoryProcessChart();
+    this.initCpuChart();
+    this.initMemoryChart();
     window.addEventListener('resize', this.handleChartResize);
   },
   beforeDestroy() {
@@ -333,7 +333,7 @@ methods: {
         {  headers: { 'Authorization': ` ${token}` } }
       )
 
-      if (!response.ok) throw new Error(`服务器实时数据获取失败\n请确保已在被监控服务器上执行了添加该服务器时所给的脚本`)
+      if (!response.ok) throw new Error(`服务器实时数据获取失败，请确保已在被监控服务器上执行了添加该服务器时所给的脚本\n详细见“帮助”`)
       
       const serverData = await response.json()
       console.log('后端系统信息:', serverData);

@@ -147,7 +147,7 @@
 </template>
 
 <script>
-import { Warning, CirclePlus, CircleClose, Close } from '@element-plus/icons-vue';
+import { Warning, CirclePlus, CircleClose, Close, Clock } from '@element-plus/icons-vue';
 export default {
    data() {
        return {
@@ -162,7 +162,8 @@ export default {
     Warning,
     CirclePlus,
     CircleClose,
-    Close
+    Close,
+    Clock
   },
    watch: {
      // 监听路由变化
