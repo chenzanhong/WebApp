@@ -104,6 +104,41 @@
             </div>
             <pre class="custom-command">./uninstall.sh</pre>
           </div>
+          <!-- 修改上报间隔部分 -->
+          <div class="custom-guide-section">
+            <div class="custom-section-title">
+              <el-icon class="custom-section-icon"><Clock /></el-icon>
+              <span>修改代理程序上报采集数据的时间间隔</span>
+            </div>
+            
+            <div class="custom-step">
+              <div class="custom-step-number">1</div>
+              <div class="custom-step-content">进入代理的配置目录：</div>
+            </div>
+            <pre class="custom-command">cd /opt/monitor/agent/config</pre>
+            
+            <div class="custom-step">
+              <div class="custom-step-number">2</div>
+              <div class="custom-step-content">编辑配置文件：</div>
+            </div>
+            <pre class="custom-command">vim config.yaml</pre>
+            <div class="custom-step-tip custom-tip-font">
+              <el-icon><Notebook /></el-icon>
+              配置文件中的<code>second: 30</code>表示上报间隔为30秒，修改该值即可（单位：秒）
+            </div>
+            
+            <div class="custom-step">
+              <div class="custom-step-number">3</div>
+              <div class="custom-step-content">重新运行代理服务：</div>
+            </div>
+            <pre class="custom-command">sudo systemctl restart monitor_agent.service</pre>
+            
+            <div class="custom-step">
+              <div class="custom-step-number">4</div>
+              <div class="custom-step-content">（可选）确认服务状态：</div>
+            </div>
+            <pre class="custom-command">sudo systemctl status monitor_agent.service</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -620,7 +655,12 @@ export default {
   box-shadow: 0 0 6px rgba(100, 165, 255, 0.6);
 }
 
-
+.custom-tip-font {
+  font-size: 14px; /* 根据需要调整大小，默认16px */
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
 .custom-command::before {
   content: "$ ";
   color: #64a5ff; /* 蓝色$符号 */
