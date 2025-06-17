@@ -237,7 +237,7 @@ bar2 {
 }
 
 .bar {
-  margin: 0.7vh 0 0vh 0;
+  margin: 1.5vh 0 2vh 0;
 }
 
 .bar2 {
@@ -342,7 +342,7 @@ bar2 {
   font-size: 16px;
   /* 移除position: absolute相关属性 */
   position: static;
-  margin-top: 1vh;
+  margin-top: 0;
 }
 .get-code-btn:disabled {
   background-color: #666 !important;
@@ -375,30 +375,33 @@ bar2 {
   left: 8% !important;
 }
 
-
+/* 添加确认按钮样式 */
 .confirm-section {
+  width: 100%;
   display: flex;
   justify-content: center;
-  width: 100%;
+  margin-top: 0vh;
 }
 
 .confirm-button {
   width: 75%;
-  height: 9vh;
-  background-color: #2B5F92;
-  font-size: 27px;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 1vh;
-  z-index: 2;
-  margin-top: 0vh;
-  border-radius: 15px;
+  height: 8vh;
+  background-color: #4095E5;
   border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 20px;
+  font-family: 'Ubuntu';
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 2px;
 }
 
 .confirm-button:hover {
-  background-color: #224a73;
-  color: white;
+  background-color: #2B5F92;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .confirm-button:active {
