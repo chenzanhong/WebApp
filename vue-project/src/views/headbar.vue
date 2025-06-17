@@ -729,7 +729,7 @@ const confirmEdit = async () => {
       new_name: userInfo.value.name,
       new_password: userInfo.value.password,
       new_email: userInfo.value.email,
-      realname: userInfo.value.name
+      realname: userInfo.value.realname
     };
 
     const response = await fetch('http://113.44.170.52:8080/agent/updateUserInfo  ', {

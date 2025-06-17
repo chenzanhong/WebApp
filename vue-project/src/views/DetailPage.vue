@@ -402,10 +402,10 @@ methods: {
       }
     },
  initCharts() {
-    this.initCpuChart();
-    this.initMemoryChart();
     this.initCpuUsageTrendChart();
     this.initMemoryProcessChart();
+    this.initCpuChart();
+    this.initMemoryChart();
   },
 // 初始化CPU图表
  async initCpuChart() {

@@ -80,6 +80,160 @@
   </div>
 </template>
 
+
+<script>
+import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { ElMessage } from 'element-plus';
+import { ElIcon } from 'element-plus';
+import { UserFilled, GoodsFilled, View, Hide, InfoFilled, Comment, CircleCloseFilled, Key } from '@element-plus/icons-vue';
+
+export default {
+    name: 'LoginPage',
+    components: {
+        UserFilled,
+        GoodsFilled,
+        View,
+        Hide,
+        InfoFilled,
+        Comment,
+        ElIcon,
+        CircleCloseFilled,
+        Key
+    },
+    data() {
+        return {
+            username: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            passwordType: 'password',
+            confirmPasswordType: 'password',
+            verificationCode: '',
+            countdown: 60,
+            isCounting: false
+        };
+    },
+    methods: {
+        registerClick() {
+            if (this.password !== this.confirmPassword) {
+                ElMessage.error('两次输入的密码不一致');
+                return;
+            }
+
+            if (!this.verificationCode) {
+                ElMessage.error('请输入验证码');
+                return;
+            }
+
+            const apiUrl = 'http://113.44.170.52:8080/agent/register';
+            const requestData = {
+                email: this.email,
+                name: this.username,
+                password: this.password,
+                token: this.verificationCode
+            };
+
+            console.log('注册请求数据:', requestData);
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('注册接口返回数据:', data);
+                if (data.message === '注册成功') {
+                    ElMessage.success(data.message);
+                    this.closeRegisterBox();
+                } else {
+                    ElMessage.error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('注册失败:', error);
+                ElMessage.error('注册失败，请稍后重试');
+            });
+        },
+        togglePasswordVisibility() {
+            this.passwordType = this.passwordType === 'password'? 'text' : 'password';
+        },
+        toggleConfirmPasswordVisibility() {
+            this.confirmPasswordType = this.confirmPasswordType === 'password'? 'text' : 'password';
+        },
+        closeRegisterBox() {
+            const router = useRouter();
+            this.$router.push('/');
+        },
+        getVerificationCode() {
+            if (!this.email) {
+                ElMessage.error('请先输入邮箱');
+                return;
+            }
+
+            // 验证邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(this.email)) {
+                ElMessage.error('请输入有效的邮箱地址');
+                return;
+            }
+
+            // 如果正在倒计时，不允许重复获取
+            if (this.isCounting) {
+                return;
+            }
+
+            // 调用获取验证码接口
+            fetch('http://113.44.170.52:8080/registertoken', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: this.email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('验证码接口返回数据:', data);  // 打印完整返回数据
+                console.log('返回状态:', data.status);     // 打印状态
+                console.log('返回消息:', data.message);    // 打印消息
+                
+                if (data.message === '验证码已发送') {
+                    ElMessage.success('验证码已发送到您的邮箱');
+                    this.startCountdown();
+                } else {
+                    ElMessage.error(data.message || '验证码发送失败');
+                }
+            })
+            .catch(error => {
+                console.error('获取验证码失败:', error);
+                ElMessage.error('获取验证码失败，请稍后重试');
+            });
+        },
+        startCountdown() {
+            this.isCounting = true;
+            this.countdown = 60;
+            const timer = setInterval(() => {
+                this.countdown--;
+                if (this.countdown <= 0) {
+                    clearInterval(timer);
+                    this.isCounting = false;
+                }
+            }, 1000);
+        },
+        handlePasswordInput() {
+            // Implementation of handlePasswordInput method
+        },
+        handleConfirmPasswordInput() {
+            // Implementation of handleConfirmPasswordInput method
+        }
+    },
+    mounted() {}
+};
+</script>
+
 <style scoped>
 @font-face {
   font-family: 'PangMenZhengDao';
@@ -339,156 +493,3 @@ a span {
 }
 
 </style>
-
-<script>
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { ElIcon } from 'element-plus';
-import { UserFilled, GoodsFilled, View, Hide, InfoFilled, Comment, CircleCloseFilled, Key } from '@element-plus/icons-vue';
-
-export default {
-    name: 'LoginPage',
-    components: {
-        UserFilled,
-        GoodsFilled,
-        View,
-        Hide,
-        InfoFilled,
-        Comment,
-        ElIcon,
-        CircleCloseFilled,
-        Key
-    },
-    data() {
-        return {
-            username: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            passwordType: 'password',
-            confirmPasswordType: 'password',
-            verificationCode: '',
-            countdown: 60,
-            isCounting: false
-        };
-    },
-    methods: {
-        registerClick() {
-            if (this.password !== this.confirmPassword) {
-                ElMessage.error('两次输入的密码不一致');
-                return;
-            }
-
-            if (!this.verificationCode) {
-                ElMessage.error('请输入验证码');
-                return;
-            }
-
-            const apiUrl = 'http://113.44.170.52:8080/agent/register';
-            const requestData = {
-                email: this.email,
-                name: this.username,
-                password: this.password,
-                token: this.verificationCode
-            };
-
-            console.log('注册请求数据:', requestData);
-
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('注册接口返回数据:', data);
-                if (data.message === '注册成功') {
-                    ElMessage.success(data.message);
-                    this.closeRegisterBox();
-                } else {
-                    ElMessage.error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('注册失败:', error);
-                ElMessage.error('注册失败，请稍后重试');
-            });
-        },
-        togglePasswordVisibility() {
-            this.passwordType = this.passwordType === 'password'? 'text' : 'password';
-        },
-        toggleConfirmPasswordVisibility() {
-            this.confirmPasswordType = this.confirmPasswordType === 'password'? 'text' : 'password';
-        },
-        closeRegisterBox() {
-            const router = useRouter();
-            this.$router.push('/');
-        },
-        getVerificationCode() {
-            if (!this.email) {
-                ElMessage.error('请先输入邮箱');
-                return;
-            }
-
-            // 验证邮箱格式
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(this.email)) {
-                ElMessage.error('请输入有效的邮箱地址');
-                return;
-            }
-
-            // 如果正在倒计时，不允许重复获取
-            if (this.isCounting) {
-                return;
-            }
-
-            // 调用获取验证码接口
-            fetch('http://113.44.170.52:8080/registertoken', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: this.email })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('验证码接口返回数据:', data);  // 打印完整返回数据
-                console.log('返回状态:', data.status);     // 打印状态
-                console.log('返回消息:', data.message);    // 打印消息
-                
-                if (data.message === '验证码已发送') {
-                    ElMessage.success('验证码已发送到您的邮箱');
-                    this.startCountdown();
-                } else {
-                    ElMessage.error(data.message || '验证码发送失败');
-                }
-            })
-            .catch(error => {
-                console.error('获取验证码失败:', error);
-                ElMessage.error('获取验证码失败，请稍后重试');
-            });
-        },
-        startCountdown() {
-            this.isCounting = true;
-            this.countdown = 60;
-            const timer = setInterval(() => {
-                this.countdown--;
-                if (this.countdown <= 0) {
-                    clearInterval(timer);
-                    this.isCounting = false;
-                }
-            }, 1000);
-        },
-        handlePasswordInput() {
-            // Implementation of handlePasswordInput method
-        },
-        handleConfirmPasswordInput() {
-            // Implementation of handleConfirmPasswordInput method
-        }
-    },
-    mounted() {}
-};
-</script>
