@@ -986,20 +986,20 @@ methods: {
 
   updateData(serverData) {
     // 确保在正确的上下文中
-      const hostname = this.$route.params.hostname;
-      if (hostname !== this.currentHostname) {
-        this.setupServerContext(hostname);
-      }
-// 主机信息
-this.hostInfo = {
-hostname: serverData.data.host_info?.host_name || 'N/A',
-os: serverData.data.host_info?.os || 'N/A',
-platform: serverData.data.host_info?.platform || 'N/A',
-kernel_arch: serverData.data.host_info?.kernel_arch || 'N/A',
-last_report: serverData.data.host_info?.host_info_created_at
-}
+    const hostname = this.$route.params.hostname;
+    if (hostname !== this.currentHostname) {
+      this.setupServerContext(hostname);
+    }
+    // 主机信息
+    this.hostInfo = {
+      hostname: serverData.data.host_info?.host_name || 'N/A',
+      os: serverData.data.host_info?.os || 'N/A',
+      platform: serverData.data.host_info?.platform || 'N/A',
+      kernel_arch: serverData.data.host_info?.kernel_arch || 'N/A',
+      last_report: serverData.data.host_info?.host_info_created_at
+    }
 
- // 计算总的CPU使用率和平均值
+  // 计算总的CPU使用率和平均值
   const cpuInfos = serverData.data.cpu_info || [];
   let totalCpuPercent = 0;
   cpuInfos.forEach(cpuInfo => {

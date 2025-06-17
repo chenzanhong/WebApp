@@ -155,6 +155,13 @@
                 </span>
               </div>
             </div>
+            <div class="info-item">
+              <span class="input-title">真实姓名：</span>
+              <template v-if="!isEditing">
+                <span class="info-value">{{ userInfo.realname || '未填写' }}</span>
+              </template>
+              <input v-else v-model="userInfo.realname" class="info-input" type="text" placeholder="请输入真实姓名">
+            </div>
           </div>
           <div class="dialog-buttons">
             <button v-if="!isEditing" class="edit-button" @click="startEditing">修改</button>
@@ -641,7 +648,8 @@ const passwordType = ref('password');
 const userInfo = ref({
   name: '',
   email: '',
-  password: ''
+  password: '',
+  realname: ''
 });
 
 // 切换密码可见性
@@ -693,7 +701,8 @@ const fetchUserInfo = async () => {
     userInfo.value = {
       name: result.user.name || '',
       email: result.user.email || '',
-      password: result.user.password || ''
+      password: result.user.password || '',
+      realname: result.user.realname || '',
     };
 
     ElMessage.success(result.message || '用户信息加载成功');

@@ -50,16 +50,17 @@
         :stripe="true"
         :border="false"
         class="log-table"
+        :cell-class-name="() => 'small-padding'"
       >
-        <el-table-column type="index" label="序号" width="80" />
-        <el-table-column prop="timestamp" label="操作时间" :min-width="12 + 'vw'">
+        <el-table-column type="index" label="序号" :min-width="10 + 'vw'" />
+        <el-table-column prop="timestamp" label="操作时间" :min-width="25 + 'vw'">
           <template #default="scope">
             {{ formatDate(scope.row.timestamp) }}
           </template>
         </el-table-column>
-        <el-table-column v-if="showOperatorColumn" prop="username" label="操作人" :min-width="8 + 'vw'" />
-        <el-table-column prop="type" label="操作类型" :min-width="10 + 'vw'" />
-        <el-table-column prop="detail" label="操作详情" :min-width="15 + 'vw'" show-overflow-tooltip>
+        <el-table-column v-if="showOperatorColumn" prop="username" label="操作人" :min-width="20 + 'vw'" />
+        <el-table-column prop="type" label="操作类型" :min-width="20 + 'vw'" />
+        <el-table-column prop="detail" label="操作详情" show-overflow-tooltip>
           <template #default="scope">
             <div style="white-space: normal; word-break: break-all;">{{ scope.row.detail }}</div>
           </template>
@@ -211,7 +212,7 @@ const refreshLogs = async (isSearch = false) => {
     };
     
     // 只有在点击搜索时才添加搜索参数
-    if (isSearch) {
+     // if (isSearch) {
       if (dateRangeStart.value) {
         requestBody.fromTime = convertToISO8601WithOffset(dateRangeStart.value);
       }
@@ -221,7 +222,7 @@ const refreshLogs = async (isSearch = false) => {
       if (logType.value !== 'all') {
         requestBody.operation = logType.value;
       }
-    }
+    // }
 
     console.log('完整的请求参数:', requestBody);
 

@@ -34,7 +34,7 @@
       </el-menu>
     </el-scrollbar>
     <!-- 操作指南按钮区域 -->
-     <div class="guide-container">
+    <div class="guide-container">
       <el-button 
         class="guide-button" 
         type="primary" 
@@ -149,15 +149,15 @@
 <script>
 import { Warning, CirclePlus, CircleClose, Close, Clock } from '@element-plus/icons-vue';
 export default {
-   data() {
-       return {
-           serverList: [],
-           token: localStorage.getItem('token') || '',  // 从 localStorage 获取 token
-           selectedServer: null,//当前选中的服务器
-           activeIndex: '', // 确保已定义activeIndex
-           guideDialogVisible: false // 控制指南弹窗显示
-       }
-   },
+  data() {
+      return {
+          serverList: [],
+          token: localStorage.getItem('token') || '',  // 从 localStorage 获取 token
+          selectedServer: null,//当前选中的服务器
+          activeIndex: '', // 确保已定义activeIndex
+          guideDialogVisible: false // 控制指南弹窗显示
+      }
+  },
     components: {
     Warning,
     CirclePlus,
@@ -165,33 +165,33 @@ export default {
     Close,
     Clock
   },
-   watch: {
-     // 监听路由变化
-     '$route.params.hostname': {
-       handler(newHostname) {
-         if (newHostname) this.setActiveIndex()
-       },
-       immediate: true
-     },
-     // 监听服务器列表变化
-     serverList() {
-       this.setActiveIndex()
-     }
-   },
-   mounted() {
-       this.getserverList();
-   },
-   
-   methods:{
+  watch: {
+    // 监听路由变化
+    '$route.params.hostname': {
+      handler(newHostname) {
+        if (newHostname) this.setActiveIndex()
+      },
+      immediate: true
+    },
+    // 监听服务器列表变化
+    serverList() {
+      this.setActiveIndex()
+    }
+  },
+  mounted() {
+      this.getserverList();
+  },
+  
+  methods:{
     setActiveIndex() {
-       const hostname = this.$route.params.hostname
-       if (hostname && this.serverList.length) {
-         const target = this.serverList.find(
-           server => server.host_name === hostname
-         )
-         if (target) this.activeIndex = target.id.toString()
-       }
-     },// 显示帮助弹窗
+      const hostname = this.$route.params.hostname
+      if (hostname && this.serverList.length) {
+        const target = this.serverList.find(
+          server => server.host_name === hostname
+        )
+        if (target) this.activeIndex = target.id.toString()
+      }
+    },// 显示帮助弹窗
     showGuide() {
       this.guideDialogVisible = true;
       
@@ -207,54 +207,56 @@ export default {
       document.body.style.overflow = 'auto';
     },
   
-       async getserverList() {
+      async getserverList() {
           try {
-               const response = await fetch("http://113.44.170.52:8080/agent/list", {
-                   method: 'GET',  
-                   
-                   headers: {
-                       
-                       Authorization: this.token,  // 携带 token
-                   },
-               }).then(response => {
-                   if (!response.ok) {
-                       throw new Error('Network response was not ok');
-                   }
-                   return response;
-               })
-               
-               const data = await response.json();
-               console.log(data);
-               this.serverList = data.hosts.map(item => ({
-               id: item.id,
-               host_name: item.host_name,
-               os: item.os,
-               platform: item.platform,
-               kernel_arch:item.kernel_arch,
-
-               }))
-               console.log(data);
-               console.log(this.serverList);
-               this.$emit('serverListUpdated', this.serverList);
-           } catch (error) {
-               console.error('获取服务器数据失败:', error.response?.data || error.message);
-           }
-       },
-       selectServer(server) {
+              const response = await fetch("http://113.44.170.52:8080/agent/list", {
+                  method: 'GET',  
+                  
+                  headers: {
+                      
+                      Authorization: this.token,  // 携带 token
+                  },
+              }).then(response => {
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response;
+              })
+              
+              const data = await response.json();
+              console.log(data);
+              this.serverList = data.hosts.map(item => ({
+              id: item.id,
+              host_name: item.host_name,
+              ip:item.ip,
+              os: item.os,
+              platform: item.platform,
+              kernel_arch:item.kernel_arch,
+              cpu_threshold:item.cpu_threshold,
+              mem_threshold:item.mem_threshold,
+              }))
+              console.log(data);
+              console.log(this.serverList);
+              this.$emit('serverListUpdated', this.serverList);
+          } catch (error) {
+              console.error('获取服务器数据失败:', error.response?.data || error.message);
+          }
+      },
+      selectServer(server) {
         this.activeIndex = server.id.toString() // 保持点击时更新
-   this.$router.push({
-     name: 'MonitorDetail',
-     params: { hostname: server.host_name }
-   });
- },
+  this.$router.push({
+    name: 'MonitorDetail',
+    params: { hostname: server.host_name }
+  });
+},
 
-     handleOpen(key, keyPath) {
-       console.log(key, keyPath);
-     },
-     handleClose(key, keyPath) {
-       console.log(key, keyPath);
-     }
-   }
+    handleOpen(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
+    }
+  }
 }
 </script>
 
