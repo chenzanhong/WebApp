@@ -140,6 +140,7 @@ const deleteServer = async () => {
         message: data.msg || '服务器删除成功',
         server: props.server
       });
+      window.location.reload(); // 强制刷新整个页面
     } catch (e) {
       // 如果响应不是JSON但状态码是200，仍然认为删除成功
       ElMessage.success('服务器删除成功');
@@ -170,7 +171,7 @@ const saveThresholds = async () => {
         'Authorization': ` ${token}`
       },
       body: JSON.stringify({
-        hostname: props.server.host_name, // 使用服务器IP
+        hostname: props.server.host_name, // 使用服务器hostname
         cpu_threshold: editForm.value.cpu_threshold,
         mem_threshold: editForm.value.mem_threshold
       })
@@ -190,6 +191,7 @@ const saveThresholds = async () => {
     
     ElMessage.success('阈值更新成功');
     editDialogVisible.value = false;
+    window.location.reload(); // 强制刷新整个页面
   } catch (error) {
     console.error('更新阈值失败:', error);
     ElMessage.error('更新阈值失败: ' + (error.message || '未知错误'));
