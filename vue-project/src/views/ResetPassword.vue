@@ -308,7 +308,7 @@ bar2 {
 /* 新增密码匹配提示样式 */
 .password-match-message {
   position: absolute;
-  bottom: -20px;
+  bottom: -30px;
   left: 20%;
   transform: translateX(-50%);
   font-size: 18px;
