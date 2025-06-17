@@ -170,7 +170,7 @@ const saveThresholds = async () => {
         'Authorization': ` ${token}`
       },
       body: JSON.stringify({
-        ip: props.server.ip || props.server.host, // 使用服务器IP
+        hostname: props.server.host_name, // 使用服务器IP
         cpu_threshold: editForm.value.cpu_threshold,
         mem_threshold: editForm.value.mem_threshold
       })
