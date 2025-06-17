@@ -226,9 +226,10 @@ a span {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  width: 60vw;
+  width: 38vw;
+  min-width: 550px;
   max-width: 660px;
-  height: 60vh;
+  height: 47vh;
   background-color: #333333;
   color: white;
   padding: 20px;
@@ -237,7 +238,7 @@ a span {
 
 .box-title {
   margin-top: 1vh;
-  font-size: 33px;
+  font-size: 27px;
   font-weight: bold;
 }
 
@@ -262,21 +263,21 @@ a span {
   background-color: #4F4F4F;
   border: 1px solid #BBBBBB;
   color: #9A9A9A;
-  font-size: 22px;
+  font-size: 18px;
   box-sizing: border-box;
   border-radius: 15px;
-  height: 9vh;
+  height: 7vh;
   width: 80%;
   z-index: 2;
   padding-left: 80px;
 }
 
 .bar {
-  margin: 3.5vh 0 5vh 0;
+  margin: 2vh 0 3vh 0;
 }
 
 .bar2 {
-  margin: 0 0 0 0;
+  margin: 0 0 2vh 0;
 }
 
 .input-wrapper {
@@ -290,7 +291,7 @@ a span {
 .input-icon1,
 .input-icon2 {
   position: absolute;
-  left: 15%; 
+  left: 14%; 
   transform: translateY(-50%);
   color: white;
   font-weight: bold;
@@ -303,7 +304,7 @@ a span {
 }
 
 .input-icon2 {
-  top: 58%;
+  top: 45%;
 }
 
 .toggle-password {
@@ -318,14 +319,14 @@ a span {
 
 .login-button {
   width: 75%;
-  height: 9vh;
+  height: 7vh;
   background-color: #2B5F92;
-  font-size: 27px;
+  font-size: 21px;
   font-weight: bold;
   color: white;
   margin-bottom: 2vh;
   z-index: 2;
-  margin-top: 6vh;
+  margin-top: 3.7vh;
   margin-bottom: 3.4vh;
   border-radius: 15px;
   border: none;
@@ -342,8 +343,8 @@ a span {
   padding: 0; 
   margin: 0; 
   position: absolute;
-  right: 15%;
-  bottom: 165px; 
+  right: 14%;
+  bottom: 14vh; 
   color: #4095E5;
   font-size: 16px;
   cursor: pointer;

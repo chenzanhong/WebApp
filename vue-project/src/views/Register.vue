@@ -339,12 +339,13 @@ a span {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  width: 60vw;
+  width: 58vw;
+  min-width: 520px;
   max-width: 660px;
-  height: 75vh;
+  height: 73vh;
   background-color: #333333;
   color: white;
-  padding: 20px 66px;
+  padding: 20px 5vw;
   border-radius: 10px;
 }
 
@@ -359,7 +360,7 @@ a span {
 
 .box-title {
   margin-top: 0.5vh;
-  font-size: 33px;
+  font-size: 27px;
   font-weight: bold;
 }
 
@@ -375,13 +376,14 @@ a span {
   background-color: #4F4F4F;
   border: 1px solid #BBBBBB;
   color: #9A9A9A;
-  font-size: 22px;
+  font-size: 18px;
   box-sizing: border-box;
   border-radius: 15px;
   height: 7vh;
   width: 100%;
   z-index: 2;
   padding-left: 80px;
+  margin: 2vh 0 3vh 0;
 }
 
 .bar {
@@ -444,17 +446,32 @@ a span {
 }
 
 .get-code-btn {
-  flex: 0.8;
+  flex: 1;
   width: auto;
-  height: 7vh;
-  background-color: #4095E5;
+  height: 6vh;
+  background-color: #5b5f63;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 15px;
   position: static;
   margin-top: 1vh;
   white-space: nowrap;
   min-width: 100px;
+  color: white;
+  transition: all 0.3s ease;
+  border: none;
+}
 
+.get-code-btn:hover {
+  background-color: #575a5d;
+}
+
+.get-code-btn:active {
+  background-color: #4a4d50;
+}
+
+.get-code-btn:disabled {
+  background-color: #474a4d;
+  cursor: not-allowed;
 }
 
 .code-input .input-icon1 {
@@ -474,15 +491,14 @@ a span {
 
 .register-button {
   width: 75%;
-  height: 9vh;
+  height: 7vh;
   background-color: #2B5F92;
-  font-size: 27px;
+  font-size: 21px;
   font-weight: bold;
   color: white;
-  margin-bottom: 2vh;
   z-index: 2;
-  margin-top: 1.7vh;
-  margin-bottom: 3.4vh;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
   border-radius: 15px;
   border: none;
 }

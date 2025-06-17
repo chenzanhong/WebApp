@@ -4,13 +4,7 @@
     <div class="left">
       <div class="main-content">
         <div class="top">
-          <el-button 
-            type="danger" 
-            class="custom-button"
-            @click="toggleAllDisable"
-          >
-            {{ isAllDisabled ? '全部启用' : '全部停用' }}
-          </el-button>
+          <div class="placeholder-button"></div>
           <div class="search-group">
             <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search" style="width:400px;height: 35px;"/>
             <el-icon
@@ -49,13 +43,13 @@
               </div>
             </div>
             <div class="button-group">
-              <el-button 
+              <!-- <el-button 
                 :type="company.isDisabled ? 'success' : 'danger'"
                 :class="company.isDisabled ? 'custom-button1-enabled' : 'custom-button1'"
                 @click="toggleDisable(company)"
               >
                 {{ company.isDisabled ? '启动' : '停用' }}
-              </el-button>
+              </el-button> -->
               <el-button 
                 type="info" 
                 class="custom-button2"
@@ -268,6 +262,13 @@ const showHelp = () => {};
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.placeholder-button {
+  width: 120px;
+  height: 34px;
+  background-color: transparent;
+  border: none;
 }
 
 .search-group {

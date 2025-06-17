@@ -155,20 +155,14 @@ const convertToISO8601WithOffset = (date) => {
   if (!date) return '';
   let d = date;
   if (!(d instanceof Date)) {
-    // 尝试将输入解析为 Date 对象，假设输入是本地时间字符串
-    // 注意：直接解析 'YYYY-MM-DD HH:mm:ss' 可能在不同浏览器行为不一致
-    // 一个更健壮的方法是手动解析年、月、日、时、分、秒来构建 Date 对象，或者考虑使用日期处理库
-    // 这里为了简化，先尝试直接创建 Date 对象。如果发现时区问题，需要进一步调整。
-    d = new Date(date.replace(' ', 'T')); // 将空格替换为'T'尝试用ISO 8601解析
+    d = new Date(date.replace(' ', 'T')); 
     if (isNaN(d.getTime())) {
-        // 如果标准解析失败，尝试手动解析 YYYY-MM-DD HH:mm:ss 格式
         const parts = date.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
         if (parts) {
-            // 注意：月份是从 0 开始的
             d = new Date(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]);
         } else {
              console.error('无法解析日期格式:', date);
-             return ''; // 返回空字符串或根据需要处理错误
+             return ''; 
         }
     }
   }
@@ -383,7 +377,7 @@ onMounted(() => {
 }
 
 .log-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
 
 .log-table {
@@ -404,8 +398,8 @@ onMounted(() => {
   border: none !important;
   table-layout: fixed !important; 
   width: 100% !important;
-  min-width: 60vw !important; /* 设置表格最小宽度 */
-  max-width: 95vw !important; /* 设置表格最大宽度 */
+  min-width: 60vw !important; 
+  max-width: 95vw !important; 
 }
 
 :deep(.el-table__header) {
@@ -417,12 +411,12 @@ onMounted(() => {
   background-color: transparent !important;
   width: 100% !important;
   overflow-x: auto !important;
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; 
+  -ms-overflow-style: none !important;
 }
 
 :deep(.el-table__header-wrapper::-webkit-scrollbar) {
-  display: none !important; /* Chrome, Safari, Opera */
+  display: none !important; 
 }
 
 :deep(.el-table__body) {
@@ -455,7 +449,7 @@ onMounted(() => {
   border-right: none !important;
   color: white !important;
   white-space: nowrap !important;
-  font-size: 14px !important; /* 固定字体大小 */
+  font-size: 14px !important; 
 }
 
 :deep(.el-table__body td) {
@@ -463,7 +457,7 @@ onMounted(() => {
   text-align: center !important;
   background-color: transparent !important;
   white-space: nowrap !important;
-  font-size: 14px !important; /* 固定字体大小 */
+  font-size: 14px !important;
 }
 
 :deep(.el-table__row) {
@@ -577,37 +571,34 @@ onMounted(() => {
   border: 1px solid #dcdfe6 !important;
 }
 
-/* 修改 Element Plus 输入框、选择器、日期选择器等的背景和文字颜色 */
-:deep(.el-input__wrapper),
 :deep(.el-select__wrapper),
 :deep(.el-range__wrapper) {
   background-color: white !important;
   box-shadow: 0 0 0 1px var(--el-input-border-color) inset; /* 添加边框 */
 }
 
-/* 修改 Element Plus 输入框、选择器等的文字颜色 */
 :deep(.el-input__inner),
 :deep(.el-select__single-input),
 :deep(.el-range-input) {
-    color: black !important; /* 确保输入框内的文本颜色是黑色 */
+    color: black !important; 
 }
 
-/* 修改 Element Plus 占位符颜色 */
+
 :deep(.el-input__inner::placeholder),
 :deep(.el-select__placeholder),
 :deep(.el-range-input::placeholder) {
   color: #636161 !important;
 }
 
-:deep(.el-button) { /* 保留el-button的deep选择器，但将样式应用到el-icon */
-  background-color: transparent; /* 将按钮背景设为透明 */
-  border: none; /* 移除按钮边框 */
-  padding: 0; /* 移除按钮内边距 */
+:deep(.el-button) { 
+  background-color: transparent; 
+  border: none;
+  padding: 0; 
 }
 
 :deep(.el-button:hover) {
-  background-color: transparent; /* 保持透明 */
-  border-color: transparent; /* 保持透明 */
+  background-color: transparent; 
+  border-color: transparent; 
 }
 
 :deep(.el-tag) {
@@ -615,10 +606,10 @@ onMounted(() => {
 }
 
 :deep(.el-range-editor .el-range-separator) {
-  color: #b8b5b5; /* 修改日期范围分隔符颜色 */
+  color: #b8b5b5; 
 }
 
-/* 针对拆分的日期时间选择器，调整其内部元素颜色 */
+
 :deep(.el-date-editor.el-input__wrapper) {
     background-color: white !important;
 }
@@ -629,6 +620,6 @@ onMounted(() => {
 
 :deep(.el-date-editor.el-input__wrapper .el-input__prefix-inner > *),
 :deep(.el-date-editor.el-input__wrapper .el-input__suffix-inner > *) {
-    color: #636161 !important; /* 修改日期选择器图标颜色 */
+    color: #636161 !important;
 }
 </style>
