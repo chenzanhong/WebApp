@@ -47,7 +47,7 @@
 <script>
 import axios from 'axios';
 import { eventBus } from '@/utils/eventBus';
-
+import { ElMessage } from 'element-plus';
 
 export default {
     props: {
@@ -114,26 +114,31 @@ export default {
         },
 
         // 确认处理方法
-        async handleConfirm(item, index) {
-            try {
-                // 先更新本地状态
-                this.updateItemStatus(item.id, 'confirmed');
-                console.log(`开始发送确认请求，消息 ID: ${item.id}`);
-                // 发送确认请求
-                await this.processConfirm(item.id);
-                console.log(`确认请求发送成功，消息 ID: ${item.id}`);
-                // 确认成功后，触发更新事件
-                await this.fetchNotifications();
-                // 触发事件更新全局计数（数量减少1）
-                eventBus.emit('decrement-unread', 1);
-                
-                // 显示确认成功提示
-                ElMessage.success('通知已确认');
-            } catch (error) {
-                console.error(`确认操作失败，消息 ID: ${item.id}:`, error);
-                // 失败时回滚状态
-                this.updateItemStatus(item.id, 'unconfirmed');
-            }
+      async handleConfirm(item, index) {
+        try {
+            // 1. 立即更新UI状态为已确认 (无需等待API响应)
+            this.updateItemStatus(item.id, 'confirmed');
+            
+            // 2. 发送API请求 
+            setTimeout(async () => {
+                    try {
+                        await this.processConfirm(item.id);
+                        console.log('确认请求发送成功');
+                    } catch (error) {
+                        console.error('确认失败:', error);
+                        // 失败时回滚状态
+                        this.updateItemStatus(item.id, 'unconfirmed');
+                    }
+                    }, 0);
+            
+            // 3. 触发全局事件
+            eventBus.emit('decrement-unread', 1);
+         
+            
+            ElMessage.success('通知已确认');
+        } catch (error) {
+            console.error('处理出错:', error);
+        }
         },
 
         // 更新状态筛选
