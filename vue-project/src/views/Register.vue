@@ -331,6 +331,7 @@ export default {
            .then(data => {
                 if (data.message === '注册成功') {
                     ElMessage.success(data.message);
+                    this.closeRegisterBox();
                 } else {
                     ElMessage.error(data.message);
                 }

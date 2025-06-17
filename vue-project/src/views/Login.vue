@@ -337,23 +337,24 @@ a span {
 }
 
 .reset-button {
-  background-color: transparent; /* 透明背景 */
-  border: none; /* 去除边框 */
-  padding: 0; /* 去除内边距 */
-  margin: 0; /* 去除外边距 */
+  background-color: transparent; 
+  border: none; 
+  padding: 0; 
+  margin: 0; 
   position: absolute;
   right: 15%;
-  bottom: 200px; /* 调整与输入框的垂直距离 */
+  bottom: 165px; 
   color: #4095E5;
   font-size: 16px;
   cursor: pointer;
   transition: opacity 0.3s;
   font-family: 'Ubuntu';
+  text-decoration: underline; 
 }
 
 .reset-button:hover {
-  text-decoration: underline; /* 悬停添加下划线 */
-  opacity: 0.8; /* 保持原有透明度变化 */
+
+  opacity: 0.8; 
 }
 
 </style>
