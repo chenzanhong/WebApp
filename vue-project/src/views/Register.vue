@@ -55,6 +55,27 @@
       </span>
     </div>
 
+    <div class="code-row">
+    <div class="input-wrapper code-input">
+      <span class="input-icon1">
+        <el-icon><Key /></el-icon>
+      </span>
+      <input 
+        type="text" 
+        v-model="verificationCode" 
+        placeholder="请输入验证码" 
+        class="bar verification-code-input"
+      >
+    </div>
+    <button 
+    class="get-code-btn" 
+    @click="getVerificationCode"
+    :disabled="isCounting"
+  >
+    {{ isCounting ? `${countdown}秒后重试` : '获取验证码' }}
+  </button>
+  </div>
+
     <button class="register-button" @click="registerClick">注册</button>
   </div>
 </template>
@@ -169,7 +190,7 @@ a span {
   height: 75vh;
   background-color: #333333;
   color: white;
-  padding: 20px;
+  padding: 20px 66px;
   border-radius: 10px;
 }
 
@@ -203,14 +224,14 @@ a span {
   font-size: 22px;
   box-sizing: border-box;
   border-radius: 15px;
-  height: 8vh;
-  width: 80%;
+  height: 7vh;
+  width: 100%;
   z-index: 2;
   padding-left: 80px;
 }
 
 .bar {
-  margin: 1.5vh 0 2vh 0;
+  margin: 1vh 0 2vh 0;
 }
 
 .bar2 {
@@ -228,7 +249,7 @@ a span {
 .input-icon1,
 .input-icon2 {
   position: absolute;
-  left: 15%; 
+  left: 6.7%; 
   transform: translateY(-50%);
   color: white;
   font-weight: bold;
@@ -237,11 +258,54 @@ a span {
 }
 
 .input-icon1 {
-  top: 58%;
+  left:5%;
+  top: 54%;
 }
 
 .input-icon2 {
-  top: 58%;
+  left:5%;
+ top: 53%;
+}
+
+.code-row {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1vh;
+}
+
+.code-input {
+  flex: 2;
+  width: auto !important;
+  height: 8vh;
+  margin-bottom: 0;
+}
+
+.verification-code-input {
+  width: 100% !important;
+  padding-right: 0;
+  margin-top: 3vh;
+}
+
+.get-code-btn {
+  flex: 0.8;
+  width: auto;
+  height: 7vh;
+  background-color: #4095E5;
+  border-radius: 10px;
+  font-size: 14px;
+  position: static;
+  margin-top: 1vh;
+  white-space: nowrap;
+  min-width: 100px;
+
+}
+
+.code-input .input-icon1 {
+  left: 8% !important;
+  top: 66% !important;
 }
 
 .toggle-password {
@@ -281,7 +345,7 @@ import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { ElIcon } from 'element-plus';
-import { UserFilled, GoodsFilled, View, Hide, InfoFilled, Comment, CircleCloseFilled } from '@element-plus/icons-vue';
+import { UserFilled, GoodsFilled, View, Hide, InfoFilled, Comment, CircleCloseFilled, Key } from '@element-plus/icons-vue';
 
 export default {
     name: 'LoginPage',
@@ -293,7 +357,8 @@ export default {
         InfoFilled,
         Comment,
         ElIcon,
-        CircleCloseFilled
+        CircleCloseFilled,
+        Key
     },
     data() {
         return {
@@ -302,21 +367,33 @@ export default {
             password: '',
             confirmPassword: '',
             passwordType: 'password',
-            confirmPasswordType: 'password'
+            confirmPasswordType: 'password',
+            verificationCode: '',
+            countdown: 60,
+            isCounting: false
         };
     },
     methods: {
         registerClick() {
-            if (this.password!== this.confirmPassword) {
+            if (this.password !== this.confirmPassword) {
                 ElMessage.error('两次输入的密码不一致');
                 return;
             }
+
+            if (!this.verificationCode) {
+                ElMessage.error('请输入验证码');
+                return;
+            }
+
             const apiUrl = 'http://113.44.170.52:8080/agent/register';
             const requestData = {
                 email: this.email,
                 name: this.username,
-                password: this.password
+                password: this.password,
+                token: this.verificationCode
             };
+
+            console.log('注册请求数据:', requestData);
 
             fetch(apiUrl, {
                 method: 'POST',
@@ -325,10 +402,9 @@ export default {
                 },
                 body: JSON.stringify(requestData)
             })
-           .then(response => {
-                return response.json();
-            })
-           .then(data => {
+            .then(response => response.json())
+            .then(data => {
+                console.log('注册接口返回数据:', data);
                 if (data.message === '注册成功') {
                     ElMessage.success(data.message);
                     this.closeRegisterBox();
@@ -336,7 +412,7 @@ export default {
                     ElMessage.error(data.message);
                 }
             })
-           .catch(error => {
+            .catch(error => {
                 console.error('注册失败:', error);
                 ElMessage.error('注册失败，请稍后重试');
             });
@@ -350,6 +426,67 @@ export default {
         closeRegisterBox() {
             const router = useRouter();
             this.$router.push('/');
+        },
+        getVerificationCode() {
+            if (!this.email) {
+                ElMessage.error('请先输入邮箱');
+                return;
+            }
+
+            // 验证邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(this.email)) {
+                ElMessage.error('请输入有效的邮箱地址');
+                return;
+            }
+
+            // 如果正在倒计时，不允许重复获取
+            if (this.isCounting) {
+                return;
+            }
+
+            // 调用获取验证码接口
+            fetch('http://113.44.170.52:8080/registertoken', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: this.email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('验证码接口返回数据:', data);  // 打印完整返回数据
+                console.log('返回状态:', data.status);     // 打印状态
+                console.log('返回消息:', data.message);    // 打印消息
+                
+                if (data.message === '验证码已发送') {
+                    ElMessage.success('验证码已发送到您的邮箱');
+                    this.startCountdown();
+                } else {
+                    ElMessage.error(data.message || '验证码发送失败');
+                }
+            })
+            .catch(error => {
+                console.error('获取验证码失败:', error);
+                ElMessage.error('获取验证码失败，请稍后重试');
+            });
+        },
+        startCountdown() {
+            this.isCounting = true;
+            this.countdown = 60;
+            const timer = setInterval(() => {
+                this.countdown--;
+                if (this.countdown <= 0) {
+                    clearInterval(timer);
+                    this.isCounting = false;
+                }
+            }, 1000);
+        },
+        handlePasswordInput() {
+            // Implementation of handlePasswordInput method
+        },
+        handleConfirmPasswordInput() {
+            // Implementation of handleConfirmPasswordInput method
         }
     },
     mounted() {}

@@ -127,12 +127,13 @@ const filteredLogs = computed(() => {
     });
   }
 
-  // 这里可以添加其他前端筛选逻辑（例如 serverName）
-
   // 更新总数以反映过滤后的日志数量
   total.value = currentLogs.length;
 
-  return currentLogs;
+  // 实现分页
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return currentLogs.slice(start, end);
 });
 
 // 格式化日期
@@ -208,21 +209,21 @@ const refreshLogs = async (isSearch = false) => {
       fromTime: '',
       toTime: '',
       operation: '',
-      level: ''
+      level: '',
+      page: currentPage.value,  // 添加分页参数
+      size: pageSize.value      // 添加每页大小参数
     };
     
     // 只有在点击搜索时才添加搜索参数
-     // if (isSearch) {
-      if (dateRangeStart.value) {
-        requestBody.fromTime = convertToISO8601WithOffset(dateRangeStart.value);
-      }
-      if (dateRangeEnd.value) {
-        requestBody.toTime = convertToISO8601WithOffset(dateRangeEnd.value);
-      }
-      if (logType.value !== 'all') {
-        requestBody.operation = logType.value;
-      }
-    // }
+    if (dateRangeStart.value) {
+      requestBody.fromTime = convertToISO8601WithOffset(dateRangeStart.value);
+    }
+    if (dateRangeEnd.value) {
+      requestBody.toTime = convertToISO8601WithOffset(dateRangeEnd.value);
+    }
+    if (logType.value !== 'all') {
+      requestBody.operation = logType.value;
+    }
 
     console.log('完整的请求参数:', requestBody);
 
@@ -264,7 +265,8 @@ const refreshLogs = async (isSearch = false) => {
       username: log.username
     })) || [];
 
-    total.value = logs.value.length;
+    // 更新总数
+    total.value = data.total || logs.value.length;
 
   } catch (error) {
     console.error('获取日志失败:', error);
@@ -275,13 +277,12 @@ const refreshLogs = async (isSearch = false) => {
 // 处理分页大小变化
 const handleSizeChange = (val) => {
   pageSize.value = val;
-  refreshLogs();
+  currentPage.value = 1; // 重置到第一页
 };
 
 // 处理页码变化
 const handleCurrentChange = (val) => {
   currentPage.value = val;
-  refreshLogs();
 };
 
 // 处理搜索按钮点击
