@@ -185,18 +185,20 @@ a span {
   letter-spacing: 0.2em;
 }
 
+/* 调整注册框尺寸和位置 */
 .register-box {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  width: 60vw;
+  width: 58vw;
+  min-width: 520px;
   max-width: 660px;
-  height: 75vh;
+  height: 65vh;
   background-color: #333333;
   color: white;
-  padding: 20px;
+  padding: 20px 5vw;
   border-radius: 10px;
 }
 
@@ -209,9 +211,10 @@ a span {
   z-index: 4; 
 }
 
+/* 调整标题字体大小 */
 .box-title {
   margin-top: 0.5vh;
-  font-size: 33px;
+  font-size: 27px; /* 缩小标题字体 */
   font-weight: bold;
 }
 
@@ -222,18 +225,19 @@ a span {
   margin: 15px auto;
 }
 
-.bar,
-bar2 {
+/* 调整输入框样式 */
+.bar {
   background-color: #4F4F4F;
   border: 1px solid #BBBBBB;
   color: #9A9A9A;
-  font-size: 22px;
+  font-size: 18px; /* 缩小输入框字体 */
   box-sizing: border-box;
   border-radius: 15px;
-  height: 8vh;
-  width: 80%;
+  height: 7vh; /* 缩小输入框高度 */
+  width: 100%;
   z-index: 2;
   padding-left: 80px;
+  margin: 1vh 0 2vh 0; /* 调整间距 */
 }
 
 .bar {
@@ -244,20 +248,31 @@ bar2 {
   margin: 0 0 0 0;
 }
 
+/* 调整输入框容器 */
 .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: 25px;
+  margin-bottom: 5px; 
 }
 
 .input-wrapper:focus-within .toggle-password {
   opacity: 1 !important;
 }
 
-.input-icon1,
+/* 调整图标位置 */
+.input-icon1 {
+  position: absolute;
+  left: 5%; /* 调整图标位置 */
+  transform: translateY(-50%);
+  color: white;
+  font-weight: bold;
+  font-size: 40px; 
+  z-index: 4; 
+  top: 54%; /* 调整垂直位置 */
+}
 .input-icon2 {
   position: absolute;
   left: 15%; 
@@ -308,41 +323,49 @@ bar2 {
 /* 新增密码匹配提示样式 */
 .password-match-message {
   position: absolute;
-  bottom: -30px;
-  left: 20%;
+  bottom: -15px; /* 上移提示 */
+  left: 10%;
   transform: translateX(-50%);
-  font-size: 18px;
+  font-size: 14px; /* 缩小字体 */
   width: 100%;
   text-align: center;
   padding-top: 5px;
 }
 
 
+/* 调整验证码行 */
 .code-row {
-  width: 80%;
-  margin: 2vh auto;
+  width: 100%;
   display: flex;
   gap: 10px;
+  align-items: center;
   justify-content: space-between;
-  align-items: stretch; /* 确保子项高度相等 */
+  margin-bottom: 1vh; /* 减小间距 */
 }
 
+/* 调整验证码输入框 */
 .code-input {
-  flex: 2;  /* 输入框占2份 */
-  width: 60% !important;
-  height: 8vh; 
+  flex: 2;
+  width: auto !important;
+  height: 8vh;
+  margin-bottom: 0;
 }
 
+/* 调整获取验证码按钮 */
 .get-code-btn {
-  flex: 1;  /* 按钮占1份 */
-  width: 35%;
-  height: 7vh;
-  background-color: #4095E5;
+  flex: 1;
+  width: auto;
+  height: 6vh; /* 缩小高度 */
+  background-color: #5b5f63; /* 改为灰色背景 */
   border-radius: 10px;
-  font-size: 16px;
-  /* 移除position: absolute相关属性 */
+  font-size: 15px; /* 缩小字体 */
   position: static;
-  margin-top: 0;
+  margin-top: 0vh;
+  white-space: nowrap;
+  min-width: 100px;
+  color: white; /* 白色字体 */
+  transition: all 0.3s ease;
+  border: none;
 }
 .get-code-btn:disabled {
   background-color: #666 !important;
@@ -357,49 +380,36 @@ bar2 {
   width: 100% !important;
   padding-right: 0;
 }
-
 .get-code-btn:hover {
-  background-color: #2B5F92;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  background-color: #575a5d;
+}
+
+.get-code-btn:active {
+  background-color: #4a4d50;
 }
 
 .get-code-btn:disabled {
-  background-color: #666;
+  background-color: #474a4d;
   cursor: not-allowed;
-  opacity: 0.7;
 }
 
-/* 调整图标位置 */
-.code-input .input-icon1 {
-  left: 8% !important;
-}
-
-/* 添加确认按钮样式 */
-.confirm-section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 0vh;
-}
 
 .confirm-button {
-  width: 75%;
-  height: 8vh;
-  background-color: #4095E5;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 20px;
-  font-family: 'Ubuntu';
+   width: 75%;
+  height: 7vh;
+  background-color: #2B5F92;
+  font-size: 21px;
   font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  letter-spacing: 2px;
+  color: white;
+  z-index: 2;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  border-radius: 15px;
+  border: none;
 }
 
 .confirm-button:hover {
-  background-color: #2B5F92;
+  background-color: #224a73; /* 使用注册按钮悬停颜色 */
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
