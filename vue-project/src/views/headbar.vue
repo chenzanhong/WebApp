@@ -729,7 +729,7 @@ const confirmEdit = async () => {
       new_name: userInfo.value.name,
       new_password: userInfo.value.password,
       new_email: userInfo.value.email,
-      realname: userInfo.value.name
+      realname: userInfo.value.realname
     };
 
     const response = await fetch('http://113.44.170.52:8080/agent/updateUserInfo  ', {
@@ -1254,7 +1254,7 @@ const isMonitorRoute = computed(() => {
       transform: translate(-50%, -50%);
       width: 60vw;
       max-width: 550px;
-      height: %40;
+      height: 40%;
       max-width: 500px;
       background-color: #222222;
       border: 1px solid #636161;
