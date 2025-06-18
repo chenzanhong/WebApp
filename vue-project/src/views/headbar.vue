@@ -44,22 +44,16 @@
           <div class="sidebar-header">功能</div>
           <div class="sidebar-menu">
             <button class="sidebar-button" @click="showServerFileTransferDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>服务器文件互传</span>
             </button>
             <button class="sidebar-button" @click="showLocalFileTransferDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>本机文件传输</span>
             </button>
             <button class="sidebar-button" @click="openServerFileDownloadDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>服务器文件下载</span>
+            </button>
+            <button class="sidebar-button" @click="showGetAgentScriptDialog">
+              <span>获取代理配置脚本</span>
             </button>
           </div>
         </div>
@@ -68,6 +62,7 @@
             <Operation />
           </el-icon>
         </div>
+
       </div>
       
       <!-- 告警侧边栏内容 -->
