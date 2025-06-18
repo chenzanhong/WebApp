@@ -4,28 +4,35 @@
     <div class="left-nav">
       <h2>团队业务</h2>
       <router-link
-    to="/headbar/display/teambusiness/applytoteam"
-    class="nav-item"
-    active-class="active"
-  >申请团队</router-link >
-  <router-link
-    to="/headbar/display/teambusiness/invitemember"
-    class="nav-item"
-    active-class="active"
-  >邀请成员</router-link>
-  <router-link
-    to="/headbar/display/teambusiness/changemonitor"
-    class="nav-item"
-    active-class="active"
-  >更换管理员</router-link>
+        to="/headbar/display/teambusiness/applytoteam"
+        class="nav-item"
+        active-class="active"
+      >申请团队</router-link>
+      <template v-if="isAdmin">
+        <router-link
+          to="/headbar/display/teambusiness/invitemember"
+          class="nav-item"
+          active-class="active"
+        >邀请成员</router-link>
+        <router-link
+          to="/headbar/display/teambusiness/changemonitor"
+          class="nav-item"
+          active-class="active"
+        >更换管理员</router-link>
+      </template>
     </div>
-
     <!-- 主体内容区域 -->
-     <router-view />
+    <router-view />
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+const isAdmin = ref(false)
+onMounted(() => {
+  const role = localStorage.getItem('userRole')
+  isAdmin.value = role === 'ADMIN' || role === 'ROOT'
+})
 // import ApplyToTeam from "@/views/TeamBusiness/ApplyToTeam.vue";
 // import InviteMember from "@/views/TeamBusiness/InviteMember.vue";
 // import ChangeMonitor from "@/views/TeamBusiness/ChangeMonitor.vue";
