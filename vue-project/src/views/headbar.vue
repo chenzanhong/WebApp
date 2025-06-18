@@ -53,7 +53,7 @@
               <span>服务器文件下载</span>
             </button>
             <button class="sidebar-button" @click="showGetAgentScriptDialog">
-              <span>获取代理配置脚本</span>
+              <span>获取配置代理服务的脚本</span>
             </button>
           </div>
         </div>
