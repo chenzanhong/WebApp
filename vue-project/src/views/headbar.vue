@@ -44,22 +44,19 @@
           <div class="sidebar-header">功能</div>
           <div class="sidebar-menu">
             <button class="sidebar-button" @click="showServerFileTransferDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>服务器文件互传</span>
             </button>
             <button class="sidebar-button" @click="showLocalFileTransferDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>本机文件传输</span>
             </button>
             <button class="sidebar-button" @click="openServerFileDownloadDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>服务器文件下载</span>
+            </button>
+            <button class="sidebar-button" @click="showGetAgentScriptDialog">
+              <span>获取代理配置脚本</span>
+            </button>
+            <button class="sidebar-button" @click="openDelAgentScriptDialog">
+              <span>获取删除代理脚本</span>
             </button>
           </div>
         </div>
@@ -68,6 +65,7 @@
             <Operation />
           </el-icon>
         </div>
+
       </div>
       
       <!-- 告警侧边栏内容 -->
@@ -177,7 +175,7 @@
       @transfer="handleServerFileTransfer"
     />
 
-    <!-- 本机文件传输弹窗 -->
+    <!-- 本地文件上传弹窗 -->
     <LocalFileTransferDialog
       v-model:visible="showLocalFileDialog"
       @transfer="handleLocalFileTransfer"
@@ -189,6 +187,17 @@
       @transfer="handleServerFileDownload"
     />
 
+    <!-- 获取配置代理服务脚本弹窗 -->
+    <GetAgentScriptDialog
+      v-model:visible="showAgentScriptDialog"
+      @transfer="handleAgentScriptDownload" 
+    />
+
+     <!-- 获取删除配置代理服务脚本弹窗 -->
+    <DelAgentScriptDialog
+      v-model:visible="showDelAgentScriptDialog"
+      @transfer="handleDelAgentScriptDownload" 
+    />
   </div>
 </template>
 
@@ -201,6 +210,8 @@ import { ElMessage } from 'element-plus';
 import ServerFileTransferDialog from '@/components/dialogs/ServerFileTransferDialog.vue';
 import LocalFileTransferDialog from '@/components/dialogs/LocalFileTransferDialog.vue';
 import ServerFileDownloadDialog from '@/components/dialogs/ServerFileDownloadDialog.vue';
+import GetAgentScriptDialog from '@/components/dialogs/GetAgentScriptDialog.vue';
+import DelAgentScriptDialog from '@/components/dialogs/DelAgentScriptDialog.vue';
 import axios from 'axios';
 
 const router = useRouter();
@@ -790,13 +801,15 @@ const logout = () => {
 const showServerFileDialog = ref(false);
 const showLocalFileDialog = ref(false);
 const showServerFileDownloadDialog = ref(false);
+const showAgentScriptDialog = ref(false);
+const showDelAgentScriptDialog = ref(false);
 
 // 显示服务器文件互传弹窗
 const showServerFileTransferDialog = () => {
   showServerFileDialog.value = true;
 };
 
-// 显示本机文件传输弹窗
+// 显示本地文件上传弹窗
 const showLocalFileTransferDialog = () => {
   showLocalFileDialog.value = true;
 };
@@ -806,14 +819,25 @@ const openServerFileDownloadDialog = () => {
   showServerFileDownloadDialog.value = true;
 };
 
+// 显示获取代理脚本弹窗
+const showGetAgentScriptDialog = () => {
+  showAgentScriptDialog.value = true;
+};
+
+// 显示删除代理脚本弹窗
+const openDelAgentScriptDialog = () => {
+  showDelAgentScriptDialog.value = true;
+};
+
+
 const handleServerFileTransfer = (data) => {
   console.log('服务器文件传输完成:', data);
   ElMessage.success('服务器文件传输成功！');
 };
 
 const handleLocalFileTransfer = (data) => {
-  console.log('本机文件传输完成:', data);
-  ElMessage.success('本机文件传输成功！');
+  console.log('本地文件上传完成:', data);
+  ElMessage.success('本地文件上传成功！');
 };
 
 const handleServerFileDownload = (data) => {
@@ -821,10 +845,28 @@ const handleServerFileDownload = (data) => {
   ElMessage.success('服务器文件下载成功！');
 };
 
+const handleAgentScriptDownload = (data) => {
+  console.log('获取代理脚本结果:', data);
+  if (data.success) {
+    ElMessage.success('安装脚本下载成功！');
+  } else {
+    ElMessage.error(data.message || '获取脚本失败');
+  }
+};
+
+const handleDelAgentScriptDownload = (data) => {
+  console.log('获取删除代理脚本结果:', data);
+  if (data.success) {
+    ElMessage.success('删除脚本下载成功！');
+  } else {
+    ElMessage.error(data.message || '获取脚本失败');
+  }
+};
 // 检查当前是否是monitor路由
 const isMonitorRoute = computed(() => {
     return route.path.includes('/headbar/monitor');
 });
+
 </script>
 
 <style scoped>
@@ -1013,7 +1055,7 @@ const isMonitorRoute = computed(() => {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    z-index: 2001;
+    z-index: 800;
   }
 
   .sidebar-toggle:hover {
@@ -1039,7 +1081,7 @@ const isMonitorRoute = computed(() => {
     overflow: hidden;
     flex-shrink: 0;
     height: 100%;
-    z-index: 100;
+    z-index: 101;
   }
 
   /* 在 monitor 页面时的样式 */
@@ -1103,7 +1145,7 @@ const isMonitorRoute = computed(() => {
   background-color: #29333E;
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 101;
   transition: right 0.3s ease;
 }
 
@@ -1263,7 +1305,7 @@ const isMonitorRoute = computed(() => {
       border-radius: 10px;
       display: flex;
       flex-direction: column;
-      z-index: 100;
+      z-index: 200;
     }
   
     .box-title {
