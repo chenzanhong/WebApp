@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="dialog-overlay" @click.self="closeDialog">
     <div class="dialog-box">
-      <div class="box-title">删除代理配置脚本</div>
+      <div class="box-title">获取删除代理服务的脚本</div>
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
@@ -114,7 +114,7 @@ const downloadScript = async () => {
     // 关闭弹窗
     closeDialog();
   } catch (error) {
-    console.error('获取删除代理脚本失败:', error);
+    console.error('获取删除代理服务的脚本失败:', error);
     emit('transfer', {
       success: false,
       hostname: hostname.value,
@@ -201,7 +201,7 @@ watch(() => props.visible, (newVal) => {
   text-align: right;
   padding-right: 20px;
   color: #9A9A9A;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   flex-shrink: 0;
 }
@@ -212,6 +212,7 @@ watch(() => props.visible, (newVal) => {
   border: 1px solid #636161;
   color: white;
   padding: 8px;
+  font-size: 16px;
   border-radius: 4px;
 }
 

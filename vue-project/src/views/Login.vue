@@ -88,6 +88,8 @@ export default {
           const token = data.token;
           localStorage.setItem('token', token);//token存到本地
           localStorage.setItem('userRole', data.role); // 存储用户角色
+          localStorage.setItem('username', data.username) // 用户名
+          localStorage.setItem('companyId', data.companyId) // 公司id
           ElMessage.success(data.message);
 
           if(data.role === 'ROOT') {

@@ -141,6 +141,7 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped>
+/* 保持样式不变 */
 .dialog-overlay {
   position: fixed;
   top: 0;
