@@ -255,7 +255,7 @@ const submitForm = async () => {
       //   throw new Error('设置阈值失败');
       // }
 
-      ElMessage.success('服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行！');
+      ElMessage.success('服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行，或者查看“帮助”');
       emit('success', {});
       closeDialog();
     } else {

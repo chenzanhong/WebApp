@@ -243,7 +243,7 @@ const handleAddServerSuccess = async (responseData) => {
     // 确保UI更新
     await nextTick();
     
-    ElMessage.success('服务器添加成功');
+    ElMessage.success('服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行，或者查看“帮助”');
   } catch (error) {
     console.error('处理服务器添加成功时出错:', error);
     ElMessage.error('刷新服务器列表失败: ' + (error.message || '未知错误'));

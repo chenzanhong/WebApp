@@ -44,21 +44,12 @@
           <div class="sidebar-header">功能</div>
           <div class="sidebar-menu">
             <button class="sidebar-button" @click="showServerFileTransferDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>服务器文件互传</span>
             </button>
             <button class="sidebar-button" @click="showLocalFileTransferDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
-              <span>本机文件传输</span>
+              <span>本地文件上传</span>
             </button>
             <button class="sidebar-button" @click="openServerFileDownloadDialog">
-              <el-icon>
-                <ArrowRight />
-              </el-icon>
               <span>服务器文件下载</span>
             </button>
           </div>
@@ -177,7 +168,7 @@
       @transfer="handleServerFileTransfer"
     />
 
-    <!-- 本机文件传输弹窗 -->
+    <!-- 本地文件上传弹窗 -->
     <LocalFileTransferDialog
       v-model:visible="showLocalFileDialog"
       @transfer="handleLocalFileTransfer"
@@ -796,7 +787,7 @@ const showServerFileTransferDialog = () => {
   showServerFileDialog.value = true;
 };
 
-// 显示本机文件传输弹窗
+// 显示本地文件上传弹窗
 const showLocalFileTransferDialog = () => {
   showLocalFileDialog.value = true;
 };
@@ -812,8 +803,8 @@ const handleServerFileTransfer = (data) => {
 };
 
 const handleLocalFileTransfer = (data) => {
-  console.log('本机文件传输完成:', data);
-  ElMessage.success('本机文件传输成功！');
+  console.log('本地文件上传完成:', data);
+  ElMessage.success('本地文件上传成功！');
 };
 
 const handleServerFileDownload = (data) => {
@@ -1013,7 +1004,7 @@ const isMonitorRoute = computed(() => {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    z-index: 2001;
+    z-index: 800;
   }
 
   .sidebar-toggle:hover {
@@ -1039,7 +1030,7 @@ const isMonitorRoute = computed(() => {
     overflow: hidden;
     flex-shrink: 0;
     height: 100%;
-    z-index: 100;
+    z-index: 101;
   }
 
   /* 在 monitor 页面时的样式 */
@@ -1103,7 +1094,7 @@ const isMonitorRoute = computed(() => {
   background-color: #29333E;
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 101;
   transition: right 0.3s ease;
 }
 
@@ -1263,7 +1254,7 @@ const isMonitorRoute = computed(() => {
       border-radius: 10px;
       display: flex;
       flex-direction: column;
-      z-index: 100;
+      z-index: 200;
     }
   
     .box-title {
