@@ -82,12 +82,17 @@
       </div>
     </div>
   </div>
+  <ImportantTipDialog
+    v-model="importantTipVisible"
+    @confirmed="handleTipConfirmed"
+  />
 </template>
 
 <script setup>
 import { ref, defineProps, defineEmits, watch } from 'vue';
 import { View, Hide } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
+import ImportantTipDialog from './ImportantTipDialog.vue';
 
 const props = defineProps({
   visible: {
@@ -97,6 +102,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:visible', 'success']);
+
+const importantTipVisible = ref(false);
 
 const passwordType = ref('password');
 const isSubmitting = ref(false);
@@ -185,34 +192,27 @@ const submitForm = async () => {
   if (!validateForm()) {
     return;
   }
-  
   isSubmitting.value = true;
-  
   try {
-    // 准备要发送的数据（不包含阈值）
+    // ...原有请求和下载逻辑...
     const requestData = {
       host: formData.value.host,
       user: formData.value.user,
       password: formData.value.password,
       port: formData.value.port,
-      Host_Name: formData.value.Host_Name, // Fixed: Changed from hostName to Host_Name to match the form binding
+      Host_Name: formData.value.Host_Name,
       os: formData.value.os,
       platform: formData.value.platform,
       kernel_arch: formData.value.kernel_arch,
       cpu_threshold: formData.value.cpuThreshold,
       mem_threshold: formData.value.memoryThreshold
     };
-    
-    console.log('Submitting server data:', requestData); // Add debug log
-    
-    // 获取token
+    console.log('Submitting server data:', requestData);
     const token = localStorage.getItem('token');
     if (!token) {
       ElMessage.error('未找到用户认证信息，请重新登录');
       return;
     }
-
-    // 发送请求到指定URL
     const response = await fetch('http://113.44.170.52:8080/agent/install', {
       method: 'POST',
       headers: {
@@ -221,12 +221,8 @@ const submitForm = async () => {
       },
       body: JSON.stringify(requestData)
     });
-    
-     // 第一步：先以 blob 形式读取响应
     const blob = await response.blob();
-
     if (response.ok) {
-      // 下载脚本
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -234,57 +230,13 @@ const submitForm = async () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
-      // 服务器创建成功，现在设置阈值
-      // 第二步：如果需要获取 JSON 数据，可单独发起请求或从 blob 解析（不推荐）
-      // 这里假设你不需要 JSON 响应数据，继续设置阈值
-      // const thresholdResponse = await fetch('http://113.44.170.52:8080/agent/setthreshold', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': ` ${token}`
-      //   },
-      //   body: JSON.stringify({
-      //     hostname: formData.value.Host_Name,
-      //     cpu_threshold: formData.value.cpuThreshold,
-      //     mem_threshold: formData.value.memoryThreshold
-      //   })
-      // });
-
-      // if (!thresholdResponse.ok) {
-      //   throw new Error('设置阈值失败');
-      // }
-
       ElMessage.success('服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行，或者查看“帮助”');
-      emit('success', {});
-      closeDialog();
+      importantTipVisible.value = true; // 弹出重要提示弹窗
     } else {
-      console.error('Server error details:', {
-        status: response.status,
-        statusText: response.statusText,
-        data: responseData
-      });
-      
-      throw new Error(
-        responseData.message || 
-        `添加服务器失败 (${response.status} ${response.statusText})`
-      );
+      ElMessage.error('添加服务器失败');
     }
   } catch (error) {
-    console.error('添加服务器出错:', error);
-    
-    // 检查错误类型并显示更友好的错误信息
-    let errorMessage = error.message || '未知错误';
-    
-    if (error.response) {
-      // 服务器响应了请求但返回了错误状态码
-      errorMessage = `服务器错误: ${error.response.status} ${error.response.statusText}`;
-    } else if (error.request) {
-      // 请求已发送但没有收到响应
-      errorMessage = '无法连接到服务器，请检查网络连接';
-    }
-    
-    ElMessage.error(`添加服务器失败: ${errorMessage}`);
+    ElMessage.error('添加服务器失败: ' + (error.message || '未知错误'));
   } finally {
     isSubmitting.value = false;
   }
@@ -308,6 +260,11 @@ watch(() => props.visible, (newVal) => {
     };
   }
 });
+function handleTipConfirmed() {
+  // 用户点击已完成上述操作，关闭主对话框并回主页面
+  emit('success', {});
+  closeDialog();
+}
 </script>
 
 <style scoped>
