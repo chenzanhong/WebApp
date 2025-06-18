@@ -55,6 +55,9 @@
             <button class="sidebar-button" @click="showGetAgentScriptDialog">
               <span>获取配置代理服务的脚本</span>
             </button>
+            <button class="sidebar-button" @click="openDelAgentScriptDialog">
+              <span>获取删除代理脚本</span>
+            </button>
           </div>
         </div>
         <div class="sidebar-toggle" @click="toggleSidebar">
@@ -189,6 +192,12 @@
       v-model:visible="showAgentScriptDialog"
       @transfer="handleAgentScriptDownload" 
     />
+
+     <!-- 获取删除配置代理服务脚本弹窗 -->
+    <DelAgentScriptDialog
+      v-model:visible="showDelAgentScriptDialog"
+      @transfer="handleDelAgentScriptDownload" 
+    />
   </div>
 </template>
 
@@ -202,6 +211,7 @@ import ServerFileTransferDialog from '@/components/dialogs/ServerFileTransferDia
 import LocalFileTransferDialog from '@/components/dialogs/LocalFileTransferDialog.vue';
 import ServerFileDownloadDialog from '@/components/dialogs/ServerFileDownloadDialog.vue';
 import GetAgentScriptDialog from '@/components/dialogs/GetAgentScriptDialog.vue';
+import DelAgentScriptDialog from '@/components/dialogs/DelAgentScriptDialog.vue';
 import axios from 'axios';
 
 const router = useRouter();
@@ -792,6 +802,7 @@ const showServerFileDialog = ref(false);
 const showLocalFileDialog = ref(false);
 const showServerFileDownloadDialog = ref(false);
 const showAgentScriptDialog = ref(false);
+const showDelAgentScriptDialog = ref(false);
 
 // 显示服务器文件互传弹窗
 const showServerFileTransferDialog = () => {
@@ -812,6 +823,13 @@ const openServerFileDownloadDialog = () => {
 const showGetAgentScriptDialog = () => {
   showAgentScriptDialog.value = true;
 };
+
+// 显示删除代理脚本弹窗
+const openDelAgentScriptDialog = () => {
+  showDelAgentScriptDialog.value = true;
+};
+
+
 const handleServerFileTransfer = (data) => {
   console.log('服务器文件传输完成:', data);
   ElMessage.success('服务器文件传输成功！');
@@ -830,7 +848,16 @@ const handleServerFileDownload = (data) => {
 const handleAgentScriptDownload = (data) => {
   console.log('获取代理脚本结果:', data);
   if (data.success) {
-    ElMessage.success('脚本下载成功！');
+    ElMessage.success('安装脚本下载成功！');
+  } else {
+    ElMessage.error(data.message || '获取脚本失败');
+  }
+};
+
+const handleDelAgentScriptDownload = (data) => {
+  console.log('获取删除代理脚本结果:', data);
+  if (data.success) {
+    ElMessage.success('删除脚本下载成功！');
   } else {
     ElMessage.error(data.message || '获取脚本失败');
   }
@@ -839,6 +866,7 @@ const handleAgentScriptDownload = (data) => {
 const isMonitorRoute = computed(() => {
     return route.path.includes('/headbar/monitor');
 });
+
 </script>
 
 <style scoped>
