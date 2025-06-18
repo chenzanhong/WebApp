@@ -53,10 +53,10 @@
               <span>服务器文件下载</span>
             </button>
             <button class="sidebar-button" @click="showGetAgentScriptDialog">
-              <span>获取代理配置脚本</span>
+              <span>获取配置代理服务的脚本</span>
             </button>
             <button class="sidebar-button" @click="openDelAgentScriptDialog">
-              <span>获取删除代理脚本</span>
+              <span>获取删除代理服务的脚本</span>
             </button>
           </div>
         </div>
@@ -716,7 +716,7 @@ const fetchUserInfo = async () => {
       realname: result.user.realname || '',
     };
 
-    ElMessage.success(result.message || '用户信息加载成功');
+    // ElMessage.success(result.message || '用户信息加载成功');
 
   } catch (error) {
     console.error('获取用户信息失败:', error);
@@ -855,7 +855,7 @@ const handleAgentScriptDownload = (data) => {
 };
 
 const handleDelAgentScriptDownload = (data) => {
-  console.log('获取删除代理脚本结果:', data);
+  console.log('获取删除代理服务的脚本结果:', data);
   if (data.success) {
     ElMessage.success('删除脚本下载成功！');
   } else {

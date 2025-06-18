@@ -21,8 +21,8 @@
           <div class="company-middle-info">
         <div class="company-name">{{ companyData.name  || ''}}</div>
         <div class="count-info">
-          <span>成员总数 {{ companyData.member_num || ''}}</span>
-          <span>服务器总数 {{ companyData.system_num || '' }}</span>
+          <span>成员总数 {{ companyData.member_num || 0}}</span>
+          <span>服务器总数 {{ companyData.system_num || 0 }}</span>
         </div>
       </div>
           <el-button type="text" class="forward-button" @click="handleToolClick('home')"> 查看服务器详情 ></el-button>
@@ -59,12 +59,17 @@
             </div>
             <div class="member-item name-item">{{ member.username }}</div>
             <div class="member-item email-item">{{ member.email }}</div>
-            <button class="deletebutton" @click="openDeleteMemberDialog(member)">删除</button>
+            <button class="deletebutton" 
+              :disabled="isCurrentUser(member.username)"
+              @click="openDeleteMemberDialog(member)"
+            >
+              删除
+            </button>
           </div>
         </div>
       </div>
     </div>
-   
+
     <!-- 添加成员弹窗 -->
     <div v-if="showAddMemberDialog" class="addbox">
       <div class="box-title">添加成员</div>
@@ -100,6 +105,237 @@
     </div>
   </div>
 </template>
+
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router'; // 新增useRoute
+import { ElInput, ElCheckbox, ElIcon, ElMessage } from 'element-plus';
+import { Search, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase, UserFilled, Comment } from '@element-plus/icons-vue';
+
+// 获取路由实例和路由参数
+const route = useRoute(); // 新增路由参数获取
+
+const companyData = ref(null); // 初始化为null
+const members = ref([]);
+const isRoot = ref(false);
+
+// 检查用户角色
+const checkUserRole = () => {
+  const userRole = localStorage.getItem('userRole');
+  isRoot.value = userRole === 'ROOT';
+};
+
+const currentUsername = localStorage.getItem('username');
+
+const isCurrentUser = (username) => {
+  return username === currentUsername;
+};
+
+// 新增获取公司信息方法
+const fetchCompanyInfo = async () => {
+  try {
+    const token = localStorage.getItem('token'); 
+    console.log('token:', token);
+    let apiUrl = 'http://113.44.170.52:8080/agent/get-company-info';
+    
+    // 从路由查询参数获取公司名称
+    const companyName = route.query.companyName;
+    if (companyName) {
+      apiUrl += `?company-name=${encodeURIComponent(companyName)}`;
+    }
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      }
+    });
+
+    if (!response.ok) throw new Error('获取数据失败');
+    
+    const data = await response.json();
+    console.log('从后端获取的原始数据:', data);
+    // 添加数据有效性验证
+    if (!data?.data?.Company || !Array.isArray(data.data.Members)) {
+      throw new Error('返回数据格式错误');
+    }
+   // 处理返回数据
+   companyData.value = {
+      name: data.data.Company.name || '',
+      member_num: data.data.Members.length,
+      system_num: data.data.Company.system_num || 0
+    };
+
+    members.value = data.data.Members.map(member => ({
+      ...member,
+      isSelected: false // 保持原有的选择状态字段
+    }));
+    
+  } catch (error) {
+    ElMessage.error(error.message || '获取公司信息失败');
+    console.error('API Error:', error);
+  }
+};
+// 在组件挂载时自动获取数据
+onMounted(() => {
+  checkUserRole();
+  fetchCompanyInfo();
+});
+
+
+const isAllSelected = ref(false);
+const searchQuery = ref('');
+const showAddMemberDialog = ref(false);
+const showDeleteMemberDialog = ref(false);
+const username = ref('');
+const email = ref('');
+const passwordType = ref('password');
+const confirmText = ref('');
+const selectedMembersToDelete = ref([]);
+
+// 工具栏状态管理
+const selectedTool = ref('home'); 
+const currentView = ref('home'); 
+
+// 获取路由实例
+const router = useRouter();
+// 处理工具栏点击事件
+const handleToolClick = (tool) => {
+  selectedTool.value = tool;
+  switch (tool) {
+    case 'home':
+      router.push('/headbar/home');
+      break;
+    case 'systemadmin':
+      router.push('/headbar/systemadmin');
+      break;
+  }
+};
+// 全选/取消全选逻辑
+const handleSelectAll = () => {
+  members.value.forEach(member => {
+    member.isSelected = isAllSelected.value;
+  });
+};
+
+// 检查是否全选
+const checkAllSelected = () => {
+  isAllSelected.value = members.value.every(member => member.isSelected);
+};
+
+// 打开删除单个成员确认弹窗
+const openDeleteMemberDialog = (member) => {
+  confirmText.value = `确定要删除 ${member.username} 吗？`; // 修正为username
+  selectedMembersToDelete.value = [member];
+  showDeleteMemberDialog.value = true;
+};
+
+// 打开删除选中成员确认弹窗
+const openDeleteSelectedDialog = () => {
+  const selectedMembers = members.value.filter(member => member.isSelected);
+  if (selectedMembers.length === 0) {
+    alert('请先选择要删除的成员');
+    return;
+  }
+  confirmText.value = `确定要删除${selectedMembers.length}个成员吗？`;
+  selectedMembersToDelete.value = selectedMembers;
+  showDeleteMemberDialog.value = true;
+};
+
+// 确认删除成员（同时处理单个和批量）
+const confirmDelete = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const usernames = selectedMembersToDelete.value.map(m => m.username);
+    
+    const response = await fetch('http://120.79.200.209:8080/agent/deleteMembers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      },
+      body: JSON.stringify({ usernames })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || '删除成员失败');
+    }
+
+    ElMessage.success(result.message);
+    
+    // 仅保留接口刷新方式（重要修改！）
+    await fetchCompanyInfo();
+
+  } catch (error) {
+    ElMessage.error(error.message);
+    console.error('删除失败:', error);
+  } finally {
+    showDeleteMemberDialog.value = false;
+    selectedMembersToDelete.value = [];
+  }
+};
+
+
+// 打开添加成员弹窗
+const openAddMemberDialog = () => {
+  showAddMemberDialog.value = true;
+};
+
+const addMember = async () => {
+  try {
+    if (!username.value || !email.value) {
+      ElMessage.warning('请输入成员姓名和邮箱');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+     const response = await fetch('http://120.79.200.209:8080/agent/addMember', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`
+      },
+      body: JSON.stringify({
+        username: username.value,
+        email: email.value
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || '添加成员失败');
+    }
+
+    ElMessage.success(result.message);
+    // 添加成功后刷新成员列表
+    await fetchCompanyInfo();
+    showAddMemberDialog.value = false;
+    username.value = '';
+    email.value = '';
+  } catch (error) {
+    ElMessage.error(error.message);
+    console.error('添加成员失败:', error);
+  }
+};
+
+const togglePasswordVisibility = () => {
+  passwordType.value = passwordType.value === 'password'? 'text' : 'password';
+};
+
+const handlePasswordInput = () => {
+  // 处理密码输入逻辑
+};
+
+// 返回系统管理页面
+const goBackToSystemAdmin = () => {
+  router.push('/headbar/systemadmin');
+};
+</script>      
 
 
 <style scoped>
@@ -627,227 +863,3 @@
 }
 </style>
 
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router'; // 新增useRoute
-import { ElInput, ElCheckbox, ElIcon, ElMessage } from 'element-plus';
-import { Search, HomeFilled, Setting, ChatDotRound, QuestionFilled, Briefcase, UserFilled, Comment } from '@element-plus/icons-vue';
-
-// 获取路由实例和路由参数
-const route = useRoute(); // 新增路由参数获取
-
-const companyData = ref(null); // 初始化为null
-const members = ref([]);
-const isRoot = ref(false);
-
-// 检查用户角色
-const checkUserRole = () => {
-  const userRole = localStorage.getItem('userRole');
-  isRoot.value = userRole === 'ROOT';
-};
-
-// 新增获取公司信息方法
-const fetchCompanyInfo = async () => {
-  try {
-    const token = localStorage.getItem('token'); 
-    console.log('token:', token);
-    let apiUrl = 'http://113.44.170.52:8080/agent/get-company-info';
-    
-    // 从路由查询参数获取公司名称
-    const companyName = route.query.companyName;
-    if (companyName) {
-      apiUrl += `?company-name=${encodeURIComponent(companyName)}`;
-    }
-
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `${token}`
-      }
-    });
-
-    if (!response.ok) throw new Error('获取数据失败');
-    
-    const data = await response.json();
-    console.log('从后端获取的原始数据:', data);
-    // 添加数据有效性验证
-    if (!data?.data?.Company || !Array.isArray(data.data.Members)) {
-      throw new Error('返回数据格式错误');
-    }
-   // 处理返回数据
-   companyData.value = {
-      name: data.data.Company.name || '',
-      member_num: data.data.Members.length,
-      system_num: data.data.Company.system_num || 0
-    };
-
-    members.value = data.data.Members.map(member => ({
-      ...member,
-      isSelected: false // 保持原有的选择状态字段
-    }));
-    
-  } catch (error) {
-    ElMessage.error(error.message || '获取公司信息失败');
-    console.error('API Error:', error);
-  }
-};
-// 在组件挂载时自动获取数据
-onMounted(() => {
-  checkUserRole();
-  fetchCompanyInfo();
-});
-
-
-const isAllSelected = ref(false);
-const searchQuery = ref('');
-const showAddMemberDialog = ref(false);
-const showDeleteMemberDialog = ref(false);
-const username = ref('');
-const email = ref('');
-const passwordType = ref('password');
-const confirmText = ref('');
-const selectedMembersToDelete = ref([]);
-
-// 工具栏状态管理
-const selectedTool = ref('home'); 
-const currentView = ref('home'); 
-
-// 获取路由实例
-const router = useRouter();
-// 处理工具栏点击事件
-const handleToolClick = (tool) => {
-  selectedTool.value = tool;
-  switch (tool) {
-    case 'home':
-      router.push('/headbar/home');
-      break;
-    case 'systemadmin':
-      router.push('/headbar/systemadmin');
-      break;
-  }
-};
-// 全选/取消全选逻辑
-const handleSelectAll = () => {
-  members.value.forEach(member => {
-    member.isSelected = isAllSelected.value;
-  });
-};
-
-// 检查是否全选
-const checkAllSelected = () => {
-  isAllSelected.value = members.value.every(member => member.isSelected);
-};
-
-// 打开删除单个成员确认弹窗
-const openDeleteMemberDialog = (member) => {
-  confirmText.value = `确定要删除 ${member.username} 吗？`; // 修正为username
-  selectedMembersToDelete.value = [member];
-  showDeleteMemberDialog.value = true;
-};
-
-// 打开删除选中成员确认弹窗
-const openDeleteSelectedDialog = () => {
-  const selectedMembers = members.value.filter(member => member.isSelected);
-  if (selectedMembers.length === 0) {
-    alert('请先选择要删除的成员');
-    return;
-  }
-  confirmText.value = `确定要删除${selectedMembers.length}个成员吗？`;
-  selectedMembersToDelete.value = selectedMembers;
-  showDeleteMemberDialog.value = true;
-};
-
-// 确认删除成员（同时处理单个和批量）
-const confirmDelete = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    const usernames = selectedMembersToDelete.value.map(m => m.username);
-    
-    const response = await fetch('http://120.79.200.209:8080/agent/deleteMembers', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `${token}`
-      },
-      body: JSON.stringify({ usernames })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || '删除成员失败');
-    }
-
-    ElMessage.success(result.message);
-    
-    // 仅保留接口刷新方式（重要修改！）
-    await fetchCompanyInfo();
-
-  } catch (error) {
-    ElMessage.error(error.message);
-    console.error('删除失败:', error);
-  } finally {
-    showDeleteMemberDialog.value = false;
-    selectedMembersToDelete.value = [];
-  }
-};
-
-
-// 打开添加成员弹窗
-const openAddMemberDialog = () => {
-  showAddMemberDialog.value = true;
-};
-
-const addMember = async () => {
-  try {
-    if (!username.value || !email.value) {
-      ElMessage.warning('请输入成员姓名和邮箱');
-      return;
-    }
-
-    const token = localStorage.getItem('token');
-     const response = await fetch('http://120.79.200.209:8080/agent/addMember', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `${token}`
-      },
-      body: JSON.stringify({
-        username: username.value,
-        email: email.value
-      })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || '添加成员失败');
-    }
-
-    ElMessage.success(result.message);
-    // 添加成功后刷新成员列表
-    await fetchCompanyInfo();
-    showAddMemberDialog.value = false;
-    username.value = '';
-    email.value = '';
-  } catch (error) {
-    ElMessage.error(error.message);
-    console.error('添加成员失败:', error);
-  }
-};
-
-const togglePasswordVisibility = () => {
-  passwordType.value = passwordType.value === 'password'? 'text' : 'password';
-};
-
-const handlePasswordInput = () => {
-  // 处理密码输入逻辑
-};
-
-// 返回系统管理页面
-const goBackToSystemAdmin = () => {
-  router.push('/headbar/systemadmin');
-};
-</script>      

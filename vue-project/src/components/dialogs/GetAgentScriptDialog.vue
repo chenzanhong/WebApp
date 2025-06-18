@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="dialog-overlay" @click.self="closeDialog">
     <div class="dialog-box">
-      <div class="box-title">获取代理配置脚本</div>
+      <div class="box-title">获取配置代理服务的脚本</div>
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
@@ -99,7 +99,7 @@ const downloadScript = async () => {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `agent-config-${hostname.value}.sh`);
+    link.setAttribute('download', `agent_install_${hostname.value}.sh`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -141,6 +141,7 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped>
+/* 保持样式不变 */
 .dialog-overlay {
   position: fixed;
   top: 0;
@@ -202,7 +203,7 @@ watch(() => props.visible, (newVal) => {
   text-align: right;
   padding-right: 20px;
   color: #9A9A9A;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   flex-shrink: 0;
 }
@@ -214,6 +215,7 @@ watch(() => props.visible, (newVal) => {
   color: white;
   padding: 8px;
   border-radius: 4px;
+  font-size: 15px;
 }
 
 .password-input-wrapper {
