@@ -1,7 +1,7 @@
 <template>
   <div v-if="visible" class="dialog-overlay" @click.self="closeDialog">
     <div class="dialog-box">
-      <div class="box-title">获取代理配置脚本</div>
+      <div class="box-title">删除代理配置脚本</div>
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
@@ -21,7 +21,7 @@
             @click="downloadScript" 
             :disabled="isLoading"
           >
-            {{ isLoading ? '下载中...' : '获取脚本' }}
+            {{ isLoading ? '下载中...' : '获取删除脚本' }}
           </button>
           <button 
             class="cancel-button" 
@@ -58,7 +58,7 @@ const closeDialog = () => {
   emit('update:visible', false);
 };
 
-// 下载脚本
+// 下载删除脚本
 const downloadScript = async () => {
   if (!hostname.value.trim()) {
     ElMessage.error('请输入服务器主机名');
@@ -72,19 +72,18 @@ const downloadScript = async () => {
     if (!token) {
       throw new Error('未找到登录凭证');
     }
-    console.log('token为：',token)
-    // 构造查询参数（GET 请求参数放在 URL 里）
+    
+    // 使用 /uninstallcombinedscript 接口
     const params = new URLSearchParams({
-      hostname: hostname.value.trim(), // 确保参数名与后端一致
+      hostname: hostname.value.trim(),
     });
 
-    // 发送 GET 请求，参数放在 URL 中
     const response = await fetch(
-      `http://113.44.170.52:8080/agent/combinedscript?${params}`,
+      `http://113.44.170.52:8080/agent/uninstallcombinedscript?${params}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': ` ${token}`, // 确保格式正确
+          'Authorization': ` ${token}`,
         },
       }
     );
@@ -99,7 +98,7 @@ const downloadScript = async () => {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `agent-config-${hostname.value}.sh`);
+    link.setAttribute('download', `uninstall-agent-${hostname.value}.sh`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -109,13 +108,13 @@ const downloadScript = async () => {
     emit('transfer', {
       success: true,
       hostname: hostname.value,
-      message: '脚本下载成功',
+      message: '删除脚本下载成功',
     });
 
     // 关闭弹窗
     closeDialog();
   } catch (error) {
-    console.error('获取代理脚本失败:', error);
+    console.error('获取删除代理脚本失败:', error);
     emit('transfer', {
       success: false,
       hostname: hostname.value,
@@ -125,7 +124,7 @@ const downloadScript = async () => {
     if (error.message.includes('未找到登录凭证') || error.message.includes('401')) {
       ElMessage.error('登录已过期，请重新登录');
     } else {
-      ElMessage.error(`获取脚本失败: ${error.message}`);
+      ElMessage.error(`获取删除脚本失败: ${error.message}`);
     }
   } finally {
     isLoading.value = false;
