@@ -121,21 +121,25 @@ onMounted(() => {
 const searchQuery = ref('');
 
 const filteredServers = computed(() => {
+  // 当搜索查询为空时，返回所有服务器
   if (!searchQuery.value) {
     return servers.value;
   }
-  
-  const filtered = [];
-  const query = searchQuery.value.toLowerCase();
-  
-  for (let i = 0; i < servers.value.length; i++) {
-    const server = servers.value[i];
-    if (server.host_name && server.host_name.toLowerCase().includes(query)) {
-      filtered.push(server);
-    }
+
+  // 确保 servers.value 和 servers.value.hosts 存在
+  if (!servers.value || !servers.value.hosts) {
+    return { hosts: [] };
   }
-  
-  return filtered;
+
+  const query = searchQuery.value.toLowerCase();
+
+  // 使用 filter 方法过滤出主机名匹配的服务器
+  const filteredHosts = servers.value.hosts.filter(server =>
+    server.host_name && server.host_name.toLowerCase().includes(query)
+  );
+
+  // 返回包含过滤后服务器列表的对象，以匹配模板中的使用方式
+  return { hosts: filteredHosts };
 });
 
 const show = ref(false);
