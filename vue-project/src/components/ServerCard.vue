@@ -218,7 +218,7 @@ const saveThresholds = async () => {
 // 告警阈值以百分比形式展示
 const formatThreshold = (threshold) => {
   if (threshold === undefined || threshold === null) return '未设置';
-  return `${threshold*100}%`;
+  return `${(threshold*100).toFixed(0)}%`;
 };
 </script>
 

@@ -28,7 +28,6 @@
         <li>
           <strong>运行脚本：</strong>
           <div class="tip-code">./install_agent.sh</div>
-          <div class="tip-desc">若遇权限问题，请尝试：<span class="tip-code-inline">./install_agent.sh</span></div>
         </li>
         <li>
           <strong>验证安装结果：</strong>

@@ -98,11 +98,11 @@
               <h2>内存使用情况</h2>
               <div class="info-item">
                   <span>总内存：</span>
-                  <span>{{ memoryData.total }}G</span>
+                  <span>{{ memoryData.total }}</span>
               </div>
               <div class="info-item">
                   <span>已用内存：</span>
-                  <span>{{ memoryData.used }}G</span>
+                  <span>{{ memoryData.used }}</span>
               </div>
               <div class="info-item">
                   <span>使用占比：</span>
@@ -139,6 +139,7 @@ import {
   DatasetComponent
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+
 const formatTraffic = bytes => {
 if (typeof bytes !== 'number') return '0 B'
 const units = ['B', 'KB', 'MB', 'GB']
@@ -197,12 +198,16 @@ data() {
     currentHostname: null,
     currentCpuHistory: [],
     currentMemHistory: [],
+    historicalHostname: '', // 存储最近一次有效的 hostname
   }
 },
 watch: {
   '$route.params.hostname': {
     handler(newVal, oldVal) {
       if (!newVal || newVal === oldVal) return;
+
+      // 更新历史记录中的hostname
+      this.historicalHostname = encodeURIComponent(newVal);
       
       // 清理旧资源
       this.cleanupCharts();
@@ -227,6 +232,7 @@ created() {
   // 组件创建时手动调用一次获取数据的方法
   const hostname = this.$route.params.hostname;
   if (hostname) {
+    this.historicalHostname = encodeURIComponent(hostname)
     this.fetchServerDetail();
     this.startDataRefresh();
   } else {
@@ -288,8 +294,15 @@ methods: {
         this.setupServerContext(hostname);
       }
   try {
-    const hostname = encodeURIComponent(this.$route.params.hostname)
     const token = localStorage.getItem('token')
+    const hostname = this.$route.params.hostname
+      ? encodeURIComponent(this.$route.params.hostname)
+      : this.historicalHostname;
+
+    if (!hostname) {
+      console.warn('无法发起请求：未找到有效的 hostname');
+      return;
+    }
     // 请求历史数据接口
     const response = await fetch(
       //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/1`,
@@ -356,8 +369,15 @@ methods: {
         if (!this.initialHistoryLoaded) {
           await this.fetchHistoryData()
         }
-      const hostname = encodeURIComponent(this.$route.params.hostname)
       const token = localStorage.getItem('token')
+      const hostname = this.$route.params.hostname
+        ? encodeURIComponent(this.$route.params.hostname)
+        : this.historicalHostname;
+
+      if (!hostname) {
+        console.warn('无法发起请求：未找到有效的 hostname');
+        return;
+      }
       console.log('实时路由:', hostname);
       const response = await fetch(
         `http://113.44.170.52:8080/agent/monitor/status/${hostname}`,
@@ -382,9 +402,16 @@ methods: {
   //刷新界面
     async refreshDataOnly() {
       try {
-        const hostname = encodeURIComponent(this.$route.params.hostname)
         const token = localStorage.getItem('token')
-         console.log('刷新路由:', hostname);
+        const hostname = this.$route.params.hostname
+          ? encodeURIComponent(this.$route.params.hostname)
+          : this.historicalHostname;
+
+        if (!hostname) {
+          console.warn('无法发起请求：未找到有效的 hostname');
+          return;
+        }
+        console.log('刷新路由:', hostname);
         const response = await fetch(
           //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
           `http://113.44.170.52:8080/agent/monitor/status/${hostname}`,

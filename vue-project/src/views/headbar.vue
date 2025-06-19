@@ -47,7 +47,7 @@
               <span>服务器文件互传</span>
             </button>
             <button class="sidebar-button" @click="showLocalFileTransferDialog">
-              <span>本机文件传输</span>
+              <span>本地文件上传</span>
             </button>
             <button class="sidebar-button" @click="openServerFileDownloadDialog">
               <span>服务器文件下载</span>
