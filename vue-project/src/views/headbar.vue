@@ -540,8 +540,8 @@ eventBus.on('unread-count', (count) => {
 });
 
 // 在组件挂载时初始化
-onMounted(() => {
-  console.log('组件开始挂载');
+onMounted(async () => {
+  await syncUserRoleFromServer();
   checkUserRole();
   console.log('组件挂载完成，最终管理员状态:', isAdmin.value);
   
@@ -560,6 +560,13 @@ onMounted(() => {
     if (newToken) fetchUnreadCount();
     else unreadCount.value = 0;
      });
+
+  // 监听角色变化事件
+  eventBus.on('role-updated', (roleId) => {
+    if (roleId === 1) {
+      isAdmin.value = true;
+    }
+  });
 });
 
 // 定期获取告警
@@ -576,6 +583,7 @@ onUnmounted(() => {
   }
   // 组件卸载时取消监听
   eventBus.off('unread-count');
+  eventBus.off('role-updated');
   clearAllAlerts(); // 组件卸载时清空所有显示
 });
 
@@ -866,6 +874,27 @@ const handleDelAgentScriptDownload = (data) => {
 const isMonitorRoute = computed(() => {
     return route.path.includes('/headbar/monitor');
 });
+
+async function syncUserRoleFromServer() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const res = await fetch('http://113.44.170.52:8080/agent/userInfo', {
+      headers: { 'Authorization': token }
+    });
+    const data = await res.json();
+    const roleId = data.user?.role_id;
+    if (roleId === 1) {
+      localStorage.setItem('userRole', 'ADMIN');
+    } else if (roleId === 2) {
+      localStorage.setItem('userRole', 'ROOT');
+    } else {
+      localStorage.setItem('userRole', 'USER');
+    }
+  } catch (e) {
+    // 忽略错误
+  }
+}
 
 </script>
 

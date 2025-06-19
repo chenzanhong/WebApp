@@ -59,7 +59,7 @@
         <div class="notice-box">
           <h2>公司注册申请注意事项</h2>
           <div class="notice-content">
-            <div>请注意在主页面侧边栏“通知”处查收公司方确认邀请的结果。
+            <div>请注意在主页面侧边栏"通知"处查收公司方确认邀请的结果。
               若邀请在十个工作日内未被确认，需要重新进行邀请。</div>
           </div>
         </div>
@@ -71,11 +71,12 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onUnmounted } from 'vue'
 //import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { HomeFilled, Setting, ChatDotRound, QuestionFilled, Plus } from '@element-plus/icons-vue';
 import src from '@/assets/image.png'; // 使用 import 引入
+import { eventBus } from '@/utils/eventBus';
 //const token = localStorage.getItem('token') || ''
 const form = reactive({
   companyName: '',
@@ -106,8 +107,43 @@ const rules = {
 
 const registerForm = ref(null)
 
+let pollingTimer = null;
+let lastRoleId = null;
 
+const startPollingUserInfo = () => {
+  if (pollingTimer) clearInterval(pollingTimer);
+  console.log('开始轮询用户信息，等待角色变更...');
+  
+  pollingTimer = setInterval(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const res = await fetch('http://113.44.170.52:8080/agent/userInfo', {
+        headers: { 'Authorization': token }
+      });
+      const data = await res.json();
+      const roleId = data.user?.role_id;
+      console.log('获取用户信息接口返回数据:', {
+        message: data.message,
+        roleId: roleId
+      });
+      
+      if (roleId === 1) {
+        localStorage.setItem('userRole', 'ADMIN'); // 变为管理员时写入localStorage
+        console.log('检测到角色为1，设置userRole为ADMIN，发送事件并停止轮询');
+        eventBus.emit('role-updated', 1);
+        clearInterval(pollingTimer);
+      }
+    } catch (e) {
+      console.error('轮询过程出错:', e);
+    }
+  }, 2000);
+};
 
+onUnmounted(() => {
+  if (pollingTimer) clearInterval(pollingTimer);
+});
 
 const submitForm = async () => {
   if (!registerForm.value) return
@@ -140,6 +176,7 @@ const submitForm = async () => {
 
     if (response.ok) {
       ElMessage.success('表单提交成功');
+      startPollingUserInfo(); // 注册成功后开始轮询
     } else {
       const errorData = await response.json(); // 获取错误信息
       console.error('Error response:', errorData);
