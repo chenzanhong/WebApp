@@ -5,19 +5,19 @@
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
-          <label class="input-title">传输服务器用户名：</label>
-          <input v-model="formData.serverUsername" class="info-input" placeholder="请输入用户名">
+          <label class="input-title">源服务器用户名：</label>
+          <input v-model="formData.sourceUsername" class="info-input" placeholder="请输入源服务器的用户名">
         </div>
         
         <div class="form-group">
-          <label class="input-title">传输服务器IP：</label>
-          <IpSearchInput v-model="formData.serverIp" placeholder="请输入传输服务器IP" />
+          <label class="input-title">源服务器的主机名或IP：</label>
+          <IpSearchInput v-model="formData.source" placeholder="请输入源服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
-          <label class="input-title">传输服务器密钥：</label>
+          <label class="input-title">源服务器密码：</label>
           <div class="password-input-wrapper">
-            <input v-model="formData.serverPassword" :type="passwordType" class="info-input" placeholder="请输入传输服务器密码">
+            <input v-model="formData.sourcePassword" :type="passwordType" class="info-input" placeholder="请输入源服务器的密码">
             <span class="toggle-password" @click="togglePasswordVisibility">
               <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
             </span>
@@ -26,23 +26,23 @@
         
         <div class="form-group">
           <label class="input-title">文件地址：</label>
-          <input v-model="formData.filePath" class="info-input" placeholder="请输入待传输文件的文件地址">
+          <input v-model="formData.filePath" class="info-input" placeholder="请输入待传输文件在源服务器上的文件路径">
         </div>
         
         <div class="form-group">
           <label class="input-title">目标服务器用户名：</label>
-          <input v-model="formData.targetUsername" class="info-input" placeholder="请输入用户名">
+          <input v-model="formData.targetUsername" class="info-input" placeholder="请输入目标服务器的用户名">
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器IP：</label>
-          <IpSearchInput v-model="formData.targetIp" placeholder="请输入目标服务器IP" />
+          <label class="input-title">目标服务器的主机名或IP：</label>
+          <IpSearchInput v-model="formData.target" placeholder="请输入目标服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器密钥：</label>
+          <label class="input-title">目标服务器密码：</label>
           <div class="password-input-wrapper">
-            <input v-model="formData.targetPassword" :type="passwordType" class="info-input" placeholder="请输入目标服务器密码">
+            <input v-model="formData.targetPassword" :type="passwordType" class="info-input" placeholder="请输入目标服务器的密码">
             <span class="toggle-password" @click="togglePasswordVisibility">
               <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
             </span>
@@ -51,7 +51,7 @@
         
         <div class="form-group">
           <label class="input-title">传输路径：</label>
-          <input v-model="formData.transferPath" class="info-input" placeholder="请输入要传输的文件路径">
+          <input v-model="formData.transferPath" class="info-input" placeholder="请输入待传输文件将在目标服务器上存放的文件路径">
         </div>
       </div>
       
@@ -87,12 +87,12 @@ const emit = defineEmits(['update:visible', 'transfer']);
 
 const passwordType = ref('password');
 const formData = ref({
-  serverUsername: '',
-  serverIp: '',
+  sourceUsername: '',
+  source: '',
   serverPassword: '',
   filePath: '',
   targetUsername: '',
-  targetIp: '',
+  target: '',
   targetPassword: '',
   transferPath: ''
 });
@@ -141,8 +141,8 @@ const cancelTransfer = () => {
 
 const startTransfer = async () => {
   // 验证表单
-  if (!formData.value.serverUsername || !formData.value.serverIp || !formData.value.serverPassword ||
-      !formData.value.filePath || !formData.value.targetUsername || !formData.value.targetIp ||
+  if (!formData.value.sourceUsername || !formData.value.sourceHostname || !formData.value.sourcePassword ||
+      !formData.value.filePath || !formData.value.targetUsername || !formData.value.target ||
       !formData.value.targetPassword || !formData.value.transferPath) {
     ElMessage.error('请填写所有必填字段');
     return;
@@ -150,11 +150,11 @@ const startTransfer = async () => {
   
   // 准备请求数据
   const requestData = {
-    source_server: formData.value.serverIp,
-    source_user: formData.value.serverUsername,
-    source_auth: formData.value.serverPassword,
+    source_server: formData.value.source,
+    source_user: formData.value.sourceUsername,
+    source_auth: formData.value.sourcePassword,
     source_path: formData.value.filePath,
-    target_server: formData.value.targetIp,
+    target_server: formData.value.target,
     target_user: formData.value.targetUsername,
     target_auth: formData.value.targetPassword,
     target_path: formData.value.transferPath

@@ -133,19 +133,33 @@ const deleteServer = async () => {
 
     try {
       const data = responseText ? JSON.parse(responseText) : {};
-      ElMessage.success(data.msg || '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"脚本"），以免无用的代理服务占用您服务器的资源');
+      ElMessage.success({
+        message: '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"获取删除代理服务的脚本"），以免无用的代理服务占用您服务器的资源',
+        duration: 0,
+        showClose: true,
+        style: {
+          fontSize: '22px' // 设置字体大小
+        }
+      });
       // 触发成功事件，通知父组件更新服务器列表
       emit('delete:success', { 
         success: true, 
-        message: data.msg || '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"脚本"），以免无用的代理服务占用您服务器的资源',
+        message: data.msg || '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"获取删除代理服务的脚本"），以免无用的代理服务占用您服务器的资源',
         server: props.server
       });
     } catch (e) {
       // 如果响应不是JSON但状态码是200，仍然认为删除成功
-      ElMessage.success('服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"脚本"），以免无用的代理服务占用您服务器的资源');
+      ElMessage.success({
+        message: '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"获取删除代理服务的脚本"），以免无用的代理服务占用您服务器的资源',
+        duration: 0,
+        showClose: true,
+        style: {
+          fontSize: '22px' // 设置字体大小
+        }
+      });
       emit('delete:success', { 
         success: true, 
-        message: '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"脚本"），以免无用的代理服务占用您服务器的资源',
+        message: '服务器删除成功，请在被删除的服务器上下载并执行删除代理服务的脚本（见"功能"->"获取删除代理服务的脚本"），以免无用的代理服务占用您服务器的资源',
         server: props.server
       });
     }

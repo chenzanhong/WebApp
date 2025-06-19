@@ -5,19 +5,19 @@
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
-          <label class="input-title">服务器IP</label>
-          <IpSearchInput v-model="formData.serverIp" placeholder="请输入目标服务器IP" />
+          <label class="input-title">服务器的主机名或IP</label>
+          <IpSearchInput v-model="formData.serverHostname" placeholder="请输入服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
           <label class="input-title">服务器用户名</label>
-          <input v-model="formData.serverUsername" class="info-input" placeholder="请输入用户名">
+          <input v-model="formData.serverUsername" class="info-input" placeholder="请输入服务器的用户名">
         </div>
         
         <div class="form-group">
-          <label class="input-title">服务器密钥</label>
+          <label class="input-title">服务器密码</label>
           <div class="password-input-wrapper">
-            <input v-model="formData.serverPassword" :type="passwordType" class="info-input" placeholder="请输入目标服务器密钥">
+            <input v-model="formData.serverPassword" :type="passwordType" class="info-input" placeholder="请输入服务器的密码">
             <span class="toggle-password" @click="togglePasswordVisibility">
               <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
             </span>
@@ -26,7 +26,7 @@
         
         <div class="form-group">
           <label class="input-title">文件路径</label>
-          <input v-model="formData.filePath" class="info-input" placeholder="请输入要下载文件的路径">
+          <input v-model="formData.filePath" class="info-input" placeholder="请输入服务器上文件的路径">
         </div>
       </div>
       
@@ -76,7 +76,7 @@ const progressColors = [
 
 const formData = ref({
   serverUsername: '',
-  serverIp: '',
+  serverHostname: '',
   serverPassword: '',
   filePath: ''
 });
@@ -111,7 +111,7 @@ const cancelTransfer = () => {
 const startTransfer = async () => {
   // 验证表单
   if (!formData.value.serverUsername || 
-      !formData.value.serverIp || 
+      !formData.value.serverHostname || 
       !formData.value.serverPassword || 
       !formData.value.filePath) {
     ElMessage.error('请填写所有必填字段');
@@ -120,7 +120,7 @@ const startTransfer = async () => {
   
   // 准备请求数据
   const requestData = {
-    server: formData.value.serverIp,
+    server: formData.value.serverHostname,
     user: formData.value.serverUsername,
     auth: formData.value.serverPassword,
     path: formData.value.filePath

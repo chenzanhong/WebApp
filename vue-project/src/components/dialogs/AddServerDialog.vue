@@ -15,9 +15,9 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">密钥：</label>
+          <label class="input-title">密码：</label>
           <div class="password-input-wrapper">
-            <input v-model="formData.password" :type="passwordType" class="info-input" placeholder="请输入服务器密钥">
+            <input v-model="formData.password" :type="passwordType" class="info-input" placeholder="请输入服务器密码">
             <span class="toggle-password" @click="togglePasswordVisibility">
               <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
             </span>
@@ -130,7 +130,7 @@ const validateForm = () => {
     { key: 'Host_Name', label: '服务器名称' },
     { key: 'host', label: '服务器IP' },
     { key: 'user', label: '用户名' },
-    { key: 'password', label: '密钥' },
+    { key: 'password', label: '密码' },
     { key: 'os', label: '操作系统' },
     { key: 'platform', label: '平台' },
     { key: 'kernel_arch', label: '内核架构' }
@@ -255,7 +255,14 @@ const submitForm = async () => {
       //   throw new Error('设置阈值失败');
       // }
 
-      ElMessage.success('服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行，或者查看“帮助”');
+      ElMessage.success({
+        message: '服务器添加成功，请把浏览器下载的脚本放到被监控服务器上执行，或者见"功能"->"获取删除代理服务的脚本"，又或者点击添加的服务器->“帮助”',
+        duration: 0,
+        showClose: true,
+        style: {
+          fontSize: '22px' // 设置字体大小
+        }
+      });
       emit('success', {});
       closeDialog();
     } else {

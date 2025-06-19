@@ -27,19 +27,19 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器IP：</label>
-          <IpSearchInput v-model="formData.targetIp" placeholder="请输入目标服务器IP地址" />
+          <label class="input-title">目标服务器的主机名或IP：</label>
+          <IpSearchInput v-model="formData.target_server" placeholder="请输入目标服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
           <label class="input-title">目标服务器用户名：</label>
-          <input v-model="formData.targetUsername" class="info-input" placeholder="请输入目标服务器用户名">
+          <input v-model="formData.targetUsername" class="info-input" placeholder="请输入登录目标服务器的用户名">
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器密钥：</label>
+          <label class="input-title">目标服务器密码：</label>
           <div class="password-input-wrapper">
-            <input v-model="formData.targetPassword" :type="passwordType" class="info-input" placeholder="请输入目标服务器密钥">
+            <input v-model="formData.targetPassword" :type="passwordType" class="info-input" placeholder="请输入登录目标服务器的密码">
             <span class="toggle-password" @click="togglePasswordVisibility">
               <el-icon :is="passwordType === 'password' ? 'Hide' : 'View'" style="color: white" />
             </span>
@@ -47,7 +47,7 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标路径：</label>
+          <label class="input-title">目标文件路径：</label>
           <input v-model="formData.transferPath" class="info-input" placeholder="请输入文件在目标服务器上的存放路径">
         </div>
       </div>
@@ -99,7 +99,7 @@ const progressColors = [
 const formData = ref({
   filePath: '',
   targetUsername: '',
-  targetIp: '',
+  target_server: '',
   targetPassword: '',
   transferPath: ''
 });
@@ -146,7 +146,7 @@ const cancelTransfer = () => {
 const startTransfer = async () => {
   // 验证表单
   if (!selectedFile.value || !formData.value.targetUsername || 
-      !formData.value.targetIp || !formData.value.targetPassword || 
+      !formData.value.target_server || !formData.value.targetPassword || 
       !formData.value.transferPath) {
     ElMessage.error('请填写所有必填字段并选择文件');
     return;
@@ -169,7 +169,7 @@ const startTransfer = async () => {
       // 创建FormData对象来发送文件
       const formDataToSend = new FormData();
       formDataToSend.append('file', selectedFile.value);
-      formDataToSend.append('server', formData.value.targetIp);
+      formDataToSend.append('server', formData.value.target_server);
       formDataToSend.append('user', formData.value.targetUsername);
       formDataToSend.append('auth', formData.value.targetPassword);
       formDataToSend.append('path', formData.value.transferPath);

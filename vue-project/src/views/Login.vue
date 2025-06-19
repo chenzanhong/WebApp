@@ -90,7 +90,7 @@ export default {
           localStorage.setItem('userRole', data.role); // 存储用户角色
           localStorage.setItem('username', data.username) // 用户名
           localStorage.setItem('companyId', data.companyId) // 公司id
-          ElMessage.success(data.message);
+          // ElMessage.success(data.message);
 
           if(data.role === 'ROOT') {
             this.$router.push('/headbar/systemadmin');
