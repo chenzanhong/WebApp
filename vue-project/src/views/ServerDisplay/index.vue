@@ -10,7 +10,7 @@
 <!--            <p class="logo-name">SeverM</p>-->
 <!--          </div> -->
           <div class="search-bar">
-            <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"/>
+            <el-input v-model="searchQuery" placeholder="请输入搜索内容" class="s-input" :prefix-icon="Search"  autocomplete="off"/>
             <el-icon
                 style="width: 2rem; height: 2rem; margin-left: 0.5rem; background-color: #ffffff; border-radius: 50%;">
               <Search style="font-size: 1.2rem; color: #000000;"/>
