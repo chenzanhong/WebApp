@@ -4,8 +4,8 @@
       <div class="dialog-box">
         <h2 style="padding-top: 1rem; padding-bottom: 5px; border-bottom: 2px solid #BBBBBB;">添加服务器</h2>
         <div class="form-group">
-          <label>服务器名称</label>
-          <input v-model="server.name" type="text" placeholder="请输入服务器名称"/>
+          <label>服务器名称（主机名）</label>
+          <input v-model="server.name" type="text" placeholder="请输入服务器名称（主机名）"/>
         </div>
 
         <div class="form-group">

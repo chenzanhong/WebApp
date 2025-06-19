@@ -190,11 +190,11 @@ const handleDelete = async (server) => {
       console.error('删除服务器API错误:', apiError);
       
       // 检查是否是密码相关的错误
-      if (apiError.response?.data?.includes('password')) {
-        ElMessage.error('删除失败：密码错误，请检查服务器密码');
-      } else {
-        ElMessage.error(`删除服务器失败: ${apiError.message || '未知错误'}`);
-      }
+      // if (apiError.response?.data?.includes('password')) {
+      //  ElMessage.error('删除失败：密码错误，请检查服务器密码');
+      // } else {
+      //  ElMessage.error(`删除服务器失败: ${apiError.message || '未知错误'}`);
+      // }
       throw apiError; // 重新抛出错误以便外部捕获
     }
   } catch (error) {

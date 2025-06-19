@@ -30,8 +30,8 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">服务器名称：</label>
-          <input v-model="formData.Host_Name" class="info-input" placeholder="请输入服务器名称">
+          <label class="input-title">服务器名称（主机名）：</label>
+          <input v-model="formData.Host_Name" class="info-input" placeholder="请输入服务器名称（主机名）">
         </div>
         
         <div class="form-group">
