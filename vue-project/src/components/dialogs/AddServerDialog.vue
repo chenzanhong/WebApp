@@ -84,6 +84,7 @@
   </div>
   <ImportantTipDialog
     v-model="importantTipVisible"
+    :hostname="formData.Host_Name"
     @confirmed="handleTipConfirmed"
   />
 </template>
@@ -235,9 +236,11 @@ const submitForm = async () => {
         duration: 0,
         showClose: true,
         style: {
+          top: '100px',
           fontSize: '22px' // 设置字体大小
         }
       });
+      console.log('Submitting server data with Host_Name:', formData.value.Host_Name);
       importantTipVisible.value = true; // 弹出重要提示弹窗
     } else {
       ElMessage.error('添加服务器失败');

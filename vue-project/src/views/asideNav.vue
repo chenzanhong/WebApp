@@ -65,13 +65,13 @@
               <div class="custom-step-number">1</div>
               <div class="custom-step-content">获取配置代理服务的脚本：</div>
             </div>
-            <pre class="custom-command">curl http://113.44.170.52:8080/combinedscript?hostname=主机名 -o install.sh</pre>
+            <pre class="custom-command">sudo curl http://113.44.170.52:8080/combinedscript?hostname=主机名 -o install.sh</pre>
             
             <div class="custom-step">
               <div class="custom-step-number">2</div>
               <div class="custom-step-content">添加执行权限：</div>
             </div>
-            <pre class="custom-command">chmod +x install.sh</pre>
+            <pre class="custom-command">sudo chmod +x install.sh</pre>
             
             <div class="custom-step">
               <div class="custom-step-number">3</div>
@@ -90,13 +90,13 @@
               <div class="custom-step-number">1</div>
               <div class="custom-step-content">获取删除代理服务的脚本：</div>
             </div>
-            <pre class="custom-command">curl http://113.44.170.52:8080/uninstallcombinedscript?hostname=主机名 -o uninstall.sh</pre>
+            <pre class="custom-command">sudo curl http://113.44.170.52:8080/uninstallcombinedscript?hostname=主机名 -o uninstall.sh</pre>
             
             <div class="custom-step">
               <div class="custom-step-number">2</div>
               <div class="custom-step-content">添加执行权限：</div>
             </div>
-            <pre class="custom-command">chmod +x uninstall.sh</pre>
+            <pre class="custom-command">sudo chmod +x uninstall.sh</pre>
             
             <div class="custom-step">
               <div class="custom-step-number">3</div>

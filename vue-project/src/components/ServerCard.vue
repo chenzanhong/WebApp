@@ -138,6 +138,7 @@ const deleteServer = async () => {
         duration: 0,
         showClose: true,
         style: {
+          top: '100px',
           fontSize: '22px' // 设置字体大小
         }
       });
@@ -154,6 +155,7 @@ const deleteServer = async () => {
         duration: 0,
         showClose: true,
         style: {
+          top: '100px',
           fontSize: '22px' // 设置字体大小
         }
       });

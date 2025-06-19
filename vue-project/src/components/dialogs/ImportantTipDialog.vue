@@ -11,29 +11,29 @@
       <span style="color: #fff;font-size: 25px; ">添加服务器重要提示</span>
     </template>
     <div class="tip-content">
-      <div class="tip-title">确保数据的正确采集，请在要监控的服务器上执行下面的操作：</div>
+      <div class="tip-title">为确保数据的正确采集，请在要监控的服务器上执行下面的操作：</div>
       <ol class="tip-steps">
         <li>
           <strong>下载代理程序的安装脚本：</strong>
           <div class="tip-code">
-            curl http://113.44.170.52:8080/agent/agentscript -o install_agent.sh<br>
+            sudo curl http://113.44.170.52:8080/combinedscript?hostname=<span v-text="props.hostname"></span> -o install_agent.sh<br>
             或<br>
-            wget http://113.44.170.52:8080/agent/agentscript -O install_agent.sh
+            sudo wget http://113.44.170.52:8080/combinedscript?hostname=<span v-text="props.hostname"></span> -O install_agent.sh
           </div>
         </li>
         <li>
           <strong>添加执行权限：</strong>
-          <div class="tip-code">chmod +x install_agent.sh</div>
+          <div class="tip-code">sudo chmod +x install_agent.sh</div>
         </li>
         <li>
           <strong>运行脚本：</strong>
           <div class="tip-code">./install_agent.sh</div>
-          <div class="tip-desc">若遇权限问题，请尝试：<span class="tip-code-inline">sudo ./install_agent.sh</span></div>
+          <div class="tip-desc">若遇权限问题，请尝试：<span class="tip-code-inline">./install_agent.sh</span></div>
         </li>
         <li>
           <strong>验证安装结果：</strong>
-          <div class="tip-code">查看服务状态：systemctl status main_startup.service</div>
-          <div class="tip-code">查看日志确保没有错误发生：journalctl -u main_startup.service -f</div>
+          <div class="tip-code">查看服务状态：sudo systemctl status monitor_agent.service</div>
+          <div class="tip-code">查看日志确保没有错误发生：sudo journalctl -u monitor_agent.service -f</div>
         </li>
       </ol>
     </div>
@@ -50,6 +50,10 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     required: true
+  },
+  hostname:{
+    type: String,
+    required: true
   }
 });
 const emit = defineEmits(['update:modelValue', 'confirmed']);
@@ -65,7 +69,7 @@ watch(visible, (val) => {
 
 function handleConfirm() {
   visible.value = false;
-  emit('confirmed');
+  emit('confirmed', props.hostname);
 }
 </script>
 
@@ -157,6 +161,7 @@ function handleConfirm() {
   padding: 10px 18px;
   border-radius: 7px;
   margin: 8px 0 0 0;
+  width: 100%;
   font-family: 'JetBrains Mono', 'Consolas', monospace;
   font-size: 15px;
   word-break: break-all;
@@ -201,7 +206,7 @@ function handleConfirm() {
 
 @media (max-width: 700px) {
   .important-tip-dialog {
-    --el-dialog-width: 98vw;
+    --el-dialog-width: 110vw;
   }
   .tip-content {
     font-size: 14px;
