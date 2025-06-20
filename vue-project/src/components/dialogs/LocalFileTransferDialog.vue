@@ -27,17 +27,17 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器的主机名或IP：</label>
+          <label class="input-title">服务器主机名或IP：</label>
           <IpSearchInput v-model="formData.target_server" placeholder="请输入目标服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器用户名：</label>
+          <label class="input-title">服务器用户名：</label>
           <input v-model="formData.targetUsername" class="info-input" placeholder="请输入登录目标服务器的用户名">
         </div>
         
         <div class="form-group">
-          <label class="input-title">目标服务器密码：</label>
+          <label class="input-title">服务器密码：</label>
           <div class="password-input-wrapper">
             <input v-model="formData.targetPassword" :type="passwordType" class="info-input" placeholder="请输入登录目标服务器的密码">
             <span class="toggle-password" @click="togglePasswordVisibility">

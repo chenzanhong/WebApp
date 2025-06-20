@@ -5,7 +5,7 @@
       <div class="divider"></div>
       <div class="dialog-content">
         <div class="form-group">
-          <label class="input-title">服务器的主机名或IP</label>
+          <label class="input-title">服务器主机名或IP</label>
           <IpSearchInput v-model="formData.serverHostname" placeholder="请输入服务器的主机名或IP" />
         </div>
         

@@ -996,7 +996,7 @@ methods: {
       // 启动新的数据刷新定时器
       this.dataRefreshInterval = setInterval(() => {
         this.refreshDataOnly();
-      }, 5000)
+      }, 4000)
     },
     
     // 修改停止刷新方法

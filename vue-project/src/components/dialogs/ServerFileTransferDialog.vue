@@ -4,14 +4,15 @@
       <div class="box-title">服务器文件互传</div>
       <div class="divider"></div>
       <div class="dialog-content">
+        
+        <div class="form-group">
+          <label class="input-title">源服务器主机名或IP：</label>
+          <IpSearchInput v-model="formData.source" placeholder="请输入源服务器的主机名或IP" />
+        </div>
+
         <div class="form-group">
           <label class="input-title">源服务器用户名：</label>
           <input v-model="formData.sourceUsername" class="info-input" placeholder="请输入源服务器的用户名">
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">源服务器的主机名或IP：</label>
-          <IpSearchInput v-model="formData.source" placeholder="请输入源服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
@@ -25,18 +26,18 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">文件地址：</label>
+          <label class="input-title">源文件路径：</label>
           <input v-model="formData.filePath" class="info-input" placeholder="请输入待传输文件在源服务器上的文件路径">
         </div>
         
         <div class="form-group">
+          <label class="input-title">目标服务器主机名或IP：</label>
+          <IpSearchInput v-model="formData.target" placeholder="请输入目标服务器的主机名或IP" />
+        </div>
+
+        <div class="form-group">
           <label class="input-title">目标服务器用户名：</label>
           <input v-model="formData.targetUsername" class="info-input" placeholder="请输入目标服务器的用户名">
-        </div>
-        
-        <div class="form-group">
-          <label class="input-title">目标服务器的主机名或IP：</label>
-          <IpSearchInput v-model="formData.target" placeholder="请输入目标服务器的主机名或IP" />
         </div>
         
         <div class="form-group">
@@ -50,7 +51,7 @@
         </div>
         
         <div class="form-group">
-          <label class="input-title">传输路径：</label>
+          <label class="input-title">目标文件路径：</label>
           <input v-model="formData.transferPath" class="info-input" placeholder="请输入待传输文件将在目标服务器上存放的文件路径">
         </div>
       </div>
@@ -141,7 +142,7 @@ const cancelTransfer = () => {
 
 const startTransfer = async () => {
   // 验证表单
-  if (!formData.value.sourceUsername || !formData.value.sourceHostname || !formData.value.sourcePassword ||
+  if (!formData.value.sourceUsername || !formData.value.source || !formData.value.sourcePassword ||
       !formData.value.filePath || !formData.value.targetUsername || !formData.value.target ||
       !formData.value.targetPassword || !formData.value.transferPath) {
     ElMessage.error('请填写所有必填字段');
@@ -302,6 +303,7 @@ const startTransfer = async () => {
   flex-direction: column;
   gap: 10px;
   max-height: 60vh;
+  width: 100% ;
   overflow-y: auto;
   padding: 0 10px;
 }
@@ -313,7 +315,7 @@ const startTransfer = async () => {
 }
 
 .input-title {
-  width: 180px;
+  width: 200px;
   text-align: right;
   padding-right: 20px;
   color: #9A9A9A;
