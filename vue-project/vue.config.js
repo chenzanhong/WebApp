@@ -2,7 +2,7 @@ module.exports = {
   devServer: {
     proxy: {
       "/api": {
-        target: "http://113.44.170.52:8080", // 后端地址
+        target: "http://localhost:8080", // 后端地址
         changeOrigin: true, // 修改请求源为目标域名
         // pathRewrite: {
         //   '^/api': '' // 如果后端接口没有统一前缀，可以去掉 /api 前缀

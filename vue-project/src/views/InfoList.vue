@@ -154,12 +154,12 @@ export default {
 
                 // 并行获取收发通知
                 const [receiveRes, sendRes] = await Promise.all([
-                    fetch(`http://113.44.170.52:8080/agent/info/recivelist`, 
+                    fetch(`http://localhost:8080/agent/info/recivelist`, 
                     //fetch(`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/info/recivelist`, 
                     {
                         headers: { 'Authorization': ` ${token}` }
                     }),
-                    fetch(`http://113.44.170.52:8080/agent/info/sendlist`,
+                    fetch(`http://localhost:8080/agent/info/sendlist`,
                     //fetch(`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/info/sendlist`,
                     {
                         headers: { 'Authorization': ` ${token}` }
@@ -218,7 +218,7 @@ export default {
         async processConfirm(id) {
             const token = localStorage.getItem('token');
             try {
-                const response = await axios.post(`http://113.44.170.52:8080/agent/info/manage`, { id }, {
+                const response = await axios.post(`http://localhost:8080/agent/info/manage`, { id }, {
                     headers: { Authorization: ` ${token}` }
                 });
                 console.log('后端响应:', response.data);

@@ -126,7 +126,7 @@ export default {
                 return;
             }
 
-            const apiUrl = 'http://113.44.170.52:8080/agent/register';
+            const apiUrl = 'http://localhost:8080/agent/register';
             const requestData = {
                 email: this.email,
                 name: this.username,
@@ -187,7 +187,7 @@ export default {
             }
 
             // 调用获取验证码接口
-            fetch('http://113.44.170.52:8080/registertoken', {
+            fetch('http://localhost:8080/registertoken', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

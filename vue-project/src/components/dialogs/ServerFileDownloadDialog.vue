@@ -143,7 +143,7 @@ const startTransfer = async () => {
       console.log('发送服务器文件下载请求:', requestData);
       
       // 发送网络请求，使用blob模式获取文件数据
-      const response = await fetch('http://113.44.170.52:8080/agent/download', {
+      const response = await fetch('http://localhost:8080/agent/download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -221,7 +221,7 @@ const refreshLogs = async (isSearch = false) => {
 
     console.log('完整的请求参数:', requestBody);
 
-    const response = await fetch('http://113.44.170.52:8080/agent/getuseroperationlogs', {
+    const response = await fetch('http://localhost:8080/agent/getuseroperationlogs', {
       method: 'POST',
       headers: {
         'Authorization': token,

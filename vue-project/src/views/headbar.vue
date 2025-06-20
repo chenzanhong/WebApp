@@ -346,12 +346,12 @@ const fetchWarnings = async () => {
   try {
     const token = localStorage.getItem('token');
     console.log('使用的token:', token);
-    console.log('请求URL:', 'http://113.44.170.52:8080/agent/getwarning');
+    console.log('请求URL:', 'http://localhost:8080/agent/getwarning');
     console.log('请求头:', {
       'Authorization': token
     });
     
-    const response = await axios.get('http://113.44.170.52:8080/agent/getwarning', {
+    const response = await axios.get('http://localhost:8080/agent/getwarning', {
       headers: {
         'Authorization': token 
       }
@@ -504,7 +504,7 @@ async function fetchUnreadCount() {
     if (!token) return;
     
     const response = await axios.get(
-      'http://113.44.170.52:8080/agent/info/recivelist', 
+      'http://localhost:8080/agent/info/recivelist', 
       { headers: { Authorization: ` ${token}` } }
     );
     
@@ -692,7 +692,7 @@ const fetchUserInfo = async () => {
       throw new Error('未找到登录凭证');
     }
 
-    const response = await fetch('http://113.44.170.52:8080/agent/userInfo  ', {
+    const response = await fetch('http://localhost:8080/agent/userInfo  ', {
       method: 'GET',
       headers: {
         'Authorization': token
@@ -751,7 +751,7 @@ const confirmEdit = async () => {
       realname: userInfo.value.realname
     };
 
-    const response = await fetch('http://113.44.170.52:8080/agent/updateUserInfo  ', {
+    const response = await fetch('http://localhost:8080/agent/updateUserInfo  ', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -879,7 +879,7 @@ async function syncUserRoleFromServer() {
   try {
     const token = localStorage.getItem('token');
     if (!token) return;
-    const res = await fetch('http://113.44.170.52:8080/agent/userInfo', {
+    const res = await fetch('http://localhost:8080/agent/userInfo', {
       headers: { 'Authorization': token }
     });
     const data = await res.json();

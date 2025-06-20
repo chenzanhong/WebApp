@@ -178,7 +178,7 @@ const startTransfer = async () => {
       console.log('发送文件传输请求:', requestData);
       
       // 发送网络请求
-      const response = await fetch('http://113.44.170.52:8080/agent/transfer', {
+      const response = await fetch('http://localhost:8080/agent/transfer', {
       // const response = await fetch('https://a4d3-116-7-245-184.ngrok-free.app/agent/transfer', {
         method: 'POST',
         headers: {

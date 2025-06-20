@@ -137,7 +137,7 @@ const fetchCompanyInfo = async () => {
   try {
     const token = localStorage.getItem('token'); 
     console.log('token:', token);
-    let apiUrl = 'http://113.44.170.52:8080/agent/get-company-info';
+    let apiUrl = 'http://localhost:8080/agent/get-company-info';
     
     // 从路由查询参数获取公司名称
     const companyName = route.query.companyName;
@@ -250,7 +250,7 @@ const confirmDelete = async () => {
     const token = localStorage.getItem('token');
     const usernames = selectedMembersToDelete.value.map(m => m.username);
     
-    const response = await fetch('http://113.44.170.52:8080/agent/deleteMembers', {
+    const response = await fetch('http://localhost:8080/agent/deleteMembers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -293,7 +293,7 @@ const addMember = async () => {
     }
 
     const token = localStorage.getItem('token');
-     const response = await fetch('http://113.44.170.52:8080/agent/addMember', {
+     const response = await fetch('http://localhost:8080/agent/addMember', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

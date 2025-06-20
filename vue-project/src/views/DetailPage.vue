@@ -306,7 +306,7 @@ methods: {
     // 请求历史数据接口
     const response = await fetch(
       //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/1`,
-      `http://113.44.170.52:8080/agent/monitor/${hostname}`,
+      `http://localhost:8080/agent/monitor/${hostname}`,
       { headers: { 'Authorization': ` ${token}` } }
     )
 
@@ -380,7 +380,7 @@ methods: {
       }
       console.log('实时路由:', hostname);
       const response = await fetch(
-        `http://113.44.170.52:8080/agent/monitor/status/${hostname}`,
+        `http://localhost:8080/agent/monitor/status/${hostname}`,
         //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
         {  headers: { 'Authorization': ` ${token}` } }
       )
@@ -414,7 +414,7 @@ methods: {
         console.log('刷新路由:', hostname);
         const response = await fetch(
           //`http://127.0.0.1:4523/m1/5953319-5641373-default/agent/monitor/status/1`,
-          `http://113.44.170.52:8080/agent/monitor/status/${hostname}`,
+          `http://localhost:8080/agent/monitor/status/${hostname}`,
           { headers: { 'Authorization': ` ${token}` } }
         )
 

@@ -113,7 +113,7 @@ const deleteServer = async () => {
   try {
     deleting.value = true;
     const token = localStorage.getItem('token');
-    const response = await fetch('http://113.44.170.52:8080/agent/delete', {
+    const response = await fetch('http://localhost:8080/agent/delete', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ const saveThresholds = async () => {
     isSaving.value = true;
     // 这里添加保存阈值的API调用
     const token = localStorage.getItem('token');
-    const response = await fetch('http://113.44.170.52:8080/agent/setthreshold', {
+    const response = await fetch('http://localhost:8080/agent/setthreshold', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

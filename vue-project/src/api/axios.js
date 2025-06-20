@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ElMessage } from 'element-plus';
 
 //const BASE_URL = import.meta.env.VITE_API_URL;
-const BASE_URL = 'http://113.44.170.52:8080';
+const BASE_URL = 'http://localhost:8080';
 
 const api = axios.create({
     baseURL: BASE_URL,

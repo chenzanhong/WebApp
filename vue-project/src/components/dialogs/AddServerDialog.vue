@@ -214,7 +214,7 @@ const submitForm = async () => {
       ElMessage.error('未找到用户认证信息，请重新登录');
       return;
     }
-    const response = await fetch('http://113.44.170.52:8080/agent/install', {
+    const response = await fetch('http://localhost:8080/agent/install', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

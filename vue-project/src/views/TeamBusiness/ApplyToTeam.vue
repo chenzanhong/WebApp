@@ -119,7 +119,7 @@ const startPollingUserInfo = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
-      const res = await fetch('http://113.44.170.52:8080/agent/userInfo', {
+      const res = await fetch('http://localhost:8080/agent/userInfo', {
         headers: { 'Authorization': token }
       });
       const data = await res.json();
@@ -165,7 +165,7 @@ const submitForm = async () => {
     console.log('Submitting form:', requestBody); // 打印表单数据
 
     // 发送请求到后端
-    const response = await fetch('http://113.44.170.52:8080/agent/registercompany', {
+    const response = await fetch('http://localhost:8080/agent/registercompany', {
       method: 'POST',
       body: JSON.stringify(requestBody), // 将请求体转换为 JSON 字符串
       headers: {

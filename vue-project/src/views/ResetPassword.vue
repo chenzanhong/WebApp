@@ -503,7 +503,7 @@ export default {
       try {
         const token = localStorage.getItem('token');
                 console.log('当前Token:', token);
-        const response = await fetch('http://113.44.170.52:8080/agent/request_reset_password', {
+        const response = await fetch('http://localhost:8080/agent/request_reset_password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -545,7 +545,7 @@ export default {
     };
     console.log('完整请求参数:', requestBody); //输出整个请求对象
     // 发送重置请求
-    const response = await fetch('http://113.44.170.52:8080/reset_password', {
+    const response = await fetch('http://localhost:8080/reset_password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

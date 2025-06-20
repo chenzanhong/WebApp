@@ -80,7 +80,7 @@ const downloadScript = async () => {
 
     // 发送 GET 请求，参数放在 URL 中
     const response = await fetch(
-      `http://113.44.170.52:8080/agent/combinedscript?${params}`,
+      `http://localhost:8080/agent/combinedscript?${params}`,
       {
         method: 'GET',
         headers: {

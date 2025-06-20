@@ -90,7 +90,7 @@ const submitJoin = async () => {
 
     console.log('Submitting form:', requestBody); // 打印表单数据
 
-    const response = await fetch('http://113.44.170.52:8080/agent/joincompany', {
+    const response = await fetch('http://localhost:8080/agent/joincompany', {
       method: 'POST',
       body: JSON.stringify(requestBody),//
       headers: {
@@ -137,7 +137,7 @@ const formDataToJson = (formData) => {
 //     formData.append('idCardBack', joinForm.idCardBack)
 //     console.log(formData);
 //     // 发送请求到后端
-//     const response = await fetch('http://113.44.170.52:8080/agent/joincompany', {
+//     const response = await fetch('http://localhost:8080/agent/joincompany', {
 //       method: 'POST',
 //       body: formData,
 //       headers: {

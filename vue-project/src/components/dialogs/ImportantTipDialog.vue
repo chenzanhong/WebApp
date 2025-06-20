@@ -16,9 +16,9 @@
         <li>
           <strong>下载代理程序的安装脚本：</strong>
           <div class="tip-code">
-            sudo curl http://113.44.170.52:8080/combinedscript?hostname=<span v-text="props.hostname"></span> -o install_agent.sh<br>
+            sudo curl http://localhost:8080/combinedscript?hostname=<span v-text="props.hostname"></span> -o install_agent.sh<br>
             或<br>
-            sudo wget http://113.44.170.52:8080/combinedscript?hostname=<span v-text="props.hostname"></span> -O install_agent.sh
+            sudo wget http://localhost:8080/combinedscript?hostname=<span v-text="props.hostname"></span> -O install_agent.sh
           </div>
         </li>
         <li>

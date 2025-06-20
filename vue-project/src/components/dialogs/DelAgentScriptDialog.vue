@@ -79,7 +79,7 @@ const downloadScript = async () => {
     });
 
     const response = await fetch(
-      `http://113.44.170.52:8080/agent/uninstallcombinedscript?${params}`,
+      `http://localhost:8080/agent/uninstallcombinedscript?${params}`,
       {
         method: 'GET',
         headers: {

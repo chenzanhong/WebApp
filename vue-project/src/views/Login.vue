@@ -70,7 +70,7 @@ export default {
     },
     async loginClick() {
       try {
-        const response = await fetch('http://113.44.170.52:8080/agent/login', {
+        const response = await fetch('http://localhost:8080/agent/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
